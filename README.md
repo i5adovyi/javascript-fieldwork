@@ -30,19 +30,30 @@ You can also deploy `dist/` to any static HTTPS host. Hash-based routes require 
 - Eight original articles and 25 curated external resources, including author-published free books, courses, documentation, and video talks.
 - Six downloadable project starter kits, with explicit unfinished work.
 - Personal notes, editable saved code, lesson progress, quiz responses, project checklists, and JSON backup import/export.
-- Local PDF reading, offline application caching, keyboard shortcuts, mobile layouts, and print styles.
+- A local book reader beside each lesson, with 97 mapped reading ranges, colored highlights, private book notes, and separate annotation backups.
+- Offline application caching, keyboard shortcuts, mobile layouts, and print styles.
 
 ## Study workflow
 
 1. Open **Overview → Start lesson 01**.
-2. Read the assignment in your own copy of the book using **Open your copy**.
+2. Select **Read beside lesson**, then **Choose PDF**, to read the assignment in your own copy alongside the lesson.
 3. Study the original lesson, predict outcomes, and answer its retrieval questions.
 4. Open **Practice lab**, implement a solution, and run the tests.
 5. Complete the written prompts in your own editor, then mark the lesson complete.
 6. Finish the stage project and record your evidence in its build log.
-7. Export a backup regularly from **My notebook**.
+7. Export progress regularly from **My notebook**, and export private book annotations separately from the reader.
 
 Read [the learner handbook](docs/LEARNER-HANDBOOK.md) for 8-week and 16-week schedules, and [the curriculum map](docs/CURRICULUM-MAP.md) for chapter coverage.
+
+## Read the book beside a lesson
+
+On a lesson, select **Read beside lesson**, then **Choose PDF** and select your own local copy. The reader and lesson appear side by side on desktop and stack on a narrow mobile screen. Choose an assigned reading range to jump to its starting page, or navigate pages directly.
+
+All 36 lessons have mapped assignments comprising 97 reading ranges. The mapping targets the supplied 1,245-page PDF of *JavaScript: The Definitive Guide*, seventh edition (2020). Page jumps use one-based physical PDF positions, not printed page numbers. Another edition or differently paginated PDF may need manual navigation; use the displayed section reference to find the right passage. Adjacent ranges can share a page when one section ends and the next begins on it.
+
+Select text and choose a highlight color to mark a passage. Add a note to the current page or selected text, then edit or delete annotations as needed; use the reader’s undo control to reverse an annotation change. These private book annotations are separate from lesson reflections in **My notebook**.
+
+Reselect the PDF after a reload. Its fingerprint identifies the matching copy and restores its last page, highlights, and notes from this browser. Use the reader’s private book notes export/import controls to keep or transfer annotations; the general progress backup does not include them. Neither backup includes the PDF. Clearing browser data loses unexported annotations, and there is no account or cloud synchronization.
 
 ## Experiment in lessons and the wiki
 
@@ -62,13 +73,13 @@ Lesson snippets include editable sample inputs, dependencies, and calls where th
 
 Progress is localStorage on the current origin and browser, not an account-backed service. Localhost, hosted deployment, and another browser have separate progress; transfer it using Export backup / Import backup. Imports merge completed lessons and labs; matching notes, code, quiz answers, and project entries are replaced by the imported entries. Backup format is version 1.
 
-PDFs are opened as local object URLs, never uploaded. Reselect the PDF after reloading. The supplied copyrighted book is neither copied into this repository nor redistributed. This project is not affiliated with O’Reilly or David Flanagan.
+The bundled PDF.js reader reads selected PDF bytes in memory. It does not upload them, put them in the offline cache, or copy the book into the repository. The book fingerprint, reading position, highlights, and notes are stored locally. Reselect the matching PDF after reloading to resume. Private book annotations have their own export/import workflow, separate from general progress backups. The supplied copyrighted book is not redistributed. This project is not affiliated with O’Reilly or David Flanagan.
 
-Google Fonts is the only external UI asset provider; fallback fonts preserve usability when offline. External library links open separately. Service-worker caching makes the core app available offline after a successful first load on a supported browser; linked websites, external fonts, and videos need their own connectivity. The study pack, wiki reference, handbook, curriculum map, printable guide, and starter kits are included in the offline cache.
+The UI fonts and PDF.js runtime are bundled locally, with their open-source licenses. Reading does not require external font or viewer services. External library links open separately. Service-worker caching makes the core app available offline after a successful first load on a supported browser; linked websites, external fonts, and videos need their own connectivity. The study pack, wiki reference, handbook, curriculum map, printable guide, and starter kits are included in the offline cache.
 
 ## Engineering
 
-The portal is static HTML, CSS, and JavaScript. CodeMirror 6 and Lezer power the shared lesson/wiki editor, bundled locally in `dist/code-editor.js` with MIT notices in `dist/vendor/editor-LICENSES.txt`. To change the editor, run `npm ci`, edit `src/editor-entry.js` or `src/editor-completions.js`, then run `npm run editors:build`. The checked-in bundle is included in the offline cache; no editor CDN is used. Content lives in four JSON files in `dist/data/`. `dist/app.js` renders the hash routes. `dist/runner.js` runs each lab in a fresh Worker; the UI terminates a run after three seconds. Lesson and wiki examples share a runner in `dist/wiki-runner.js` and does not affect lab scoring. Acorn 8.19.0 is vendored in `dist/vendor/` under its MIT license to parse module imports and instrument DOM loops; no installation or external runtime CDN is needed. Console output is capped. It is a learning aid, not a security boundary or a certification grader. Do not paste untrusted code. The tests and solutions are intentionally visible to the learner.
+The portal is static HTML, CSS, and JavaScript. CodeMirror 6 and Lezer power the shared lesson/wiki editor, bundled locally in `dist/code-editor.js` with MIT notices in `dist/vendor/editor-LICENSES.txt`. To change the editor, run `npm ci`, edit `src/editor-entry.js` or `src/editor-completions.js`, then run `npm run editors:build`. The checked-in bundle is included in the offline cache; no editor CDN is used. Content lives in four JSON files in `dist/data/`. `dist/app.js` renders the hash routes. `dist/runner.js` runs each lab in a fresh Worker; the UI terminates a run after three seconds. Lesson and wiki examples share a runner in `dist/wiki-runner.js` and does not affect lab scoring. Acorn 8.19.0 is vendored in `dist/vendor/` under its MIT license to parse module imports and instrument DOM loops; no installation or external runtime CDN is needed. The local reader uses bundled PDF.js and its worker; `dist/book-map.js` contains section headings and physical-page ranges, without book prose or PDF bytes. Console output is capped. It is a learning aid, not a security boundary or a certification grader. Do not paste untrusted code. The tests and solutions are intentionally visible to the learner.
 
 Lesson completion and project checklists are self-assessed. Lab completion means the supplied assertions passed, not a proof of correctness for all inputs. The hosted Site is public and does not synchronize learner state.
 

@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Private reader browser QA</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/book-reader.css">
+  <style>
+    .qa-panel{max-width:1200px;margin:24px auto;padding:24px;font:15px/1.5 system-ui;color:#202722;background:#f8f6ef}
+    .qa-panel h1{font:700 30px/1.2 system-ui;margin:0 0 12px}
+    .qa-panel p{margin:8px 0 16px}.qa-actions{display:flex;flex-wrap:wrap;gap:10px}
+    .qa-panel button{font:inherit;padding:10px 16px;border:1px solid #444;border-radius:6px;background:white;color:#202722;cursor:pointer}
+    .qa-panel button:disabled{opacity:.6;cursor:wait}
+    #results{padding:16px;background:#17241e;color:#e8f3ea;white-space:pre-wrap;overflow-wrap:anywhere;min-height:90px;font:13px/1.6 ui-monospace,monospace}
+    #stage{width:100%;height:850px;display:block;border:1px solid #888;background:white}
+    #mobile{box-sizing:content-box;width:390px;max-width:100%;height:820px;display:block;border:1px solid #888;background:white;margin-top:16px}
+    .qa-driver .qa-panel{display:none}.qa-driver #app{padding:24px;max-width:44vw;font:16px/1.6 system-ui}
+    .qa-driver #app h1{font:700 26px system-ui}.qa-driver #app button{padding:10px}
+    .qa-driver #app pre{white-space:pre-wrap;overflow-wrap:anywhere}
+    #driver-status{padding:12px;font:14px/1.5 system-ui}
+    body:not(.qa-driver)>#app,body:not(.qa-driver)>#driver-status{display:none}
+  </style>
+</head>
+<body>
+  <main class="qa-panel">
+    <h1>Private reader browser verification</h1>
+    <p>This development-only harness generates two original, synthetic PDFs in memory. It does not open or copy the reference book. It exercises the real reader controls on a separate local origin and keeps its generated notes available for inspection.</p>
+    <div class="qa-actions">
+      <button id="run" type="button">Run reader browser tests</button>
+      <button id="preview" type="button">Open 390px mobile preview</button>
+    </div>
+    <pre id="results" role="status" aria-live="polite">Ready. Start the local server on port 4197, then run the tests.</pre>
+    <iframe id="stage" title="Real reader under test"></iframe>
+    <section id="mobile-section" hidden>
+      <h2>Mobile inspection</h2>
+      <p>The same original synthetic PDF is available here. Inspect navigation, selection, note editing, and overflow at 390 pixels.</p>
+      <iframe id="mobile" title="390 pixel private reader preview"></iframe>
+    </section>
+  </main>
+  <div id="app">
+    <h1>Synthetic lesson workspace</h1>
+    <p>The reader in this frame is the real application module. Every PDF and annotation used here was generated for local verification.</p>
+    <button id="driver-open" type="button">Open reading room</button>
+    <pre id="driver-toasts" aria-live="polite"></pre>
+  </div>
+  <p id="driver-status" role="status">Loading the reader module…</p>
+  <script type="module">
+    const params = new URLSearchParams(location.search);
+    const driverMode = params.has('driver');
+    const delay = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
+    const assert = (condition, message) => { if (!condition) throw new Error(message); };
+    async function until(predicate, message, timeout = 15000) {
+      const end = performance.now() + timeout;
+      while (performance.now() < end) {
+        const result = predicate();
+        if (result) return result;
+        await delay(30);
+      }
+      throw new Error(message);
+    }
+
+    // Only original ASCII test text enters these literal, uncompressed PDF
+    // objects. Byte offsets are calculated, rather than relying on a fixture.
+    function syntheticPDF(label) {
+      const safe = label.replace(/[^A-Za-z0-9_-]/g, '');
+      const stream = (page, text) => [
+        'BT /F1 18 Tf 40 550 Td',
+        `(${text}) Tj`,
+        '0 -32 Td /F1 12 Tf',
+        `(Original synthetic reader fixture ${safe}) Tj`,
+        '0 -28 Td',
+        `(Select these words to practice a local highlight.) Tj`,
+        '0 -28 Td',
+        `(Page ${page} is intentionally independent of the reference book.) Tj`,
+        'ET'
+      ].join('\n');
+      const first = stream(1, 'FIRST PAGE - local reading practice');
+      const second = stream(2, 'SECOND PAGE - private notes and highlights');
+      const objects = [
+        '<< /Type /Catalog /Pages 2 0 R >>',
+        '<< /Type /Pages /Kids [3 0 R 5 0 R] /Count 2 >>',
+        '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 400 600] /Resources << /Font << /F1 7 0 R >> >> /Contents 4 0 R >>',
+        `<< /Length ${new TextEncoder().encode(first).length} >>\nstream\n${first}\nendstream`,
+        '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 400 600] /Resources << /Font << /F1 7 0 R >> >> /Contents 6 0 R >>',
+        `<< /Length ${new TextEncoder().encode(second).length} >>\nstream\n${second}\nendstream`,
+        '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>'
+      ];
+      let source = '%PDF-1.4\n%FIELDWORK-QA\n';
+      const offsets = [0];
+      objects.forEach((body, index) => {
+        offsets.push(new TextEncoder().encode(source).length);
+        source += `${index + 1} 0 obj\n${body}\nendobj\n`;
+      });
+      const xref = new TextEncoder().encode(source).length;
+      source += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+      source += offsets.slice(1).map(offset => `${String(offset).padStart(10, '0')} 00000 n \n`).join('');
+      source += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
+      return new File([new TextEncoder().encode(source)], `synthetic-${safe}.pdf`, {type: 'application/pdf'});
+    }
+    async function fingerprint(file) {
+      const digest = await crypto.subtle.digest('SHA-256', await file.arrayBuffer());
+      return [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, '0')).join('');
+    }
+
+    if (driverMode) {
+      document.body.classList.add('qa-driver');
+      const qa = window.readerQA = {
+        token: params.get('driver'),
+        reader: null,
+        error: null,
+        audit: [],
+        resources: [],
+        downloads: [],
+        writes: [],
+        failKey: null
+      };
+      const originalFetch = window.fetch.bind(window);
+      const originalOpen = XMLHttpRequest.prototype.open;
+      const originalSend = XMLHttpRequest.prototype.send;
+      const requests = new WeakMap();
+      const objectURLs = new Map();
+      const createURL = URL.createObjectURL.bind(URL);
+      const originalClick = HTMLAnchorElement.prototype.click;
+      const setItem = Storage.prototype.setItem;
+      const describe = (kind, url, method = 'GET', body = null) => {
+        const parsed = new URL(String(url), location.href);
+        const entry = {
+          kind, url: parsed.href, method: String(method).toUpperCase(),
+          hasBody: body !== undefined && body !== null,
+          allowed: parsed.origin === location.origin && String(method).toUpperCase() === 'GET' && body == null
+        };
+        qa.audit.push(entry);
+        return entry;
+      };
+      window.fetch = (input, options = {}) => {
+        const request = input instanceof Request ? input : null;
+        const entry = describe('fetch', request?.url || input, options.method || request?.method || 'GET', options.body ?? request?.body);
+        if (!entry.allowed) return Promise.reject(new Error('QA blocked a non-asset network request.'));
+        return originalFetch(input, options);
+      };
+      XMLHttpRequest.prototype.open = function(method, url, ...rest) {
+        requests.set(this, {method, url});
+        return originalOpen.call(this, method, url, ...rest);
+      };
+      XMLHttpRequest.prototype.send = function(body) {
+        const request = requests.get(this) || {};
+        const entry = describe('xhr', request.url || location.href, request.method || 'GET', body);
+        if (!entry.allowed) throw new Error('QA blocked a non-asset XHR request.');
+        return originalSend.call(this, body);
+      };
+      Object.defineProperty(navigator, 'sendBeacon', {configurable: true, value(url, body) {
+        describe('beacon', url, 'POST', body);
+        return false;
+      }});
+      URL.createObjectURL = blob => {
+        const url = createURL(blob);
+        objectURLs.set(url, blob);
+        return url;
+      };
+      HTMLAnchorElement.prototype.click = function() {
+        if (this.download && objectURLs.has(this.href)) {
+          qa.downloads.push({name: this.download, blob: objectURLs.get(this.href)});
+          return; // Capture the real download bytes without writing a test file.
+        }
+        return originalClick.call(this);
+      };
+      Storage.prototype.setItem = function(key, value) {
+        if (this === localStorage) {
+          qa.writes.push({key: String(key), bytes: new TextEncoder().encode(String(value)).length});
+          if (qa.failKey === key) throw new DOMException('Synthetic QA storage quota failure', 'QuotaExceededError');
+        }
+        return setItem.call(this, key, value);
+      };
+      new PerformanceObserver(list => {
+        for (const item of list.getEntries()) {
+          qa.resources.push({url: item.name, initiatorType: item.initiatorType});
+        }
+      }).observe({type: 'resource', buffered: true});
+      try {
+        // Instrumentation above runs before loading the production reader.
+        const {createBookReader} = await import('/book-reader.js');
+        qa.reader = createBookReader({toast: message => {
+          document.querySelector('#driver-toasts').textContent = message;
+        }});
+        document.querySelector('#driver-open').onclick = () => qa.reader.open();
+        document.querySelector('#driver-status').textContent = 'Reader ready. No PDF has been uploaded or requested.';
+      } catch (error) {
+        qa.error = error.stack || String(error);
+        document.querySelector('#driver-status').textContent = qa.error;
+      }
+    } else {
+      const runButton = document.querySelector('#run');
+      const results = document.querySelector('#results');
+      const stage = document.querySelector('#stage');
+      const prefix = 'fieldwork.book-notes.v1.';
+      let token = 0, active = false;
+      const audits = [];
+      window.readerQA = {syntheticPDF, fingerprint, audits, last: null};
+
+      async function initialize(frame = stage) {
+        const current = String(++token);
+        frame.src = `/__reader-qa?driver=${current}`;
+        const qa = await until(() => {
+          const candidate = frame.contentWindow?.readerQA;
+          if (candidate?.token !== current) return null;
+          if (candidate.error) throw new Error(candidate.error);
+          return candidate.reader ? candidate : null;
+        }, 'The reader module did not initialize.');
+        audits.push(qa);
+        return qa;
+      }
+      const doc = () => stage.contentDocument;
+      const find = selector => doc().querySelector(selector);
+      function click(name) {
+        const button = find(`[data-br="${name}"]`);
+        assert(button && !button.disabled, `The ${name} control is missing or disabled.`);
+        button.click();
+      }
+      function change(selector, value) {
+        const input = find(selector);
+        assert(input, `Missing control: ${selector}`);
+        input.value = String(value);
+        input.dispatchEvent(new stage.contentWindow.Event('change', {bubbles: true}));
+      }
+      function attach(selector, file, frame = stage) {
+        const input = frame.contentDocument.querySelector(selector);
+        assert(input, `Missing file input: ${selector}`);
+        const transfer = new frame.contentWindow.DataTransfer();
+        transfer.items.add(file);
+        input.files = transfer.files;
+        input.dispatchEvent(new frame.contentWindow.Event('change', {bubbles: true}));
+      }
+      async function rendered(page, frame = stage) {
+        await until(() => {
+          const root = frame.contentDocument;
+          const input = root.querySelector('#br-page-number');
+          const layer = root.querySelector('.br-text-layer');
+          return input?.value === String(page) && !input.disabled &&
+            layer?.textContent.includes(page === 1 ? 'FIRST PAGE' : 'SECOND PAGE') &&
+            layer.getBoundingClientRect().width > 10;
+        }, `PDF page ${page} did not finish rendering.`);
+        // Allow the fit-width ResizeObserver to settle before geometry checks.
+        await delay(200);
+      }
+      function stored(bookId) {
+        const raw = localStorage.getItem(prefix + bookId);
+        return raw ? JSON.parse(raw) : null;
+      }
+      async function addNote(text) {
+        click('note');
+        const field = await until(() => !find('[data-br-editor]').hidden && find('#br-note-text'), 'Note editor did not open.');
+        field.value = text;
+        field.dispatchEvent(new stage.contentWindow.Event('input', {bubbles: true}));
+        find('[data-br-editor]').requestSubmit();
+        await until(() => find('[data-br-editor]').hidden, 'Note did not finish saving.');
+      }
+      async function downloadNotes(qa) {
+        const previous = qa.downloads.length;
+        click('export');
+        const item = await until(() => qa.downloads.length > previous && qa.downloads.at(-1), 'Reader did not prepare its notes download.');
+        return JSON.parse(await item.blob.text());
+      }
+      async function importNotes(value) {
+        const before = find('[data-br-notice]').textContent;
+        const file = new File([typeof value === 'string' ? value : JSON.stringify(value)], 'synthetic-book-notes.json', {type: 'application/json'});
+        attach('[data-br-import]', file);
+        await until(() => find('[data-br-notice]').textContent !== before, 'Reader did not report the import result.');
+      }
+      async function choose(file, page) {
+        attach('[data-br-file]', file);
+        await until(() => find('[data-br-filename]')?.textContent === file.name && !find('#br-page-number').disabled, 'Synthetic PDF did not open.');
+        await rendered(page);
+      }
+
+      runButton.onclick = async () => {
+        if (active) return;
+        active = true;
+        runButton.disabled = true;
+        const lines = [], failures = [];
+        const auditStart = audits.length;
+        document.querySelector('#preview').disabled = true;
+        const runId = crypto.randomUUID().replaceAll('-', '');
+        const first = syntheticPDF(`first-${runId}`);
+        const other = syntheticPDF(`other-${runId}`);
+        const bookId = await fingerprint(first), otherId = await fingerprint(other);
+        const noteText = `QA_PRIVATE_NOTE_${runId}`;
+        const editedText = `${noteText}_EDITED`;
+        let qa, exported;
+        results.textContent = 'Running actual reader UI with original synthetic PDFs…';
+        async function check(name, run, critical = false) {
+          try {
+            await run();
+            lines.push(`PASS ${name}`);
+          } catch (error) {
+            lines.push(`FAIL ${name}: ${error.message}`);
+            failures.push({name, message: error.stack || String(error)});
+            if (critical) throw error;
+          } finally {
+            results.textContent = lines.join('\n');
+          }
+        }
+        try {
+          await check('First-open exact-page request survives the file chooser', async () => {
+            qa = await initialize();
+            qa.reader.open({
+              page: 2,
+              lesson: {id: 'qa-lesson', title: 'Original QA lesson'},
+              assignment: {label: 'Synthetic page two', ranges: [{label: 'Private notes', start: 2, end: 2}]}
+            });
+            await choose(first, 2);
+            assert(stored(bookId)?.page === 2, 'The requested first page was not persisted.');
+            assert(find('[data-br-page-count]').textContent.includes('2'), 'Synthetic PDF must have exactly two pages.');
+          }, true);
+          await check('Create a page note through the visible note form', async () => {
+            await addNote(noteText);
+            const annotations = stored(bookId).annotations;
+            assert(annotations.length === 1 && annotations[0].note === noteText, 'Page note was not stored.');
+            assert(annotations[0].page === 2 && annotations[0].rects.length === 0, 'Page note has incorrect position metadata.');
+          }, true);
+          await check('Edit an existing page note without duplicating it', async () => {
+            find('[data-br-mark-action="edit"]').click();
+            await until(() => !find('[data-br-editor]').hidden, 'Edit form did not open.');
+            find('#br-note-text').value = editedText;
+            find('[data-br-editor]').requestSubmit();
+            assert(stored(bookId).annotations.length === 1, 'Editing created a second annotation.');
+            assert(stored(bookId).annotations[0].note === editedText, 'Edited note was not saved.');
+            await rendered(2);
+          });
+          await check('Range selection creates a green highlight with normalized rectangles', async () => {
+            const layer = find('.br-text-layer');
+            const walker = doc().createTreeWalker(layer, stage.contentWindow.NodeFilter.SHOW_TEXT);
+            let node;
+            while ((node = walker.nextNode()) && !node.textContent.trim()) {}
+            assert(node && node.textContent.length > 10, 'PDF text layer contains no selectable text.');
+            const range = doc().createRange();
+            range.setStart(node, 0);
+            range.setEnd(node, Math.min(30, node.textContent.length));
+            const selection = stage.contentWindow.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            doc().dispatchEvent(new stage.contentWindow.Event('selectionchange'));
+            layer.dispatchEvent(new stage.contentWindow.MouseEvent('mouseup', {bubbles: true}));
+            await until(() => !find('[data-br="highlight"]').disabled, 'PDF selection was not recognized.');
+            find('[data-br-color="green"]').click();
+            click('highlight');
+            const highlight = stored(bookId).annotations.find(mark => mark.type === 'highlight');
+            assert(highlight?.quote && highlight.color === 'green', 'Highlight text or color was not persisted.');
+            assert(highlight.rects.length > 0 && highlight.rects.every(rect =>
+              [rect.x, rect.y, rect.width, rect.height].every(Number.isFinite) &&
+              rect.x >= 0 && rect.y >= 0 && rect.width > 0 && rect.height > 0 &&
+              rect.x + rect.width <= 1 + 1e-9 && rect.y + rect.height <= 1 + 1e-9
+            ), 'Highlight rectangles are outside normalized page bounds.');
+            assert(find('.br-highlight-green'), 'The green highlight overlay was not drawn.');
+          }, true);
+          await check('Zoom changes rendering without changing saved highlight geometry', async () => {
+            const before = find('.br-pdf-page').getBoundingClientRect().width;
+            const rects = JSON.stringify(stored(bookId).annotations.find(mark => mark.type === 'highlight').rects);
+            click('zoom-in');
+            await rendered(2);
+            assert(find('.br-pdf-page').getBoundingClientRect().width > before, 'Zoom in did not increase page width.');
+            assert(JSON.stringify(stored(bookId).annotations.find(mark => mark.type === 'highlight').rects) === rects, 'Zoom rewrote normalized geometry.');
+            assert(find('.br-highlight-green'), 'Highlight disappeared after zoom.');
+            click('fit');
+            await rendered(2);
+          });
+          await check('Page bounds and first/last-page controls are enforced', async () => {
+            change('#br-page-number', 0);
+            assert(find('#br-page-number').value === '2', 'Invalid page zero replaced the current page.');
+            change('#br-page-number', 999);
+            await rendered(2);
+            assert(find('[data-br="next"]').disabled, 'Next must be disabled on the final page.');
+            click('previous');
+            await rendered(1);
+            assert(find('[data-br="previous"]').disabled, 'Previous must be disabled on the first page.');
+          });
+          await check('Lesson synchronization preserves a manually selected page and scroll', async () => {
+            const page = find('.br-pdf-page');
+            const scroll = find('[data-br-scroll]');
+            scroll.scrollTop = Math.min(25, scroll.scrollHeight - scroll.clientHeight);
+            const before = scroll.scrollTop;
+            qa.reader.syncLesson({id: 'qa-lesson', title: 'Updated lesson heading'}, {
+              label: 'Assignment still starts at page two',
+              ranges: [{label: 'Page two', start: 2, end: 2}]
+            });
+            await delay(220);
+            assert(find('#br-page-number').value === '1', 'syncLesson jumped to the assignment page.');
+            assert(find('.br-pdf-page') === page, 'syncLesson unnecessarily rerendered the page.');
+            assert(scroll.scrollTop === before, 'syncLesson reset PDF scroll position.');
+          });
+          await check('A real frame reload restores notes and reading page for the same SHA-256 PDF', async () => {
+            const previous = localStorage.getItem(prefix + bookId);
+            qa = await initialize();
+            qa.reader.open();
+            await choose(first, 1);
+            assert(stored(bookId).annotations.length === 2, 'Stored notes were lost after reloading the reader.');
+            assert(JSON.parse(previous).annotations.length === stored(bookId).annotations.length, 'Reload changed note count.');
+            change('#br-mark-filter', 'all');
+            assert(find('[data-br-mark-list]').textContent.includes(editedText), 'Edited note did not return after reload.');
+            change('#br-page-number', 2);
+            await rendered(2);
+            assert(find('.br-highlight-green'), 'Saved highlight was not restored.');
+          }, true);
+          await check('Another PDF receives a separate annotation namespace', async () => {
+            const previous = JSON.stringify(stored(bookId).annotations);
+            await choose(other, 1);
+            assert(stored(otherId).annotations.length === 0, 'A different PDF inherited the first PDF’s notes.');
+            assert(JSON.stringify(stored(bookId).annotations) === previous, 'Opening another PDF changed the first PDF’s annotations.');
+            await choose(first, 2);
+            assert(stored(bookId).annotations.length === 2, 'Original PDF annotations did not return.');
+          }, true);
+          await check('Dedicated notes export contains metadata and selected quotes, never PDF bytes', async () => {
+            exported = await downloadNotes(qa);
+            assert(exported.format === 'fieldwork-book-notes' && exported.version === 1, 'Incorrect backup format.');
+            assert(exported.bookId === bookId && exported.pageCount === 2 && exported.page === 2, 'Incorrect export document metadata.');
+            assert(exported.annotations.length === 2 && exported.annotations.some(mark => mark.note === editedText), 'Export omitted the current notes.');
+            assert(!JSON.stringify(exported).includes('%PDF-'), 'Export contains raw PDF bytes.');
+            assert(Object.keys(exported).every(key => ['format', 'version', 'bookId', 'pageCount', 'page', 'annotations', 'exportedAt'].includes(key)), 'Export contains unexpected file payload fields.');
+          }, true);
+          await check('A mismatched PDF backup is rejected without changing existing annotations', async () => {
+            const previous = localStorage.getItem(prefix + bookId);
+            await importNotes({...exported, bookId: otherId});
+            assert(find('[data-br-notice]').textContent.startsWith('Import rejected:'), 'Mismatched import was not rejected.');
+            assert(localStorage.getItem(prefix + bookId) === previous, 'Rejected import changed saved data.');
+          });
+          await check('Notes import appends new IDs and preserves existing notes on conflicts', async () => {
+            const imported = structuredClone(exported);
+            imported.annotations[0].note = 'This conflicting import must not overwrite the original.';
+            imported.annotations.push({
+              id: `qa-import-${runId}`, type: 'note', page: 1, quote: '', note: `QA_IMPORTED_NOTE_${runId}`,
+              color: 'pink', rects: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
+            });
+            await importNotes(imported);
+            assert(stored(bookId).annotations.length === 3, 'Import did not append exactly one annotation.');
+            assert(stored(bookId).annotations.find(mark => mark.id === exported.annotations[0].id).note === editedText, 'Import replaced an existing note.');
+            assert(find('[data-br-notice]').textContent.includes('1 book notes imported'), 'Import did not report its result.');
+          });
+          await check('Malformed highlight rectangles are rejected atomically through the file picker', async () => {
+            const previous = localStorage.getItem(prefix + bookId);
+            const invalid = structuredClone(exported);
+            invalid.annotations.find(mark => mark.type === 'highlight').rects[0].width = 2;
+            await importNotes(invalid);
+            assert(find('[data-br-notice]').textContent.startsWith('Import rejected:'), 'Out-of-bounds geometry was accepted.');
+            assert(localStorage.getItem(prefix + bookId) === previous, 'Invalid geometry import changed saved data.');
+          });
+          await check('Quota failures remain visible and session-only notes are still exportable', async () => {
+            const previous = localStorage.getItem(prefix + bookId);
+            qa.failKey = prefix + bookId;
+            const sessionNote = `QA_SESSION_ONLY_${runId}`;
+            await addNote(sessionNote);
+            assert(localStorage.getItem(prefix + bookId) === previous, 'Failed write changed persisted data.');
+            assert(find('[data-br-saved-state]').textContent.includes('Session only'), 'Failed write was presented as saved.');
+            assert(find('[data-br-notice]').textContent.includes('remain in this tab'), 'Persistent storage warning was not visible.');
+            const sessionExport = await downloadNotes(qa);
+            assert(sessionExport.annotations.some(mark => mark.note === sessionNote), 'Export lost the unsaved in-memory note.');
+            qa.failKey = null;
+            change('#br-page-number', 2);
+            await rendered(2);
+            assert(stored(bookId).annotations.some(mark => mark.note === sessionNote), 'Retry did not persist the session note.');
+          });
+          await check('Delete and Undo preserve annotation contents', async () => {
+            change('#br-mark-filter', 'all');
+            const marks = stored(bookId).annotations;
+            const last = marks.at(-1);
+            const button = find(`[data-br-mark-action="delete"][data-mark-id="${last.id}"]`);
+            assert(button, 'Delete control not found.');
+            button.click();
+            assert(!stored(bookId).annotations.some(mark => mark.id === last.id), 'Delete did not remove the note.');
+            click('undo');
+            assert(JSON.stringify(stored(bookId).annotations.find(mark => mark.id === last.id)) === JSON.stringify(last), 'Undo did not restore the exact note.');
+          });
+        } catch (error) {
+          lines.push('Dependent reader checks stopped because a prerequisite failed.');
+        } finally {
+          if (qa) qa.failKey = null;
+          await check('Private PDF data never enters a network request or the progress storage key', async () => {
+            const currentAudits = audits.slice(auditStart);
+            const bad = currentAudits.flatMap(session => session.audit).filter(entry => !entry.allowed);
+            const foreign = currentAudits.flatMap(session => session.resources).filter(entry => {
+              const url = new URL(entry.url, location.href);
+              return !['blob:', 'data:'].includes(url.protocol) && url.origin !== location.origin;
+            });
+            assert(!bad.length, `Unexpected network request: ${JSON.stringify(bad)}`);
+            assert(!foreign.length, `Cross-origin resource request: ${JSON.stringify(foreign)}`);
+            const requests = currentAudits.flatMap(session => session.audit);
+            assert(requests.every(entry => !entry.url.includes(runId) && !entry.url.includes('QA_PRIVATE_NOTE') && !entry.hasBody), 'A request contains private fixture content.');
+            const keys = currentAudits.flatMap(session => session.writes).map(write => write.key);
+            assert(keys.length > 0 && keys.every(key => key === prefix + bookId || key === prefix + otherId), 'Reader wrote outside its two fingerprint-specific annotation keys.');
+          });
+          const passes = lines.filter(line => line.startsWith('PASS')).length;
+          results.textContent = lines.join('\n') + `\n\n${passes} checks passed; ${failures.length} failed.\nSynthetic document IDs: ${bookId.slice(0,12)}, ${otherId.slice(0,12)}.\nNo user book was opened.`;
+          window.readerQA.last = {passes, failures, bookId, otherId, first, other, lines};
+          runButton.disabled = false;
+          document.querySelector('#preview').disabled = false;
+          active = false;
+        }
+      };
+      document.querySelector('#preview').onclick = async () => {
+        const button = document.querySelector('#preview');
+        button.disabled = true;
+        document.querySelector('#mobile-section').hidden = false;
+        try {
+          const frame = document.querySelector('#mobile');
+          const qa = await initialize(frame);
+          qa.reader.open({page: 2, assignment: {label: 'Synthetic mobile reading', ranges: [{label: 'Page two', start: 2, end: 2}]}});
+          attach('[data-br-file]', syntheticPDF('mobile-preview'), frame);
+          await rendered(2, frame);
+          const root = frame.contentDocument;
+          const width = frame.contentWindow.innerWidth;
+          assert(width === 390, `Expected a 390px viewport, received ${width}px.`);
+          assert(root.querySelector('#book-reader').getBoundingClientRect().width <= width + 1, 'Mobile reader exceeds its viewport.');
+          assert(root.documentElement.scrollWidth <= width + 1, 'Mobile document has horizontal overflow.');
+          root.querySelector('[data-br="previous"]').click();
+          await rendered(1, frame);
+          assert(root.querySelector('[data-br="previous"]').disabled, 'Mobile first-page boundary is not enforced.');
+          root.querySelector('[data-br="next"]').click();
+          await rendered(2, frame);
+          const layer = root.querySelector('.br-text-layer');
+          const walker = root.createTreeWalker(layer, frame.contentWindow.NodeFilter.SHOW_TEXT);
+          let node;
+          while ((node = walker.nextNode()) && !node.textContent.trim()) {}
+          assert(node, 'Mobile page has no selectable text.');
+          const range = root.createRange();
+          range.setStart(node, 0);
+          range.setEnd(node, Math.min(24, node.textContent.length));
+          const selection = frame.contentWindow.getSelection();
+          selection.removeAllRanges();
+          selection.addRange(range);
+          root.dispatchEvent(new frame.contentWindow.Event('selectionchange'));
+          layer.dispatchEvent(new frame.contentWindow.MouseEvent('mouseup', {bubbles: true}));
+          await until(() => !root.querySelector('[data-br="highlight"]').disabled, 'Mobile text selection did not enable highlighting.');
+          results.textContent += '\nMOBILE PASS: 390px width, no horizontal overflow, page navigation, bounds, and text selection.';
+          button.textContent = 'Mobile preview ready · reopen';
+        } catch (error) {
+          results.textContent += `\nMobile preview failed: ${error.message}`;
+        } finally { button.disabled = false; }
+      };
+    }
+  </script>
+</body>
+</html>

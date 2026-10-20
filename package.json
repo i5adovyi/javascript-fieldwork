@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "node scripts/serve.mjs",
     "start": "node scripts/serve.mjs",
-    "test": "node tests/validate-content.mjs && node tests/validate-labs.mjs && node tests/validate-runner.mjs && node tests/validate-wiki.mjs && node tests/validate-state.mjs && node tests/validate-content-loading.mjs && node tests/validate-playground.mjs && node tests/validate-lesson-playgrounds.mjs",
+    "test": "node tests/validate-content.mjs && node tests/validate-labs.mjs && node tests/validate-runner.mjs && node tests/validate-wiki.mjs && node tests/validate-state.mjs && node tests/validate-content-loading.mjs && node tests/validate-playground.mjs && node tests/validate-lesson-playgrounds.mjs && node tests/validate-book-map.mjs && node tests/validate-book-storage.mjs && node tests/validate-reader-release.mjs",
     "materials": "node scripts/build-guide.mjs",
     "wiki:export": "node scripts/export-wiki.mjs",
     "editors:build": "node scripts/build-editors.mjs"

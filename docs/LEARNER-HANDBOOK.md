@@ -7,12 +7,24 @@ The objective is independent capability: you can take a small problem, choose a 
 ## Start here
 
 1. Open **Overview** and choose the first lesson in **Learning path**. Read the stated objective before opening any reference.
-2. Use **Read book** to select your own PDF. The file is read locally; it is not uploaded. After a page reload, select the PDF again. The book is not included in the portal or its downloadable materials.
+2. Select **Read beside lesson**, then **Choose PDF**, and select your own local copy. The reader sits beside the lesson on desktop and stacks with it on mobile. Choose an assigned reading range to open its first PDF page. The book is not included in the portal or its downloadable materials.
 3. Keep an editor, browser developer tools, and a notebook available. The built-in **Practice lab** is suitable for focused language exercises; larger portfolio projects belong in their own working folders.
 4. Write a prediction, attempt the exercise, and use **Run tests**. If you are stuck, use **Hint** before **View solution**. A passing lab is marked complete automatically. Use **Mark complete** for a lesson when you have done the work; quizzes help you check understanding but do not replace an implementation.
 5. End the session in **My notebook**. Write what changed in your understanding and the next experiment you will run.
 
 The portal is a local learning workspace. It has no account or cloud synchronization. Once it has loaded and its assets are cached, the app can be used offline; external courses, documentation, and YouTube videos still need a connection. Your locally selected book must be available on your device.
+
+## Read and annotate your own book
+
+The reader maps all 36 lessons to 97 reading ranges in the supplied 1,245-page PDF of *JavaScript: The Definitive Guide*, seventh edition (2020). A page jump means a physical position in that PDF, counted from its first page; it is not a printed page number. If your edition or PDF pagination differs, use the assignment’s chapter and section reference and navigate manually. A boundary page may belong to two neighboring ranges because it contains the end of one section and the start of another.
+
+Use **Read beside lesson** to keep the explanation and the assigned reading together. After choosing your PDF, select a reading range or use the reader’s page navigation. On a narrow screen, the reader and lesson stack so you can move between them without reducing the book to an unreadable column.
+
+To leave evidence of your reading, select text and choose a highlight color. Add a note either to that selection or to the current page. Write a prediction, a question, or an explanation in your own words. You can edit or delete annotations and use undo to reverse an annotation change. Page notes help when a thought concerns a whole example rather than one selectable phrase. Book annotations stay separate from your lesson reflections and project logs.
+
+The bundled PDF.js reader reads the selected file’s bytes in memory. The PDF is never uploaded, added to the application’s offline cache, or copied into the repository. After a reload, choose the local PDF again. A fingerprint identifies the matching copy so the reader can restore its last page, highlights, and notes saved in this browser. A different PDF may have a different fingerprint even if its title looks the same.
+
+Private book notes have their own export and import controls in the reader. Export them separately from your general progress backup, and keep the annotation file somewhere you control. Neither export includes the PDF itself. There is no account or cloud synchronization; clearing browser data removes annotations unless you have a backup. On another browser or device, choose the matching PDF and import your private book notes to restore them.
 
 ## The five-part study loop
 
@@ -40,7 +52,7 @@ After twenty minutes with no new evidence, write the smallest reproduction and c
 
 ## Your route through the program
 
-Every stage contains six lessons. Use the chapter map in [CURRICULUM-MAP.md](CURRICULUM-MAP.md) to navigate the book by chapter and section rather than PDF page number. Printed pages and PDF viewer pages can differ.
+Every stage contains six lessons. Use the mapped reading ranges in the lesson’s reader for the supplied PDF, and consult [CURRICULUM-MAP.md](CURRICULUM-MAP.md) for chapter and section coverage. The reader uses physical PDF positions; printed page numbers and differently paginated copies can differ.
 
 | Stage | Focus | Portfolio artifact | Estimated project effort |
 | --- | --- | --- | --- |
@@ -114,7 +126,9 @@ The portal stores learning progress, notebook content, and saved lab code in you
 
 Use **My notebook → Export backup** at the end of each week and before clearing browser data or changing devices. Save the downloaded JSON somewhere you control. To restore it, open the destination portal and use **Import backup**. Export the destination’s current workspace first so you retain a recovery copy. Inspect your progress, notebook, and a saved lab after import.
 
-A backup is a file you own; the portal does not provide cloud retention. Keep at least one copy outside the browser profile. The selected book PDF is not part of a progress backup. Select it again from your local files after a reload or on a new device.
+A general progress backup is separate from a private book annotation backup. Use the reader’s export/import controls for reading positions, highlights, and book notes; **My notebook → Export backup** preserves your learning workspace instead. Export both before changing browsers or clearing site data. Inspect a highlighted passage and a book note after restoring annotations.
+
+These backups are files you own; the portal does not provide cloud retention. Keep at least one copy outside the browser profile. The selected book PDF is not part of either backup and is not cached with the app. Select the matching local file again after a reload or on a new device so its fingerprint can reconnect the saved reading state.
 
 **Download handbook** provides this guide for offline reference. The built-in lab executes code in a worker with a three-second timeout. It is a learning aid with visible checks, not a secure remote grading service. Larger programs, DOM experiments, and Node projects should be run in their appropriate environments.
 
