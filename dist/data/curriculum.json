@@ -71,7 +71,12 @@
             "JavaScript defines values, expressions, objects, functions, and other language behavior. A host environment supplies additional capabilities. A browser provides a document and browser events; Node.js provides access to processes and files. The same arithmetic expression behaves similarly in both, but document.querySelector is a browser capability. Treating this distinction as a boundary helps you understand unfamiliar examples instead of memorizing where each function happens to work.",
             "Create a scratch directory with one JavaScript file and one HTML file that loads it. Keep experiments small enough to inspect completely. Record how you ran each example, the expected output, and the actual output. When a name is missing, first identify whether it belongs to your code, the language, or the host. That question is often more useful than immediately changing syntax."
           ],
-          "code": "const minutes = 25;\nconst sessions = 4;\nconsole.log({ totalMinutes: minutes * sessions });"
+          "code": "const minutes = 25;\nconst sessions = 4;\nconsole.log({ totalMinutes: minutes * sessions });",
+          "playground": {
+            "id": "workbench",
+            "runtime": "worker",
+            "output": "{\n  \"totalMinutes\": 100\n}"
+          }
         },
         {
           "heading": "Read programs as a sequence of observations",
@@ -170,7 +175,12 @@
             "JavaScript values have types even though a variable can hold different types over its lifetime. Common primitive types include number, string, boolean, undefined, null, bigint, and symbol. Objects include arrays and functions. A missing property typically evaluates to undefined; null is often an intentional marker selected by an API. These are different signals, so define what each means in your own program rather than treating every empty-looking value identically.",
             "Input boundaries deserve special attention because form controls and command-line arguments commonly provide strings. The text \"12\" and the number 12 can participate in different operations. Convert deliberately, then validate the result with a check that matches your requirement. Number.isFinite rejects NaN and infinities without coercion. An empty string converts to zero with Number, which may be inappropriate for a required field."
           ],
-          "code": "const raw = \"12\";\nconst count = Number(raw);\nconsole.log(Number.isFinite(count)); // true"
+          "code": "const raw = \"12\";\nconst count = Number(raw);\nconsole.log(Number.isFinite(count)); // true",
+          "playground": {
+            "id": "conversion",
+            "runtime": "worker",
+            "output": "true"
+          }
         },
         {
           "heading": "Bindings are not containers that freeze objects",
@@ -178,7 +188,12 @@
             "A variable binding associates a name with a value. const prevents reassignment of that binding; it does not make an object immutable. When two variables refer to the same object, changing a property through either name affects the same underlying object. By contrast, assigning a primitive gives another binding access to that immutable value, and later reassignment does not change the other binding.",
             "Draw arrows when reasoning about identity. For const first = { score: 1 }; const second = first;, draw two names pointing to one object. For a spread copy, draw another outer object, but remember that nested objects are still shared. This visual distinction explains many surprising updates in application state. Decide whether a function may mutate its arguments and make that decision part of its contract."
           ],
-          "code": "const first = { score: 1 };\nconst second = first;\nsecond.score += 1;\nconsole.log(first.score); // 2"
+          "code": "const first = { score: 1 };\nconst second = first;\nsecond.score += 1;\nconsole.log(first.score); // 2",
+          "playground": {
+            "id": "identity",
+            "runtime": "worker",
+            "output": "2"
+          }
         },
         {
           "heading": "Conversions need a policy",
@@ -270,7 +285,14 @@
             "An expression evaluates to a value, but evaluation can also cause observable effects. A function call might write a log, mutate state, or start a request. Arithmetic, property access, comparisons, and assignments are all expressions with different rules. Operator precedence determines grouping; evaluation order determines when operands are evaluated. Parentheses make the intended grouping visible without requiring a reader to remember the entire precedence table.",
             "Consider total = price + fee * quantity. Multiplication groups more tightly than addition, which may or may not match the business rule. Name intermediate values when an expression mixes several concepts. The goal is to expose the domain calculation: unit cost, subtotal, discount, and final amount. A few clear assignments often communicate more effectively than a compressed formula with several nested conditional operators."
           ],
-          "code": "const unitCost = price + fee;\nconst subtotal = unitCost * quantity;"
+          "code": "const unitCost = price + fee;\nconst subtotal = unitCost * quantity;",
+          "playground": {
+            "id": "expressions",
+            "runtime": "worker",
+            "output": "66",
+            "before": "// Sample inputs: change any value and run again.\nconst price = 20;\nconst fee = 2;\nconst quantity = 3;",
+            "after": "console.log(subtotal);"
+          }
         },
         {
           "heading": "Short-circuit operators return operands",
@@ -278,7 +300,12 @@
             "The logical operators && and || select and return operand values; their results are not necessarily booleans. Evaluation may stop before the right operand runs. This allows compact checks but can hide side effects. The nullish coalescing operator ?? selects its fallback only for null or undefined, whereas || uses the broader category of falsy values. The distinction matters whenever zero, false, or an empty string is meaningful.",
             "Build a small truth table for a setting such as playbackVolume. If zero means mute, volume || 50 changes a valid choice into a default. volume ?? 50 preserves it. Write the table before choosing an operator, and include absent values and valid edge values. When mixing nullish and logical operators, use explicit parentheses as required by the syntax and to make the policy immediately readable."
           ],
-          "code": "const savedVolume = 0;\nconsole.log(savedVolume || 50); // 50\nconsole.log(savedVolume ?? 50); // 0"
+          "code": "const savedVolume = 0;\nconsole.log(savedVolume || 50); // 50\nconsole.log(savedVolume ?? 50); // 0",
+          "playground": {
+            "id": "defaults",
+            "runtime": "worker",
+            "output": "50\n0"
+          }
         },
         {
           "heading": "Read safely without disguising invalid state",
@@ -376,7 +403,13 @@
             "A guard clause handles a special or invalid situation near the beginning of a function and exits early. This can keep the successful path at a consistent indentation level. It is especially effective at boundaries where raw input must satisfy a few clear requirements. The order of guards is part of the behavior: if several rules fail, the first guard determines which result or error the caller receives.",
             "Do not confuse concise guards with incomplete validation. Decide whether a rejected request should return a structured result, return a sentinel value, or throw an exception. Expected user mistakes often work well as explicit results; violated programmer assumptions may justify exceptions. Whichever policy you choose, make the caller handle it consistently and ensure that no partial mutation happens before the validation finishes."
           ],
-          "code": "function enroll(seats) {\n  if (!Number.isInteger(seats) || seats < 0) {\n    throw new TypeError(\"seats must be a nonnegative integer\");\n  }\n  if (seats === 0) return { ok: false, reason: \"full\" };\n  return { ok: true, remaining: seats - 1 };\n}"
+          "code": "function enroll(seats) {\n  if (!Number.isInteger(seats) || seats < 0) {\n    throw new TypeError(\"seats must be a nonnegative integer\");\n  }\n  if (seats === 0) return { ok: false, reason: \"full\" };\n  return { ok: true, remaining: seats - 1 };\n}",
+          "playground": {
+            "id": "guard-clauses",
+            "runtime": "worker",
+            "output": "{\"ok\":false,\"reason\":\"full\"}\n{\"ok\":true,\"remaining\":2}\nTypeError: seats must be a nonnegative integer",
+            "after": "console.log(JSON.stringify(enroll(0)));\nconsole.log(JSON.stringify(enroll(3)));\ntry { enroll(-1); }\ncatch (error) { console.log(`${error.name}: ${error.message}`); }"
+          }
         },
         {
           "heading": "Choose branching structures for the domain",
@@ -474,7 +507,12 @@
             "A loop invariant is a statement that remains true before and after each iteration. When summing durations, the accumulator equals the sum of all items already processed. It begins at zero, each iteration adds exactly the next duration, and at termination every item has been processed. This style of reasoning makes correctness concrete and exposes duplicate processing, skipped values, and accidental resets inside a loop.",
             "Write an invariant in a comment for your first few algorithms. Then trace one input in a table with columns for the index, current value, and accumulator. Include a negative value or another edge case if the contract permits it. The purpose is to connect the implementation to a claim you can verify, rather than assuming that a plausible-looking loop must be correct."
           ],
-          "code": "let total = 0;\nfor (const minutes of [15, 25, 10]) {\n  // Before each step, total covers the preceding values.\n  total += minutes;\n}\nconsole.log(total); // 50"
+          "code": "let total = 0;\nfor (const minutes of [15, 25, 10]) {\n  // Before each step, total covers the preceding values.\n  total += minutes;\n}\nconsole.log(total); // 50",
+          "playground": {
+            "id": "invariant",
+            "runtime": "worker",
+            "output": "50"
+          }
         },
         {
           "heading": "Early exits are part of the contract",
@@ -566,7 +604,12 @@
             "Lexical scope is determined by the structure of source code. A binding declared inside a block with let or const is available within that block and its nested scopes, subject to initialization rules. A same-named inner binding shadows an outer one. This can be useful, but unnecessary shadowing makes debugging harder because a familiar name may refer to a different value at a different location.",
             "Declarations with let and const have a temporal dead zone before initialization. Access during that interval throws rather than returning undefined. Avoid relying on declaration quirks: declare values near their first meaningful use, prefer narrow scopes, and use distinct names when they represent different concepts. These habits reduce the amount of program state you must mentally track while reviewing a function or investigating a failure."
           ],
-          "code": "const goal = 4;\n{\n  const completed = 2;\n  console.log(goal - completed);\n}\n// completed is not accessible here."
+          "code": "const goal = 4;\n{\n  const completed = 2;\n  console.log(goal - completed);\n}\n// completed is not accessible here.",
+          "playground": {
+            "id": "block-scope",
+            "runtime": "worker",
+            "output": "2"
+          }
         },
         {
           "heading": "Errors should preserve the useful story",
@@ -665,7 +708,12 @@
             "An object groups properties under a single identity. Before writing a literal, decide what the record represents and which properties are required. A lesson record might contain id, title, durationMinutes, and status. Names encode units and meaning; durationMinutes prevents confusion that a generic duration invites. A stable identifier lets other records refer to a lesson without depending on a title that may change during editing.",
             "Property keys are strings or symbols, and bracket notation evaluates an expression to choose a key. Dot notation is convenient for a known identifier-like name. When a key comes from input, validate it against the operation you intend to support. A general-purpose object updater that accepts every possible property is harder to reason about than a small operation such as renameLesson or completeLesson."
           ],
-          "code": "const lesson = { id: \"L1\", title: \"Values\", durationMinutes: 45 };\nconst field = \"title\";\nconsole.log(lesson[field]);"
+          "code": "const lesson = { id: \"L1\", title: \"Values\", durationMinutes: 45 };\nconst field = \"title\";\nconsole.log(lesson[field]);",
+          "playground": {
+            "id": "record",
+            "runtime": "worker",
+            "output": "Values"
+          }
         },
         {
           "heading": "Presence and value are different questions",
@@ -763,7 +811,13 @@
             "An array is an ordered collection whose elements are accessed by numeric indexes. A pipeline becomes readable when each operation describes a distinct transformation. filter selects elements, map produces one output for each visited element, find returns the first match, and reduce accumulates a result. Begin by writing the desired input and output shapes. Then choose operations that communicate how one shape becomes the other.",
             "Do not use map simply to perform side effects while discarding its returned array. A loop or forEach states that intention more clearly. A long pipeline can also become obscure when callbacks mix filtering, mutation, and logging. Name meaningful intermediate collections during development. Clear stages make it easier to inspect an unexpected result and isolate whether selection, conversion, or aggregation introduced the error."
           ],
-          "code": "const lessons = [{ minutes: 20, done: true }, { minutes: 35, done: false }];\nconst remainingMinutes = lessons\n  .filter(lesson => !lesson.done)\n  .reduce((total, lesson) => total + lesson.minutes, 0);"
+          "code": "const lessons = [{ minutes: 20, done: true }, { minutes: 35, done: false }];\nconst remainingMinutes = lessons\n  .filter(lesson => !lesson.done)\n  .reduce((total, lesson) => total + lesson.minutes, 0);",
+          "playground": {
+            "id": "pipeline",
+            "runtime": "worker",
+            "output": "35",
+            "after": "console.log(remainingMinutes);"
+          }
         },
         {
           "heading": "Order and mutation are part of the contract",
@@ -868,7 +922,13 @@
             "A pure calculation depends only on its inputs and produces no externally visible mutation. Calling it with equivalent inputs yields equivalent results, which makes examples easy to reproduce. Effects such as reading the current clock, writing storage, and modifying the DOM are still necessary, but can sit outside the calculation. Pass needed environmental values as arguments so the core decision remains deterministic.",
             "For a deadline checker, supply now rather than calling Date.now deep inside the rule. For a recommendation function, pass the lessons instead of reading a global array. These changes make the hidden dependencies visible. Test both the returned value and the promise that input objects remain unchanged. Purity is a design tool, not a requirement for every function; effectful functions should simply make their responsibilities explicit."
           ],
-          "code": "function remainingMinutes(planned, completed) {\n  if (completed > planned) throw new RangeError(\"completed exceeds planned\");\n  return planned - completed;\n}"
+          "code": "function remainingMinutes(planned, completed) {\n  if (completed > planned) throw new RangeError(\"completed exceeds planned\");\n  return planned - completed;\n}",
+          "playground": {
+            "id": "function-contract",
+            "runtime": "worker",
+            "output": "15\nRangeError: completed exceeds planned",
+            "after": "console.log(remainingMinutes(45, 30));\ntry { remainingMinutes(20, 30); }\ncatch (error) { console.log(`${error.name}: ${error.message}`); }"
+          }
         },
         {
           "heading": "Function forms carry different semantics",
@@ -959,7 +1019,12 @@
             "A closure combines a function with access to the lexical environment where it was created. The function can continue using those bindings after the outer call has returned. It captures access to bindings, not a frozen snapshot of every value. If a captured binding changes, a later call observes the current value. This explains both useful private state and confusing behavior in callbacks created around shared mutable variables.",
             "Trace a factory by drawing one environment for each invocation. Two calls to makeCounter create independent count bindings, while two references to the same returned function share one environment. Block-scoped let in a loop gives callbacks the expected per-iteration binding in common patterns. Practice predicting these relationships before executing the code; the model is more durable than memorizing a closure definition."
           ],
-          "code": "function makeCounter() {\n  let count = 0;\n  return () => ++count;\n}\nconst first = makeCounter();\nconst second = makeCounter();\nconsole.log(first(), first(), second()); // 1 2 1"
+          "code": "function makeCounter() {\n  let count = 0;\n  return () => ++count;\n}\nconst first = makeCounter();\nconst second = makeCounter();\nconsole.log(first(), first(), second()); // 1 2 1",
+          "playground": {
+            "id": "closures",
+            "runtime": "worker",
+            "output": "1 2 1"
+          }
         },
         {
           "heading": "Private state still needs a clear contract",
@@ -1064,7 +1129,12 @@
             "For an ordinary function, this depends on how it is called. A method invocation such as timer.start() supplies the receiver as this. Extracting const start = timer.start and calling start() loses that receiver. In strict mode, a plain function call has undefined this. Arrow functions behave differently: they inherit this from the surrounding lexical environment instead of receiving it from a method call.",
             "Use bind when you intentionally need a function permanently associated with a receiver, or use a small closure that makes the intended call explicit. Do not automatically bind every method; first ask whether the operation needs this at all. Passing data as a parameter can be clearer for reusable calculations. Predict the receiver at the call site before interpreting a method body that reads properties through this."
           ],
-          "code": "const timer = { minutes: 25, read() { return this.minutes; } };\nconst readTimer = () => timer.read();\nconsole.log(readTimer()); // 25"
+          "code": "const timer = { minutes: 25, read() { return this.minutes; } };\nconst readTimer = () => timer.read();\nconsole.log(readTimer()); // 25",
+          "playground": {
+            "id": "context",
+            "runtime": "worker",
+            "output": "25"
+          }
         },
         {
           "heading": "Composition makes dependencies visible",
@@ -1162,7 +1232,14 @@
             "An invariant is a rule the model must preserve after every public operation. A completed lesson must exist in the curriculum; duration must be finite and nonnegative; progress for one learner must not mutate another learner. Implement focused operations such as completeLesson, reopenLesson, and planSession. Let each operation validate its inputs before creating a new state or changing owned state according to your chosen policy.",
             "Define selection behavior precisely. A session planner may choose unfinished lessons in curriculum order until its time budget is exhausted. Decide whether an oversized first lesson is skipped, included with a warning, or causes an empty plan. Different policies are defensible, but accidental behavior is not. Use examples that distinguish the policies, including an exact budget fit and a remaining lesson longer than the entire budget."
           ],
-          "code": "const progress = { completedIds: [\"L1\"] };\nconst completed = new Set(progress.completedIds);\nconst unfinished = lessons.filter(lesson => !completed.has(lesson.id));"
+          "code": "const progress = { completedIds: [\"L1\"] };\nconst completed = new Set(progress.completedIds);\nconst unfinished = lessons.filter(lesson => !completed.has(lesson.id));",
+          "playground": {
+            "id": "progress-model",
+            "runtime": "worker",
+            "output": "L2",
+            "before": "const lessons = [\n  { id: \"L1\", title: \"Values\" },\n  { id: \"L2\", title: \"Objects\" }\n];",
+            "after": "console.log(unfinished.map(lesson => lesson.id).join(\", \"));"
+          }
         },
         {
           "heading": "Review the result like a small product",
@@ -1261,7 +1338,12 @@
             "A read can find inherited data, while ordinary assignment often creates an own property that shadows inherited data. Accessors and nonwritable properties introduce additional rules, so inspect descriptors when behavior is surprising. Deleting an own property can reveal an inherited property again. It does not necessarily make every future read of that name return undefined.",
             "Mutable instance data should not accidentally live on a shared prototype. If two learners inherit one history array, pushing through either learner changes the same array. Give each learner an independent array. Shared methods are appropriate because they obtain working state from their receiver. Test both the values and reference identities when diagnosing shared-state bugs."
           ],
-          "code": "const methods = { describe() { return this.title; } };\nconst lesson = Object.create(methods);\nlesson.title = \"Prototypes\";\nconsole.log(lesson.describe());"
+          "code": "const methods = { describe() { return this.title; } };\nconst lesson = Object.create(methods);\nlesson.title = \"Prototypes\";\nconsole.log(lesson.describe());",
+          "playground": {
+            "id": "prototype",
+            "runtime": "worker",
+            "output": "Prototypes"
+          }
         },
         {
           "heading": "Construction connects identity and behavior",
@@ -1359,7 +1441,13 @@
             "Methods such as start, pause, and complete describe domain transitions more clearly than unrestricted setters for each field. Decide what repeated calls mean: starting an already running session could return its current state or reject the operation. Either policy can work, but callers need a predictable contract. Validate a transition before changing several related fields.",
             "Static methods belong to the class object and can provide named construction helpers such as fromRecord. Getters can expose computed values without storing redundant state. Keep apparently simple reads free of surprising expensive effects. A public surface should let callers distinguish inspection from change and understand which operations can fail before they use the object in a larger workflow."
           ],
-          "code": "class Session {\n  constructor(minutes) {\n    if (!Number.isFinite(minutes) || minutes <= 0) throw new RangeError(\"Invalid duration\");\n    this.minutes = minutes;\n    this.state = \"idle\";\n  }\n  start() {\n    if (this.state !== \"idle\") throw new Error(\"Invalid transition\");\n    this.state = \"running\";\n  }\n}"
+          "code": "class Session {\n  constructor(minutes) {\n    if (!Number.isFinite(minutes) || minutes <= 0) throw new RangeError(\"Invalid duration\");\n    this.minutes = minutes;\n    this.state = \"idle\";\n  }\n  start() {\n    if (this.state !== \"idle\") throw new Error(\"Invalid transition\");\n    this.state = \"running\";\n  }\n}",
+          "playground": {
+            "id": "transitions",
+            "runtime": "worker",
+            "output": "idle\nrunning\nInvalid transition",
+            "after": "const session = new Session(25);\nconsole.log(session.state);\nsession.start();\nconsole.log(session.state);\ntry { session.start(); }\ncatch (error) { console.log(error.message); }"
+          }
         },
         {
           "heading": "Encapsulation supports change",
@@ -1457,7 +1545,13 @@
             "Composition gives an object collaborators instead of encoding every variation in ancestry. A planner can receive a selection strategy and a storage adapter. Changing selection then does not require a new storage subclass, and changing storage does not duplicate selection logic. This matters when two independent choices would otherwise create a growing number of combined subclasses.",
             "Keep collaborator interfaces narrow and behavioral. A selection strategy can simply accept lessons and a budget and return a plan. Specify mutation and failure rules as well as parameter names. Inject a fake collaborator to control outcomes in tests. Avoid creating interfaces for imaginary future changes; extract the boundary when it clarifies a present responsibility or a plausible, concrete variation."
           ],
-          "code": "function createPlanner(select, save) {\n  return (lessons, budget) => {\n    const plan = select(lessons, budget);\n    save(plan);\n    return plan;\n  };\n}"
+          "code": "function createPlanner(select, save) {\n  return (lessons, budget) => {\n    const plan = select(lessons, budget);\n    save(plan);\n    return plan;\n  };\n}",
+          "playground": {
+            "id": "composition",
+            "runtime": "worker",
+            "output": "Saved: L1\nL1",
+            "after": "// Swap these dependencies to experiment with another policy.\nconst select = (lessons, budget) => lessons.filter(lesson => lesson.minutes <= budget);\nconst save = plan => console.log(\"Saved:\", plan.map(lesson => lesson.id).join(\", \"));\nconst plan = createPlanner(select, save)([\n  { id: \"L1\", minutes: 20 }, { id: \"L2\", minutes: 40 }\n], 25);\nconsole.log(plan.map(lesson => lesson.id).join(\", \"));"
+          }
         },
         {
           "heading": "Judge the design through a change",
@@ -1555,7 +1649,17 @@
             "An ES module import remains connected to its exported binding. It is not a detached copy that an importer can reassign freely. If the exporter changes a mutable exported binding, importers can observe that change. This behavior does not make shared mutable exports a good default; unclear ownership still produces difficult interactions across otherwise well-separated files.",
             "Top-level module code can have effects when the module loads. A subscription, timer, or request at import time complicates reuse and testing because a simple dependency declaration now starts work. Export an explicit start or initialize operation when startup needs control. Assign cleanup responsibility for every resource that outlives one call, and make ordinary utility imports predictable."
           ],
-          "code": "// planner.js\nexport function totalMinutes(lessons) {\n  return lessons.reduce((sum, lesson) => sum + lesson.minutes, 0);\n}\n// app.js\nimport { totalMinutes } from \"./planner.js\";"
+          "code": "// planner.js\nexport function totalMinutes(lessons) {\n  return lessons.reduce((sum, lesson) => sum + lesson.minutes, 0);\n}\n// app.js\nimport { totalMinutes } from \"./planner.js\";",
+          "playground": {
+            "id": "modules",
+            "runtime": "module",
+            "output": "55",
+            "note": "Edit either file. Run example starts app.mjs with real ES module imports; local literal imports only, without circular dependencies.",
+            "files": {
+              "planner.js": "export function totalMinutes(lessons) {\n  return lessons.reduce((sum, lesson) => sum + lesson.minutes, 0);\n}",
+              "app.mjs": "import { totalMinutes } from \"./planner.js\";\n\nconst lessons = [{ minutes: 20 }, { minutes: 35 }];\nconsole.log(totalMinutes(lessons));"
+            }
+          }
         },
         {
           "heading": "Contracts outlive implementation details",
@@ -1653,7 +1757,17 @@
             "A storage interface needs more than load and save names. Define missing-data behavior, malformed-data errors, synchronous or asynchronous execution, and whether saves replace or merge. An in-memory test adapter should honor the same observable contract as the real one. A fake that always returns success cannot expose the recovery behavior the application promises when persistence fails.",
             "Use shared examples across implementations: save then load preserves the intended record, an unknown key follows the absence policy, and a failed save never claims success. Inject time where it affects decisions. A supplied clock lets examples represent expiry and deadlines without waiting or depending on the computer's current date. These explicit inputs make environmental assumptions reviewable and reproducible."
           ],
-          "code": "export function createSummaryService({ loadProgress, summarize }) {\n  return async learnerId => {\n    const progress = await loadProgress(learnerId);\n    return summarize(progress);\n  };\n}"
+          "code": "export function createSummaryService({ loadProgress, summarize }) {\n  return async learnerId => {\n    const progress = await loadProgress(learnerId);\n    return summarize(progress);\n  };\n}",
+          "playground": {
+            "id": "dependencies",
+            "runtime": "module",
+            "output": "learner-1: 2 completed",
+            "note": "The service and its caller are separate modules. The editable loader is an offline test double, so no account or server is needed.",
+            "files": {
+              "summary-service.js": "export function createSummaryService({ loadProgress, summarize }) {\n  return async learnerId => {\n    const progress = await loadProgress(learnerId);\n    return summarize(progress);\n  };\n}",
+              "app.mjs": "import { createSummaryService } from \"./summary-service.js\";\n\nconst summarize = progress => `${progress.learnerId}: ${progress.completedIds.length} completed`;\nconst service = createSummaryService({\n  loadProgress: async learnerId => ({ learnerId, completedIds: [\"L1\", \"L2\"] }),\n  summarize\n});\nconsole.log(await service(\"learner-1\"));"
+            }
+          }
         },
         {
           "heading": "Contain a source of change",
@@ -1751,7 +1865,13 @@
             "Use records for transferable data, functions for calculations, and a class or closure when one identity owns coordinated state. These tools can coexist. A progress store can own persistence while a pure planner calculates recommendations. Do not turn every record into a class to demonstrate syntax; require each abstraction to clarify ownership, preserve invariants, or expose meaningful behavior.",
             "The entry point constructs adapters and connects services. Reusable modules should not secretly import startup state. If a cycle appears, inspect whether responsibilities are entangled or whether a shared concept belongs below both modules. Keep the final graph small enough to explain honestly in one diagram. Omitted dependencies make the diagram prettier but undermine its value as evidence."
           ],
-          "code": "// Startup owns concrete wiring.\nconst plan = selectLessons(curriculum, progress, budget);\nconst report = formatPlan(plan);\nconsole.log(report);"
+          "code": "// Startup owns concrete wiring.\nconst plan = selectLessons(curriculum, progress, budget);\nconst report = formatPlan(plan);\nconsole.log(report);",
+          "playground": {
+            "id": "wiring",
+            "runtime": "worker",
+            "output": "Plan: L2 (20 min)",
+            "before": "// Small, visible implementations of the boundaries in the lesson.\nconst curriculum = [{ id: \"L1\", minutes: 15 }, { id: \"L2\", minutes: 20 }];\nconst progress = { completedIds: [\"L1\"] };\nconst budget = 25;\nfunction selectLessons(lessons, progress, budget) {\n  let remaining = budget;\n  return lessons.filter(lesson => {\n    if (progress.completedIds.includes(lesson.id) || lesson.minutes > remaining) return false;\n    remaining -= lesson.minutes;\n    return true;\n  });\n}\nconst formatPlan = plan => \"Plan: \" + plan.map(lesson => `${lesson.id} (${lesson.minutes} min)`).join(\", \");"
+          }
         },
         {
           "heading": "Prove the design with change",
@@ -1849,7 +1969,14 @@
             "JSON converts a supported data structure into text and parses text into new values. It does not preserve every JavaScript feature. Functions, undefined values, special numeric values, dates, maps, sets, and cycles require particular care or explicit conversion policies. Parsing successfully only establishes valid JSON syntax; it does not prove that the result matches your application schema or is safe to use.",
             "Treat serialization as a boundary. Define a plain transfer shape, serialize it, parse it, and validate it before creating domain values. Include a version when the shape may evolve. Test round trips using the actual supported values, and do not use JSON serialization as a universal deep-cloning trick. Representation changes can silently remove information that your program depends on."
           ],
-          "code": "const completed = new Set([\"L1\", \"L1\", \"L2\"]);\nconst byId = new Map(lessons.map(lesson => [lesson.id, lesson]));\nconst url = new URL(\"https://example.com/learn\");\nurl.searchParams.set(\"stage\", \"2\");"
+          "code": "const completed = new Set([\"L1\", \"L1\", \"L2\"]);\nconst byId = new Map(lessons.map(lesson => [lesson.id, lesson]));\nconst url = new URL(\"https://example.com/learn\");\nurl.searchParams.set(\"stage\", \"2\");",
+          "playground": {
+            "id": "collections",
+            "runtime": "worker",
+            "output": "2\nValues\nhttps://example.com/learn?stage=2",
+            "before": "const lessons = [{ id: \"L1\", title: \"Values\" }, { id: \"L2\", title: \"Objects\" }];",
+            "after": "console.log(completed.size);\nconsole.log(byId.get(\"L1\").title);\nconsole.log(url.href);"
+          }
         },
         {
           "heading": "Use specialized tools deliberately",
@@ -1947,7 +2074,12 @@
             "A Date represents an instant as a numeric time value, while its formatting and component access can depend on a time zone. Calendar dates, local appointment times, and elapsed durations are different concepts. Adding a fixed number of milliseconds is suitable for an elapsed duration but may not implement a local calendar-day rule around daylight-saving transitions or other offset changes.",
             "Store and exchange timestamps in an explicit format, and decide which time zone the product uses for calendar interpretation. Avoid ambiguous date strings whose parsing assumptions are unclear. Inject the current time into rules so boundary tests are deterministic. Include examples near midnight and a relevant offset transition when a feature promises calendar behavior rather than simply measuring elapsed milliseconds."
           ],
-          "code": "const formatter = new Intl.DateTimeFormat(\"en-GB\", {\n  dateStyle: \"medium\", timeZone: \"UTC\"\n});\nconsole.log(formatter.format(new Date(\"2026-01-15T12:00:00Z\")));"
+          "code": "const formatter = new Intl.DateTimeFormat(\"en-GB\", {\n  dateStyle: \"medium\", timeZone: \"UTC\"\n});\nconsole.log(formatter.format(new Date(\"2026-01-15T12:00:00Z\")));",
+          "playground": {
+            "id": "dates",
+            "runtime": "worker",
+            "output": "15 Jan 2026"
+          }
         },
         {
           "heading": "Presentation belongs at a boundary",
@@ -2045,7 +2177,12 @@
             "A generator function returns a generator object when called. Its body advances when the consumer requests the next item, suspending at yield. Local variables remain available between resumptions, which makes stateful sequence logic readable. A range generator can produce values without first allocating an array for the entire range. Laziness changes when work happens and can reduce memory requirements.",
             "Laziness does not automatically make every algorithm faster. Repeated consumption may repeat computation, and a consumer that spreads an infinite generator into an array never finishes. Define whether a sequence is finite and how a consumer can stop. Use generators when the incremental nature of the data improves the model, such as traversing pages or producing records as they become available."
           ],
-          "code": "function* range(start, end) {\n  for (let value = start; value < end; value++) yield value;\n}\nconst iterator = range(2, 4);\nconsole.log(iterator.next()); // { value: 2, done: false }"
+          "code": "function* range(start, end) {\n  for (let value = start; value < end; value++) yield value;\n}\nconst iterator = range(2, 4);\nconsole.log(iterator.next()); // { value: 2, done: false }",
+          "playground": {
+            "id": "generator",
+            "runtime": "worker",
+            "output": "{\n  \"value\": 2,\n  \"done\": false\n}"
+          }
         },
         {
           "heading": "Composition needs termination and cleanup",
@@ -2143,7 +2280,13 @@
             "then returns a new promise. Returning a plain value fulfills that next promise with the value; returning a promise adopts its eventual outcome. Throwing inside a handler rejects the next promise. This is why return is essential when a handler begins another asynchronous operation. Without it, the outer chain may finish before the nested work and cannot reliably observe its result or failure.",
             "Keep each step focused on one transformation. Name the intermediate result and specify whether it is immediate or eventual. A catch handler that returns a value converts rejection into fulfillment, which is a recovery policy. If recovery is impossible, rethrow or let the rejection propagate. Logging an error and returning nothing can accidentally make a failed operation appear successfully completed with undefined."
           ],
-          "code": "loadProgress()\n  .then(progress => savePlan(buildPlan(progress)))\n  .then(() => console.log(\"Saved\"))\n  .catch(error => console.error(\"Plan failed:\", error.message));"
+          "code": "loadProgress()\n  .then(progress => savePlan(buildPlan(progress)))\n  .then(() => console.log(\"Saved\"))\n  .catch(error => console.error(\"Plan failed:\", error.message));",
+          "playground": {
+            "id": "promise-chain",
+            "runtime": "worker",
+            "output": "Saved",
+            "before": "// Offline dependencies. Change a loader to throw to test the catch branch.\nconst loadProgress = async () => ({ completedIds: [\"L1\"] });\nconst buildPlan = progress => [\"L1\", \"L2\"].filter(id => !progress.completedIds.includes(id));\nconst savePlan = async plan => plan;"
+          }
         },
         {
           "heading": "Completion and cleanup are different concerns",
@@ -2241,7 +2384,14 @@
             "Sequential awaits are appropriate when a later step depends on an earlier result. Independent operations can be started together and observed with Promise.all. Promise.all rejects when one input rejects, but it does not cancel the remaining work. Promise.allSettled collects every outcome when partial results are useful. Choose the combinator from the product's failure policy rather than treating concurrency as an automatic speed improvement.",
             "Unbounded concurrency can overload a service or consume too much memory. A worker pool limits the number of active operations while preserving a defined output order. Separate concurrency, rate limits, and total work: limiting active requests does not necessarily limit requests per second. Start with a small pool and instrument active counts so the bound is supported by evidence instead of assumed from the code."
           ],
-          "code": "const [lessons, progress] = await Promise.all([\n  loadLessons(),\n  loadProgress()\n]);\nconst plan = buildPlan(lessons, progress);"
+          "code": "const [lessons, progress] = await Promise.all([\n  loadLessons(),\n  loadProgress()\n]);\nconst plan = buildPlan(lessons, progress);",
+          "playground": {
+            "id": "concurrency",
+            "runtime": "worker",
+            "output": "L2",
+            "before": "const loadLessons = async () => {\n  await new Promise(resolve => setTimeout(resolve, 20));\n  return [{ id: \"L1\" }, { id: \"L2\" }];\n};\nconst loadProgress = async () => {\n  await new Promise(resolve => setTimeout(resolve, 10));\n  return { completedIds: [\"L1\"] };\n};\nconst buildPlan = (lessons, progress) => lessons.filter(lesson => !progress.completedIds.includes(lesson.id));",
+            "after": "console.log(plan.map(lesson => lesson.id).join(\", \"));"
+          }
         },
         {
           "heading": "Cancellation and stale results need ownership",
@@ -2340,7 +2490,13 @@
             "Retries require a reason and a limit. Retry transient operations only when repeating them is safe, and do not retry malformed input as if time would fix it. Separate attempts from unique records in metrics. A useful report shows how many records were read, accepted, enriched, and failed, plus the maximum observed concurrency. These measurements reveal whether the implementation honors its operational promises.",
             "An asynchronous iterable extends the sequence model to values that arrive over time. for await...of waits for successive items while preserving readable loop control. It suits a streamed source, but does not automatically make downstream processing concurrent. Keep source iteration, worker scheduling, and cancellation as separate responsibilities so the pipeline can explain both ordering and resource use."
           ],
-          "code": "const report = { read: 0, accepted: 0, succeeded: 0, failed: [] };\n// Each accepted record must reach exactly one terminal outcome.\n// Record source identifiers alongside failures for repair."
+          "code": "const report = { read: 0, accepted: 0, succeeded: 0, failed: [] };\n// Each accepted record must reach exactly one terminal outcome.\n// Record source identifiers alongside failures for repair.",
+          "playground": {
+            "id": "outcomes",
+            "runtime": "worker",
+            "output": "{\"read\":3,\"accepted\":2,\"succeeded\":1,\"failed\":[{\"id\":\"L3\",\"error\":\"Save failed\"}]}",
+            "after": "const records = [{ id: \"L1\", minutes: 20 }, { id: \"L2\", minutes: -1 }, { id: \"L3\", minutes: 30 }];\nfor (const record of records) {\n  report.read++;\n  if (record.minutes <= 0) continue;\n  report.accepted++;\n  try {\n    if (record.id === \"L3\") throw new Error(\"Save failed\");\n    report.succeeded++;\n  } catch (error) {\n    report.failed.push({ id: record.id, error: error.message });\n  }\n}\nconsole.log(JSON.stringify(report));"
+          }
         },
         {
           "heading": "Demonstrate resilience with controlled failures",
@@ -2439,7 +2595,12 @@
             "Browser events and timers schedule tasks, while promise reactions use the microtask mechanism. After the current stack completes, microtasks are processed at appropriate checkpoints before the browser continues its event-loop work. A chain of microtasks can delay other work, so repeatedly scheduling promises is not a reliable way to yield for rendering. Timers also express a minimum delay, not an exact appointment.",
             "Predict the output of a synchronous log, a resolved-promise handler, and a zero-delay timer. Then run the example and explain the order. Keep the model modest: do not infer precise frame timing from one console trace. Use the model to distinguish guaranteed ordering within your code from host scheduling details that require measurement or a more specific API contract."
           ],
-          "code": "console.log(\"sync\");\nPromise.resolve().then(() => console.log(\"microtask\"));\nsetTimeout(() => console.log(\"timer task\"), 0);"
+          "code": "console.log(\"sync\");\nPromise.resolve().then(() => console.log(\"microtask\"));\nsetTimeout(() => console.log(\"timer task\"), 0);",
+          "playground": {
+            "id": "event-loop",
+            "runtime": "worker",
+            "output": "sync\nmicrotask\ntimer task"
+          }
         },
         {
           "heading": "Startup must match document availability",
@@ -2537,7 +2698,14 @@
             "textContent inserts text without treating it as HTML. innerHTML parses markup, which creates a different trust boundary when content comes from users, remote services, or imported files. For ordinary lesson titles and descriptions, use text nodes or textContent. Building interface elements through DOM methods also makes attribute and event behavior explicit rather than embedding uncontrolled strings in a large template.",
             "If a feature truly accepts rich markup, it needs a deliberate sanitization and rendering policy rather than improvised string replacement. Keep this lesson focused on plain text rendering and safe attribute choices. Test a title containing angle brackets, quotation marks, and an apparent script tag. The expected behavior is to display the characters as text, not execute or reinterpret them as page structure."
           ],
-          "code": "function lessonCard(lesson) {\n  const article = document.createElement(\"article\");\n  const title = document.createElement(\"h2\");\n  title.textContent = lesson.title;\n  article.append(title);\n  return article;\n}"
+          "code": "function lessonCard(lesson) {\n  const article = document.createElement(\"article\");\n  const title = document.createElement(\"h2\");\n  title.textContent = lesson.title;\n  article.append(title);\n  return article;\n}",
+          "playground": {
+            "id": "dom",
+            "runtime": "dom",
+            "output": "Values <script>",
+            "note": "Runs in an isolated document. The sample call below renders a card in the live preview; try changing its title.",
+            "after": "const card = lessonCard({ title: \"Values <script>\" });\ndocument.body.append(card);\nconsole.log(card.querySelector(\"h2\").textContent);"
+          }
         },
         {
           "heading": "Render from state with intentional updates",
@@ -2635,7 +2803,15 @@
             "Native buttons, inputs, labels, and forms provide keyboard and accessibility behavior that a clickable generic element does not automatically have. A label should identify its control, and a validation message should explain how to correct the input. Keep raw input, converted values, and validated domain values separate. A successful browser validity check does not replace the domain rules or server-side validation needed elsewhere.",
             "Make errors local and specific: name the field, explain the problem, and retain the user's entry. For asynchronous submission, communicate pending state and prevent accidental duplicate operations without trapping the user. Decide where focus moves after success or failure. These details are part of functional correctness because they determine whether someone can complete the task without a pointer or without seeing every visual cue."
           ],
-          "code": "form.addEventListener(\"submit\", event => {\n  event.preventDefault();\n  const raw = new FormData(form).get(\"minutes\");\n  submitValidatedMinutes(raw);\n});"
+          "code": "form.addEventListener(\"submit\", event => {\n  event.preventDefault();\n  const raw = new FormData(form).get(\"minutes\");\n  submitValidatedMinutes(raw);\n});",
+          "playground": {
+            "id": "form",
+            "runtime": "dom",
+            "output": "Accepted: 25",
+            "note": "The preview contains a working form. The initial submit uses 25 minutes; change the value and submit again to see validation.",
+            "before": "const form = document.createElement(\"form\");\nform.innerHTML = `<label>Minutes <input name=\"minutes\" type=\"number\" value=\"25\"></label> <button type=\"submit\">Plan session</button>`;\ndocument.body.append(form);\nfunction submitValidatedMinutes(raw) {\n  const minutes = Number(raw);\n  if (String(raw).trim() === \"\" || !Number.isInteger(minutes) || minutes <= 0) {\n    console.log(\"Enter a positive whole number of minutes.\");\n    return;\n  }\n  console.log(\"Accepted:\", minutes);\n}",
+            "after": "form.requestSubmit();"
+          }
         },
         {
           "heading": "Test an interaction as a sequence",
@@ -2733,7 +2909,15 @@
             "Browser storage can preserve progress between sessions, but stored values are not automatically trustworthy or compatible forever. localStorage stores strings and its operations are synchronous. Parsing or writing can fail, and users can clear storage. Define a versioned record, validate it after parsing, and choose a recovery policy for missing or malformed data. Do not let storage corruption prevent the entire interface from starting.",
             "Keep the in-memory model authoritative during an interaction, then persist through a narrow adapter. Report a failed save honestly instead of displaying a success message merely because the checkbox changed. Decide whether the interface keeps an unsaved local change or rolls it back. Both approaches require visible state so the user can understand whether progress will survive a reload."
           ],
-          "code": "const response = await fetch(\"/api/lessons\");\nif (!response.ok) throw new Error(`HTTP ${response.status}`);\nconst payload = await response.json();\nconst lessons = validateLessons(payload);"
+          "code": "const response = await fetch(\"/api/lessons\");\nif (!response.ok) throw new Error(`HTTP ${response.status}`);\nconst payload = await response.json();\nconst lessons = validateLessons(payload);",
+          "playground": {
+            "id": "fetch",
+            "runtime": "worker",
+            "output": "Values, Objects",
+            "note": "An editable offline fetch double returns a real Response. Try status 500 or malformed lesson data to explore failures; no live API is called.",
+            "before": "// Offline API response: edit the body or status to test another outcome.\nconst fetch = async () => new Response(JSON.stringify([\n  { id: \"L1\", title: \"Values\" }, { id: \"L2\", title: \"Objects\" }\n]), { status: 200, headers: { \"content-type\": \"application/json\" } });\nfunction validateLessons(payload) {\n  if (!Array.isArray(payload) || !payload.every(lesson =>\n    lesson && typeof lesson.id === \"string\" && typeof lesson.title === \"string\"\n  )) throw new TypeError(\"Invalid lesson data\");\n  return payload;\n}",
+            "after": "console.log(lessons.map(lesson => lesson.title).join(\", \"));"
+          }
         },
         {
           "heading": "State should describe the whole request lifecycle",
@@ -2831,7 +3015,14 @@
             "A web worker executes JavaScript in a separate worker context and communicates through messages. It cannot directly manipulate the page DOM. This makes it suitable for expensive calculations that can operate on transferable or cloneable data. Moving work to a worker introduces message and coordination costs, so measure the task before assuming the extra machinery will improve the experience.",
             "Define a message protocol with a request identifier, operation, input, and result or error. Validate incoming messages on both sides. Decide how a worker is terminated and what happens to outstanding requests. Structured cloning and transferable objects have different ownership implications; transferring a buffer can detach it from the sender. Treat message boundaries as real contracts rather than informal calls across a magical background thread."
           ],
-          "code": "const worker = new Worker(\"./analysis-worker.js\", { type: \"module\" });\nworker.postMessage({ id: \"request-1\", type: \"analyze\", lessons });\n// The owning screen must handle replies and terminate the worker on disposal."
+          "code": "const worker = new Worker(\"./analysis-worker.js\", { type: \"module\" });\nworker.postMessage({ id: \"request-1\", type: \"analyze\", lessons });\n// The owning screen must handle replies and terminate the worker on disposal.",
+          "playground": {
+            "id": "worker",
+            "runtime": "worker",
+            "output": "request-1: 45 minutes",
+            "note": "A real worker runs the editable source string below. A blob URL replaces the external worker file so this example works entirely on the page.",
+            "code": "const lessons = [{ minutes: 20 }, { minutes: 25 }];\n// This source would normally live in analysis-worker.js.\nconst source = `\n  self.onmessage = ({ data }) => {\n    if (data.type !== \"analyze\") return;\n    const total = data.lessons.reduce((sum, lesson) => sum + lesson.minutes, 0);\n    self.postMessage({ id: data.id, total });\n  };\n`;\nconst url = URL.createObjectURL(new Blob([source], { type: \"text/javascript\" }));\nconst worker = new Worker(url, { type: \"module\" });\ntry {\n  const reply = await new Promise((resolve, reject) => {\n    worker.onmessage = event => resolve(event.data);\n    worker.onerror = () => reject(new Error(\"Worker failed\"));\n    worker.postMessage({ id: \"request-1\", type: \"analyze\", lessons });\n  });\n  console.log(`${reply.id}: ${reply.total} minutes`);\n} finally {\n  worker.terminate();\n  URL.revokeObjectURL(url);\n}"
+          }
         },
         {
           "heading": "Responsive interfaces require resource ownership",
@@ -2929,7 +3120,13 @@
             "Wire the domain planner to a browser persistence adapter and a resource-loading adapter. Keep DOM rendering focused on display and event handlers focused on translating user intent. Validate data at boundaries and make asynchronous state explicit. Prevent stale responses from replacing current results, and decide how failed saves affect the visible completion state.",
             "Create a recovery path for malformed saved progress and a retry action for failed loading. Preserve the learner's input where recovery is possible. Test slow responses and rapid repeated actions. If two controls trigger the same domain operation, ensure they share the same validation and state transition instead of maintaining subtly different copies of the business rule."
           ],
-          "code": "const state = {\n  route: \"dashboard\",\n  load: { status: \"idle\" },\n  progress: { completedIds: [] },\n  filters: { stage: \"all\" }\n};"
+          "code": "const state = {\n  route: \"dashboard\",\n  load: { status: \"idle\" },\n  progress: { completedIds: [] },\n  filters: { stage: \"all\" }\n};",
+          "playground": {
+            "id": "state",
+            "runtime": "worker",
+            "output": "idle\nready\n{\"route\":\"dashboard\",\"load\":{\"status\":\"ready\"},\"progress\":{\"completedIds\":[\"L1\"]},\"filters\":{\"stage\":\"all\"}}",
+            "after": "console.log(state.load.status);\nstate.load = { status: \"ready\" };\nstate.progress = { completedIds: [\"L1\"] };\nconsole.log(state.load.status);\nconsole.log(JSON.stringify(state));"
+          }
         },
         {
           "heading": "Review the experience with evidence",
@@ -3028,7 +3225,14 @@
             "Command-line programs communicate through arguments, standard input, standard output, standard error, and an exit status. Reserve standard output for the requested result when other tools may consume it. Send diagnostics to standard error and set a nonzero exit status when the promised operation fails. A friendly message alone is insufficient if automation sees a successful status for an unsuccessful command.",
             "Define a small command such as plan --minutes 60 --progress progress.json. Specify missing arguments, unknown options, invalid values, and help behavior. Keep machine-readable output separate from decorative progress messages. Test paths containing spaces and execution from another working directory. These cases reveal assumptions that are easy to miss when running only one command manually inside the project folder."
           ],
-          "code": "try {\n  const options = parseArguments(process.argv.slice(2));\n  const result = await runPlanner(options);\n  process.stdout.write(JSON.stringify(result) + \"\\n\");\n} catch (error) {\n  process.stderr.write(error.message + \"\\n\");\n  process.exitCode = 1;\n}"
+          "code": "try {\n  const options = parseArguments(process.argv.slice(2));\n  const result = await runPlanner(options);\n  process.stdout.write(JSON.stringify(result) + \"\\n\");\n} catch (error) {\n  process.stderr.write(error.message + \"\\n\");\n  process.exitCode = 1;\n}",
+          "playground": {
+            "id": "cli",
+            "runtime": "worker",
+            "output": "{\"minutes\":25,\"selectedIds\":[\"L1\"]}",
+            "note": "Browser version: edit argv to simulate CLI arguments. Results go to this console; process.argv, exit codes, and stdout belong to Node in the original excerpt.",
+            "code": "const argv = [\"--minutes\", \"25\"];\nfunction parseArguments(args) {\n  if (args.length !== 2 || args[0] !== \"--minutes\") throw new Error(\"Usage: --minutes <positive integer>\");\n  const minutes = Number(args[1]);\n  if (!Number.isInteger(minutes) || minutes <= 0) throw new Error(\"Invalid minutes\");\n  return { minutes };\n}\nasync function runPlanner({ minutes }) {\n  const lessons = [{ id: \"L1\", minutes: 20 }, { id: \"L2\", minutes: 40 }];\n  return { minutes, selectedIds: lessons.filter(lesson => lesson.minutes <= minutes).map(lesson => lesson.id) };\n}\nconst options = parseArguments(argv);\nconst result = await runPlanner(options);\nconsole.log(JSON.stringify(result));"
+          }
         },
         {
           "heading": "Keep the core independent of the terminal",
@@ -3126,7 +3330,14 @@
             "A stream processes chunks over time instead of requiring the entire input at once. Chunks are transport units, not guaranteed logical records. A line or multibyte character can cross chunk boundaries, so decoding and record framing need appropriate handling. Choose established stream and decoder utilities where possible, and test boundaries deliberately rather than assuming one chunk equals one complete JSON object.",
             "Backpressure coordinates a producer with a slower consumer so buffered data does not grow without bound. Respect the stream APIs' signals or use a composition utility that manages them. Streaming does not automatically bound memory if your own code accumulates every chunk in an array. Trace retained data and active work, not just whether the source exposes a stream-shaped interface."
           ],
-          "code": "import { pipeline } from \"node:stream/promises\";\nimport { createReadStream, createWriteStream } from \"node:fs\";\nawait pipeline(\n  createReadStream(sourcePath),\n  createWriteStream(destinationPath)\n);"
+          "code": "import { pipeline } from \"node:stream/promises\";\nimport { createReadStream, createWriteStream } from \"node:fs\";\nawait pipeline(\n  createReadStream(sourcePath),\n  createWriteStream(destinationPath)\n);",
+          "playground": {
+            "id": "streams",
+            "runtime": "worker",
+            "output": "QA ready",
+            "note": "Browser version: Web Streams pipe bytes into an in-memory destination. The original Node example reads and writes filesystem paths.",
+            "code": "const encoder = new TextEncoder();\nconst source = new ReadableStream({\n  start(controller) {\n    controller.enqueue(encoder.encode(\"QA\"));\n    controller.enqueue(encoder.encode(\" ready\"));\n    controller.close();\n  }\n});\nconst decoder = new TextDecoder();\nlet copiedText = \"\";\nconst destination = new WritableStream({\n  write(chunk) { copiedText += decoder.decode(chunk, { stream: true }); },\n  close() { copiedText += decoder.decode(); }\n});\nawait source.pipeTo(destination);\nconsole.log(copiedText);"
+          }
         },
         {
           "heading": "Failures require end-to-end cleanup",
@@ -3225,7 +3436,14 @@
             "Request bodies can be malformed or unexpectedly large. Apply a body-size limit before accumulating unlimited bytes, then parse the supported representation and validate its shape. Do not treat arbitrary paths, headers, or JSON properties as instructions to access files or execute behavior. Keep the service's capabilities narrow and expose only operations that the API intentionally supports.",
             "Validate identifiers and numeric constraints at the boundary, and use the same domain functions as other consumers. Authentication, authorization, and deployment protections require deliberate design when the service moves beyond a local learning environment. For this studio, clearly state the local scope and avoid pretending that a minimal HTTP example is a complete production security architecture. Concrete limits and explicit scope make the exercise honest and useful."
           ],
-          "code": "// A boundary sketch: validate before invoking domain behavior.\nconst input = validatePlanRequest(await readLimitedJson(request));\nconst result = planSession(input.lessons, input.progress, input.minutes);\nresponse.writeHead(200, { \"content-type\": \"application/json\" });\nresponse.end(JSON.stringify(result));"
+          "code": "// A boundary sketch: validate before invoking domain behavior.\nconst input = validatePlanRequest(await readLimitedJson(request));\nconst result = planSession(input.lessons, input.progress, input.minutes);\nresponse.writeHead(200, { \"content-type\": \"application/json\" });\nresponse.end(JSON.stringify(result));",
+          "playground": {
+            "id": "http-boundary",
+            "runtime": "worker",
+            "output": "200\n{\"selectedIds\":[\"L2\"]}",
+            "note": "Browser version: a real Request and Response exercise the boundary in memory. This does not start an HTTP server; the original Node response API is shown below.",
+            "code": "const request = new Request(\"https://example.invalid/plan\", {\n  method: \"POST\",\n  body: JSON.stringify({ lessons: [{ id: \"L1\", minutes: 15 }, { id: \"L2\", minutes: 20 }], progress: { completedIds: [\"L1\"] }, minutes: 25 })\n});\nasync function readLimitedJson(request) {\n  // Demonstration with an in-memory body. Production servers must also\n  // enforce the limit while streaming, before buffering the full request.\n  const text = await request.text();\n  if (new TextEncoder().encode(text).byteLength > 1024) throw new Error(\"Request too large\");\n  return JSON.parse(text);\n}\nfunction validatePlanRequest(input) {\n  if (!input || !Number.isInteger(input.minutes) || input.minutes <= 0 ||\n      !Array.isArray(input.lessons) || !input.lessons.every(lesson =>\n        lesson && typeof lesson.id === \"string\" && Number.isFinite(lesson.minutes) && lesson.minutes > 0) ||\n      !Array.isArray(input.progress?.completedIds) || !input.progress.completedIds.every(id => typeof id === \"string\")) {\n    throw new TypeError(\"Invalid plan request\");\n  }\n  return input;\n}\nfunction planSession(lessons, progress, minutes) {\n  let remaining = minutes;\n  const selectedIds = [];\n  for (const lesson of lessons) {\n    if (progress.completedIds.includes(lesson.id) || lesson.minutes > remaining) continue;\n    selectedIds.push(lesson.id);\n    remaining -= lesson.minutes;\n  }\n  return { selectedIds };\n}\nconst input = validatePlanRequest(await readLimitedJson(request));\nconst result = planSession(input.lessons, input.progress, input.minutes);\nconst response = new Response(JSON.stringify(result), { status: 200, headers: { \"content-type\": \"application/json\" } });\nconsole.log(response.status);\nconsole.log(await response.text());"
+          }
         },
         {
           "heading": "A response has one lifecycle",
@@ -3323,7 +3541,14 @@
             "Symbols can provide property keys that avoid ordinary string-name collisions. Well-known symbols let objects participate in language protocols such as iteration. Implementing Symbol.iterator gives an object a familiar integration point with for...of and other consumers. The value comes from honoring the protocol's behavior, not from making an API obscure or difficult to inspect.",
             "Prefer an explicit method when a protocol hook would surprise callers. A custom conversion behavior can make a simple arithmetic or string operation trigger unexpected work. Keep such hooks predictable and free of unrelated side effects. Document the situations in which the hook runs and test representative language operations so consumers understand the observable consequences of your customization."
           ],
-          "code": "const observed = new Proxy(target, {\n  get(object, key, receiver) {\n    console.log(\"read\", String(key));\n    return Reflect.get(object, key, receiver);\n  }\n});"
+          "code": "const observed = new Proxy(target, {\n  get(object, key, receiver) {\n    console.log(\"read\", String(key));\n    return Reflect.get(object, key, receiver);\n  }\n});",
+          "playground": {
+            "id": "proxy",
+            "runtime": "worker",
+            "output": "read title\nValues",
+            "before": "const target = { title: \"Values\" };",
+            "after": "console.log(observed.title);"
+          }
         },
         {
           "heading": "Proxies require careful semantic boundaries",
@@ -3421,7 +3646,14 @@
             "Choose tests from the contract and likely failure modes. Unit tests suit pure calculations, integration tests exercise boundaries and wiring, and a small number of end-to-end scenarios verify important user journeys. Avoid duplicating implementation logic inside expected-value calculations. An expected result should come from an independent example or invariant, otherwise the same defect can appear in both the implementation and its test.",
             "Use controlled clocks, adapters, and deferred promises for deterministic cases. Cover boundaries and failures that matter, including empty data, invalid input, stale results, and persistence errors. Do not write a test merely to assert an incidental class name or a reversible styling choice. The test suite should protect meaningful behavior and make a defect easier to localize when it fails."
           ],
-          "code": "// Example script names; implementations depend on your chosen tools.\n// npm run check\n// npm test\n// npm run build\n// npm run preview"
+          "code": "// Example script names; implementations depend on your chosen tools.\n// npm run check\n// npm test\n// npm run build\n// npm run preview",
+          "playground": {
+            "id": "tests",
+            "runtime": "worker",
+            "output": "2 checks passed",
+            "note": "Browser test: run these assertions here. The original npm commands require a terminal and your project’s scripts; this playground does not execute shell commands.",
+            "code": "function totalMinutes(lessons) {\n  return lessons.reduce((sum, lesson) => sum + lesson.minutes, 0);\n}\nfunction equal(actual, expected) {\n  if (actual !== expected) throw new Error(`Expected ${expected}, received ${actual}`);\n}\nequal(totalMinutes([{ minutes: 20 }, { minutes: 25 }]), 45);\nequal(totalMinutes([]), 0);\nconsole.log(\"2 checks passed\");"
+          }
         },
         {
           "heading": "Delivery needs evidence and instructions",
@@ -3519,7 +3751,14 @@
             "Organize the project around clear responsibilities: domain model, browser interface, adapters, command-line entry points, and tests. Use classes, generators, or metaprogramming only where they improve the actual problem. The capstone is not a checklist requiring every language feature to appear. It should demonstrate judgment about when ordinary functions and records are sufficient and when stronger abstractions earn their cost.",
             "Include a run guide, architecture diagram, data-format documentation, a troubleshooting page, and a short learner manual. Provide example commands and screenshots of important states. Document how to back up and restore progress, what data remains local, and which limitations affect the user. A transferable project contains enough operating knowledge that another person can install it, use it, and diagnose common failures without you present."
           ],
-          "code": "const releaseEvidence = {\n  acceptanceScenarios: 5,\n  keyboardJourney: \"verified\",\n  failureRehearsal: \"documented\",\n  cleanSetup: \"reproduced\",\n  knownLimitations: []\n};\n// Fill evidence with real results; never mark a check passed by assumption."
+          "code": "const releaseEvidence = {\n  acceptanceScenarios: 5,\n  keyboardJourney: \"verified\",\n  failureRehearsal: \"documented\",\n  cleanSetup: \"reproduced\",\n  knownLimitations: []\n};\n// Fill evidence with real results; never mark a check passed by assumption.",
+          "playground": {
+            "id": "evidence",
+            "runtime": "worker",
+            "output": "5 acceptance scenarios\nverified",
+            "note": "This prints the lesson’s illustrative evidence record. Running this snippet does not verify a release; replace the sample values with evidence from your own project.",
+            "after": "console.log(`${releaseEvidence.acceptanceScenarios} acceptance scenarios`);\nconsole.log(releaseEvidence.keyboardJourney);"
+          }
         },
         {
           "heading": "Review claims against evidence",

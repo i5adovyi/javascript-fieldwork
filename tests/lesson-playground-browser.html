@@ -1,0 +1,130 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Lesson playground browser QA</title>
+<style>body{font:15px system-ui;margin:24px}button{padding:10px}pre{white-space:pre-wrap}iframe{width:1100px;max-width:100%;height:760px;border:1px solid #ccc}</style>
+<h1>Lesson playground browser QA</h1><button id="run">Run lesson checks</button><pre id="results">Ready</pre><div id="preview"></div>
+<script type="module">
+import {lessonExamples} from '/lesson-playgrounds.js';
+const results=document.querySelector('#results'),button=document.querySelector('#run');
+const assert=(condition,message)=>{if(!condition)throw Error(message);};
+const wait=async predicate=>{
+  const deadline=Date.now()+6000;
+  while(!predicate()){
+    if(Date.now()>deadline)throw Error('Timed out waiting for UI');
+    await new Promise(resolve=>setTimeout(resolve,25));
+  }
+};
+button.onclick=async()=>{
+  button.disabled=true;results.textContent='';
+  let passed=0,failed=0;
+  const check=async(name,test)=>{
+    try{await test();passed++;results.textContent+=`PASS ${name}\n`;}
+    catch(error){failed++;results.textContent+=`FAIL ${name}: ${error.message}\n`;}
+  };
+  const keys=['fieldwork.wiki-code.v1','fieldwork.progress.v1'];
+  const original=new Map(keys.map(key=>[key,localStorage.getItem(key)]));
+  const frame=document.createElement('iframe');frame.title='Lesson under test';
+  const {lessons}=await(await fetch('/data/curriculum.json')).json();
+  const doc=()=>frame.contentDocument;
+  const panel=id=>doc().querySelector(`[data-playground="${id}"]`);
+  const edit=(root,code)=>{
+    const editor=root.querySelector('textarea');editor.value=code;editor.dispatchEvent(new Event('input',{bubbles:true}));
+  };
+  const navigate=async lesson=>{
+    frame.contentWindow.location.hash=`#/lesson/${lesson.id}`;
+    await wait(()=>panel(lessonExamples(lesson)[0].id));
+  };
+  const run=async(root,expected)=>{
+    root.querySelector('[data-example-run]').click();
+    await wait(()=>!root.querySelector('[data-example-run]').disabled);
+    const status=root.querySelector('[data-run-status]').textContent;
+    const output=root.querySelector('[data-example-output]').textContent.trimEnd();
+    assert(status.startsWith('Finished'),`${status}: ${output}`);
+    assert(output===expected,`Expected ${expected}; got ${output}`);
+  };
+  try{
+    for(const key of keys)localStorage.removeItem(key);
+    frame.src='/#/lesson/lesson-01';document.querySelector('#preview').append(frame);
+    await wait(()=>panel('lesson-01-workbench'));
+    for(const lesson of lessons){
+      await navigate(lesson);
+      for(const example of lessonExamples(lesson))await check(example.id,()=>run(panel(example.id),example.example.output));
+    }
+    await check('running examples does not complete lessons or quizzes',async()=>{
+      const state=JSON.parse(localStorage.getItem(keys[1])||'{}');
+      assert(!state.lessons?.length,'Example marked a lesson complete');
+      assert(!Object.keys(state.quiz||{}).length,'Example changed quiz answers');
+    });
+    await check('two editors retain separate drafts and outputs',async()=>{
+      await navigate(lessons[1]);
+      const a=panel('lesson-02-conversion'),b=panel('lesson-02-identity');
+      edit(a,'console.log("first draft");');edit(b,'console.log("second draft");');
+      await run(a,'first draft');await run(b,'second draft');
+      assert(a.querySelector('[data-example-output]').textContent.trim()==='first draft','Second run replaced first output');
+      const ids=[...doc().querySelectorAll('[id]')].map(e=>e.id);
+      assert(new Set(ids).size===ids.length,'Duplicate DOM IDs');
+    });
+    await check('quiz rerender keeps both code drafts',async()=>{
+      doc().querySelector('[data-quiz]').click();
+      assert(panel('lesson-02-conversion').querySelector('textarea').value.includes('first draft'),'First draft lost on quiz answer');
+      assert(panel('lesson-02-identity').querySelector('textarea').value.includes('second draft'),'Second draft lost on quiz answer');
+    });
+    await check('reload restores drafts',async()=>{
+      const old=doc();frame.contentWindow.location.reload();
+      await wait(()=>doc()!==old&&panel('lesson-02-identity'));
+      assert(panel('lesson-02-conversion').querySelector('textarea').value.includes('first draft'),'Draft lost after reload');
+      assert(panel('lesson-02-identity').querySelector('textarea').value.includes('second draft'),'Second draft lost after reload');
+    });
+    await check('reset affects only its own example',async()=>{
+      panel('lesson-02-conversion').querySelector('[data-example-reset]').click();
+      assert(!panel('lesson-02-conversion').querySelector('textarea').value.includes('first draft'),'Reset did not restore original');
+      assert(panel('lesson-02-identity').querySelector('textarea').value.includes('second draft'),'Reset erased another example');
+      panel('lesson-02-identity').querySelector('[data-example-reset]').click();
+    });
+    await check('keyboard runs the focused editor',async()=>{
+      const root=panel('lesson-02-identity');edit(root,'console.log("shortcut");');
+      root.querySelector('textarea').dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',ctrlKey:true,bubbles:true,cancelable:true}));
+      await wait(()=>root.querySelector('[data-run-status]').textContent==='Finished');
+      assert(root.querySelector('[data-example-output]').textContent.trim()==='shortcut','Keyboard output incorrect');
+      root.querySelector('[data-example-reset]').click();
+    });
+    await check('stopping and navigation discard late output',async()=>{
+      let root=panel('lesson-02-identity');
+      edit(root,'setTimeout(() => console.log("late"), 500);');
+      root.querySelector('[data-example-run]').click();
+      root.querySelector('[data-example-stop]').click();
+      await new Promise(resolve=>setTimeout(resolve,600));
+      assert(!root.querySelector('[data-example-output]').textContent.includes('late'),'Stopped example emitted output');
+      root.querySelector('[data-example-run]').click();
+      const output=root.querySelector('[data-example-output]');
+      await navigate(lessons[2]);await new Promise(resolve=>setTimeout(resolve,600));
+      assert(!output.isConnected&&!output.textContent.includes('late'),'Navigated example emitted output');
+      await navigate(lessons[1]);panel('lesson-02-identity').querySelector('[data-example-reset]').click();
+    });
+    await check('module edits run across separate files',async()=>{
+      await navigate(lessons[15]);const root=panel('lesson-16-modules');
+      edit(root,'export const totalMinutes = lessons => lessons.length;');
+      await run(root,'2');
+      root.querySelector('[data-example-file="app.mjs"]').click();
+      assert(root.querySelector('textarea').value.includes('import'),'App file was replaced');
+      root.querySelector('[data-example-reset]').click();
+      await run(root,'55');
+    });
+    for(const n of [2,16,33])await check(`375px layout, lesson ${n}`,async()=>{
+      frame.style.width='375px';await navigate(lessons[n-1]);
+      assert(doc().documentElement.scrollWidth<=frame.clientWidth+1,'Page overflows horizontally');
+      for(const root of doc().querySelectorAll('[data-playground]')){
+        assert(root.querySelector('textarea').getBoundingClientRect().width<=375,'Editor exceeds viewport');
+      }
+      const e=lessonExamples(lessons[n-1])[0];await run(panel(e.id),e.example.output);
+    });
+    await check('wiki still opens and runs after lessons',async()=>{
+      frame.style.width='1100px';frame.contentWindow.location.hash='#/wiki/closures';
+      await wait(()=>panel('closures'));await run(panel('closures'),'1 2 1');
+    });
+  }catch(error){failed++;results.textContent+=`FAIL setup: ${error.message}\n`;}
+  finally{
+    frame.remove();
+    for(const [key,value] of original)value===null?localStorage.removeItem(key):localStorage.setItem(key,value);
+    results.textContent+=`\n${passed} passed; ${failed} failed.`;button.disabled=false;
+  }
+};
+</script></html>

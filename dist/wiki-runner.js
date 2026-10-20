@@ -32,9 +32,10 @@ export function runWikiExample({code,files,dom=false,preview,onEvent,timeout=300
       const guarded=guardLoops(code,guardName);
       frame=document.createElement('iframe');
       frame.title='Isolated example preview';
-      frame.setAttribute('sandbox','allow-scripts');
+      // Allow local submit events for form lessons; CSP blocks navigation/submission.
+      frame.setAttribute('sandbox','allow-scripts allow-forms');
       const setup = `const run=${executeSnippet.toString()};addEventListener('message',function start(e){if(e.source!==parent||e.data.token!==${JSON.stringify(token)})return;removeEventListener('message',start);run(e.data.config,event=>parent.postMessage({token:${JSON.stringify(token)},event},'*'));});parent.postMessage({token:${JSON.stringify(token)},ready:true},'*');`;
-      frame.srcdoc=`<!doctype html><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval'; style-src 'unsafe-inline'; img-src data: blob:"><style>body{font:15px system-ui;color:#263326;padding:14px}button{padding:8px 14px}body:not(:has(> :not(script))):before{content:'Append an element to document.body to see it here.';color:#6c7567;font-size:13px}</style><body><script>${setup.replaceAll('</script','<\\/script')}<\/script>`;
+      frame.srcdoc=`<!doctype html><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; form-action 'none'; script-src 'unsafe-inline' 'unsafe-eval'; style-src 'unsafe-inline'; img-src data: blob:"><style>body{font:15px system-ui;color:#263326;padding:14px}button{padding:8px 14px}body:not(:has(> :not(script))):before{content:'Append an element to document.body to see it here.';color:#6c7567;font-size:13px}</style><body><script>${setup.replaceAll('</script','<\\/script')}<\/script>`;
       listener=event=>{
         if(event.source!==frame.contentWindow||event.data?.token!==token)return;
         if(event.data.ready)frame.contentWindow.postMessage({token,config:{dom:true,code:guarded,guardName}},'*');

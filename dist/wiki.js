@@ -50,7 +50,7 @@ export function createWiki({data, shell, esc, link, codeBlock}) {
     return `<section class="wiki-lesson-links"><div><span class="tiny-label">QUICK REFERENCE</span><h2>Wiki for this lesson</h2><p>Need a rule or a small example while you practice?</p></div><div class="wiki-related">${related.map(a=>link('wiki/'+a.id,`${esc(a.title)} <span aria-hidden="true">↗</span>`)).join('')}</div></section>`;
   }
   function bind() {
-    const playground=document.querySelector('[data-playground]');
+    const playground=document.querySelector('[data-playground-kind="wiki"]');
     if(playground)disposePlayground=bindPlayground(playground,articles.find(a=>a.id===playground.dataset.playground));
     function refresh() {
       const result = cards();

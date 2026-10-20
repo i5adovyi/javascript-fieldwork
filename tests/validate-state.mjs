@@ -1,5 +1,6 @@
 import vm from 'node:vm';
 import assert from 'node:assert/strict';
+import {lessonExamples} from '../dist/lesson-playgrounds.js';
 import {readFile} from 'node:fs/promises';
 const app=await readFile(new URL('../dist/app.js',import.meta.url),'utf8');
 const boot=app.slice(app.indexOf('const KEY='),app.indexOf('let wikiUI,data,'));
@@ -12,7 +13,7 @@ for(const stored of ['{broken','null',JSON.stringify({version:1,lessons:null,lab
 }
 const KEY='fieldwork.progress.v1',DRAFT_KEY='fieldwork.wiki-code.v1';
 const data={
- lessons:[{id:'lesson-01',quiz:[{},{}]},{id:'lesson-02',quiz:[{},{}]}],
+ lessons:[{id:'lesson-01',quiz:[{},{}],body:[{heading:'Example',code:'console.log(1)',playground:{id:'example',runtime:'worker',output:'1'}}]},{id:'lesson-02',quiz:[{},{}]}],
  labs:[{id:'lab-01',difficulty:'Easy',tests:[{name:'Works'}]}],
  projects:[{id:'project-one',milestones:[{tasks:['Build']}]}],
  wiki:[{id:'runtime',example:{code:'original'}},{id:'modules',example:{files:{'app.mjs':'original app','counter.mjs':'original counter'}}}]
@@ -23,7 +24,7 @@ const backup={version:1,lessons:['lesson-02','nonexistent'],labs:['lab-01','bad'
 function harness({stored=JSON.stringify(original),drafts='{"runtime":{"example.js":"prior draft"}}',failWrite=()=>false,failRead=()=>false}={}){
  const storage=new Map();if(stored!==null)storage.set(KEY,stored);if(drafts!==null)storage.set(DRAFT_KEY,drafts);
  const messages=[],downloads=[];let renders=0;
- const context=vm.createContext({data,localStorage:{
+ const context=vm.createContext({data,lessonExamples,localStorage:{
   getItem:key=>{if(failRead(key))throw Error('Read blocked');return storage.get(key)??null;},
   setItem:(key,value)=>{if(failWrite(key,value))throw Error('Quota exceeded');storage.set(key,value);},
   removeItem:key=>{if(failWrite(key,null))throw Error('Storage blocked');storage.delete(key);}
@@ -52,9 +53,16 @@ await importInto(d,{...backup,wikiDrafts:{runtime:{'example.js':'x'.repeat(10000
 assert.equal(JSON.parse(d.storage.get(DRAFT_KEY)).runtime['example.js'],'edited','Oversized drafts are filtered, not truncated or imported');
 assert.equal(JSON.parse(d.storage.get(DRAFT_KEY)).modules['counter.mjs'].length,100000);
 for(const invalid of [null,[],42,'bad']){
- const before=JSON.stringify(d.state);await importInto(d,{...backup,wikiDrafts:invalid});assert.match(d.messages.at(-1),/Invalid wiki draft/);assert.equal(JSON.stringify(d.state),before);
+ const before=JSON.stringify(d.state);await importInto(d,{...backup,wikiDrafts:invalid});assert.match(d.messages.at(-1),/Invalid example draft/);assert.equal(JSON.stringify(d.state),before);
 }
 d.context.exportBackup();assert.deepEqual(d.downloads.at(-1).value.wikiDrafts,JSON.parse(d.storage.get(DRAFT_KEY)));assert.equal(d.downloads.at(-1).value.lastLesson,'lesson-02');
+// Lesson examples share the versioned draft field; legacy wiki-only backups still work.
+await importInto(d,{...backup,wikiDrafts:{'lesson-01-example':{'example.js':'console.log("restored lesson")','unknown.js':'ignored'},'lesson-01-missing':{'example.js':'ignored'}}});
+assert.deepEqual(JSON.parse(d.storage.get(DRAFT_KEY))['lesson-01-example'],{'example.js':'console.log("restored lesson")'});
+assert.equal(JSON.parse(d.storage.get(DRAFT_KEY))['lesson-01-missing'],undefined);
+d.context.exportBackup();
+assert.deepEqual(d.downloads.at(-1).value.wikiDrafts['lesson-01-example'],{'example.js':'console.log("restored lesson")'});
+assert.equal(JSON.parse(d.storage.get(DRAFT_KEY)).runtime['example.js'],'edited','Importing lesson drafts preserves wiki drafts');
 // A failed progress write must not mutate the live session, drafts, or persisted progress.
 let blocked=true;
 const f=harness({failWrite:key=>blocked&&key===KEY});const beforeState=f.state,beforeProgress=f.storage.get(KEY),beforeDrafts=f.storage.get(DRAFT_KEY);
@@ -70,7 +78,7 @@ for(const stored of [JSON.stringify(original),null]){
 let progressWrites=0;
 const partial=harness({failWrite:key=>key===DRAFT_KEY||(key===KEY&&++progressWrites>1)});
 await importInto(partial,{...backup,wikiDrafts});assert.deepEqual(partial.state,original);assert.match(partial.messages.at(-1),/stored progress could not be restored/);assert.ok(!partial.messages.some(m=>m.startsWith('Backup imported')));
-const unreadable=harness({failRead:key=>key===DRAFT_KEY});unreadable.context.exportBackup();assert.deepEqual(unreadable.downloads[0].value,original);assert.match(unreadable.messages.at(-1),/wiki draft storage could not be read/);
+const unreadable=harness({failRead:key=>key===DRAFT_KEY});unreadable.context.exportBackup();assert.deepEqual(unreadable.downloads[0].value,original);assert.match(unreadable.messages.at(-1),/example draft storage could not be read/);
 // Exercise the actual click-handler completion path: its save failure must remain visible.
 const completion=harness({failWrite:()=>true});let click;
 Object.assign(completion.context,{document:{addEventListener:(name,handler)=>{if(name==='click')click=handler;}},scrollY:0,window:{scrollTo:()=>{}}});

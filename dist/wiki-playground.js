@@ -62,6 +62,7 @@ console.log("3 checks passed");`
 };
 
 export function playgroundExample(article) {
+  if (article.playground) return article.playground;
   const version=browserVersions[article.id];
   return {
     files:article.example.files || {'example.js':version?.code || article.example.code},
@@ -80,18 +81,19 @@ export function playgroundExample(article) {
 
 export function playgroundMarkup(article,esc,codeBlock) {
   const example=playgroundExample(article),names=Object.keys(example.files),name=names[0];
-  return `<div class="wiki-playground" data-playground="${esc(article.id)}">
+  const editorId=`example-${article.id}-code`,helpId=`example-${article.id}-help`;
+  return `<div class="wiki-playground" data-playground="${esc(article.id)}" data-playground-kind="${article.kind==='lesson'?'lesson':'wiki'}" role="group" aria-label="${esc(article.title)} example">
     <div class="wiki-playground-heading"><span class="tiny-label">TRY IT YOURSELF</span><span class="wiki-save-state" data-draft-status>Original example</span></div>
     <p class="wiki-playground-note">${esc(example.note)}</p>
     <div class="wiki-file-tabs" role="group" aria-label="Example files">${names.map((file,i)=>`<button type="button" data-example-file="${esc(file)}" aria-pressed="${i===0}">${esc(file)}</button>`).join('')}</div>
-    <label class="sr-only" for="wiki-code">Code editor for ${esc(name)}</label>
-    <textarea id="wiki-code" class="wiki-code-editor" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-describedby="wiki-editor-help" wrap="off">${esc(example.files[name])}</textarea>
+    <label class="sr-only" data-example-label for="${esc(editorId)}">Code editor for ${esc(name)}</label>
+    <textarea id="${esc(editorId)}" data-example-editor class="wiki-code-editor" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-describedby="${esc(helpId)}" wrap="off">${esc(example.files[name])}</textarea>
     <div class="wiki-run-toolbar"><div><button type="button" class="button orange small" data-example-run>Run example <span aria-hidden="true">▶</span></button><button type="button" class="button outline small" data-example-stop disabled>Stop</button></div><div><button type="button" class="text-button" data-example-copy>Copy code</button><button type="button" class="text-button" data-example-reset>Reset example</button></div></div>
-    <div class="wiki-run-meta"><span id="wiki-editor-help">⌘ / Ctrl + Enter to run · 3 second limit</span><span role="status" data-run-status>Ready to experiment</span></div>
+    <div class="wiki-run-meta"><span id="${esc(helpId)}">⌘ / Ctrl + Enter to run · 3 second limit</span><span role="status" data-run-status>Ready to experiment</span></div>
     <div class="wiki-console"><div class="wiki-console-heading"><span class="tiny-label">YOUR OUTPUT</span><button type="button" class="text-button" data-example-clear>Clear</button></div><pre data-example-output aria-label="Example console output">Run the example to see its output.</pre></div>
     ${example.dom?'<div class="wiki-preview"><span class="tiny-label">BROWSER PREVIEW</span><div data-example-preview><p>Run the example to open its isolated document.</p></div></div>':''}
     <details class="wiki-expected"><summary>Expected output of the original example</summary><pre>${esc(article.example.output)}</pre></details>
-    ${example.original?`<details class="wiki-original"><summary>${article.example.runtime==='node'?'Original Node example':'Original module files'}</summary>${codeBlock(article.example.code)}</details>`:''}
+    ${example.original?`<details class="wiki-original"><summary>${esc(example.originalLabel||(article.example.runtime==='node'?'Original Node example':'Original module files'))}</summary>${codeBlock(article.example.code)}</details>`:''}
   </div>`;
 }
 
@@ -99,7 +101,7 @@ export function bindPlayground(root,article) {
   const example=playgroundExample(article);
   let files={...example.files},active=Object.keys(files)[0],cancel,runNumber=0;
   const $=selector=>root.querySelector(selector);
-  const editor=$('#wiki-code'),output=$('[data-example-output]'),status=$('[data-run-status]');
+  const editor=$('[data-example-editor]'),output=$('[data-example-output]'),status=$('[data-run-status]');
   const run=$('[data-example-run]'),stop=$('[data-example-stop]'),saved=$('[data-draft-status]');
   function readDrafts() {
     const value=JSON.parse(localStorage.getItem(DRAFT_KEY)||'{}');
@@ -121,7 +123,7 @@ export function bindPlayground(root,article) {
   }
   function showFile() {
     editor.value=files[active];
-    $('label[for="wiki-code"]').textContent=`Code editor for ${active}`;
+    $('[data-example-label]').textContent=`Code editor for ${active}`;
     editor.style.height=`${Math.min(480,Math.max(190,files[active].split('\n').length*22+36))}px`;
     root.querySelectorAll('[data-example-file]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.exampleFile===active)));
   }
