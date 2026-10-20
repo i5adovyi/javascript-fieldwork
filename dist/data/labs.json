@@ -1,0 +1,2036 @@
+{
+  "labs": [
+    {
+      "id": "lab-01",
+      "stage": 1,
+      "title": "Keep a value inside the rails",
+      "difficulty": "Foundation",
+      "minutes": 15,
+      "concept": "Numbers \u00b7 guards \u00b7 conditionals",
+      "prompt": "Implement clamp(value, min, max). Return value bounded inclusively by min and max. All three arguments must be finite numbers, otherwise throw TypeError. If min exceeds max, throw RangeError. Do not coerce strings. Preserve zero and fractional values.",
+      "examples": [
+        {
+          "input": "clamp(12, 0, 10)",
+          "output": "10"
+        }
+      ],
+      "starter": "function clamp(value, min, max) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function clamp(value, min, max) {\n  if (![value, min, max].every(Number.isFinite)) throw new TypeError(\"Finite numbers required\");\n  if (min > max) throw new RangeError(\"Invalid bounds\");\n  return Math.min(max, Math.max(min, value));\n}",
+      "hints": [
+        "Validate before computing the answer. Number.isFinite does not coerce strings.",
+        "A value below min becomes min; a value above max becomes max.",
+        "Compose Math.max(min, value) inside Math.min(max, ...)."
+      ],
+      "tests": [
+        {
+          "name": "Interior and fractional values",
+          "code": "assertEqual(clamp(2.5, 0, 5), 2.5);"
+        },
+        {
+          "name": "Both boundaries",
+          "code": "assertEqual([clamp(-8, -2, 4), clamp(9, -2, 4)], [-2, 4]);"
+        },
+        {
+          "name": "Equal bounds",
+          "code": "assertEqual(clamp(100, 3, 3), 3);"
+        },
+        {
+          "name": "Reject invalid input",
+          "code": "for (const value of [NaN, Infinity, \"2\", null]) { let error; try { clamp(value, 0, 3); } catch(e) { error = e; } assert(error instanceof TypeError, \"Reject non-finite numbers\"); }"
+        },
+        {
+          "name": "Reject reversed bounds",
+          "code": "let error; try { clamp(1, 8, 2); } catch(e) { error = e; } assert(error instanceof RangeError, \"Reversed bounds must fail\");"
+        }
+      ]
+    },
+    {
+      "id": "lab-02",
+      "stage": 1,
+      "title": "Convert temperature deliberately",
+      "difficulty": "Foundation",
+      "minutes": 15,
+      "concept": "Branching \u00b7 rounding \u00b7 input contracts",
+      "prompt": "Implement convertTemperature(value, from, to), accepting only finite numeric values and the units C, F, K. Convert through Celsius and return a number rounded to two decimal places. Unknown units or non-finite values throw TypeError. A temperature below absolute zero throws RangeError, including when source and destination units match.",
+      "examples": [
+        {
+          "input": "convertTemperature(98.6, \"F\", \"C\")",
+          "output": "37"
+        }
+      ],
+      "starter": "function convertTemperature(value, from, to) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function convertTemperature(value, from, to) {\n  if (!Number.isFinite(value) || ![\"C\", \"F\", \"K\"].includes(from) || ![\"C\", \"F\", \"K\"].includes(to)) throw new TypeError(\"Invalid temperature\");\n  const c = from === \"C\" ? value : from === \"F\" ? (value - 32) * 5 / 9 : value - 273.15;\n  if (c < -273.15) throw new RangeError(\"Below absolute zero\");\n  const result = to === \"C\" ? c : to === \"F\" ? c * 9 / 5 + 32 : c + 273.15;\n  return Number(result.toFixed(2));\n}",
+      "hints": [
+        "Use Celsius as the intermediate representation.",
+        "Fahrenheit to Celsius is (F \u2212 32) \u00d7 5 / 9. Kelvin to Celsius subtracts 273.15.",
+        "Round only the final answer, using Number(result.toFixed(2))."
+      ],
+      "tests": [
+        {
+          "name": "Freezing point",
+          "code": "assertEqual(convertTemperature(32, \"F\", \"C\"), 0);"
+        },
+        {
+          "name": "Kelvin and decimals",
+          "code": "assertEqual(convertTemperature(100, \"C\", \"K\"), 373.15); assertEqual(convertTemperature(1, \"C\", \"F\"), 33.8);"
+        },
+        {
+          "name": "Absolute zero allowed",
+          "code": "assertEqual(convertTemperature(0, \"K\", \"C\"), -273.15);"
+        },
+        {
+          "name": "Impossible temperature",
+          "code": "let e; try { convertTemperature(-1, \"K\", \"K\"); } catch(x) { e = x; } assert(e instanceof RangeError, \"Reject below zero Kelvin\");"
+        },
+        {
+          "name": "No coercion or unknown units",
+          "code": "for (const args of [[\"4\", \"C\", \"F\"], [4, \"X\", \"C\"], [NaN, \"C\", \"F\"]]) { let e; try { convertTemperature(...args); } catch(x) { e = x; } assert(e instanceof TypeError, \"Invalid arguments must fail\"); }"
+        }
+      ]
+    },
+    {
+      "id": "lab-03",
+      "stage": 1,
+      "title": "Quote a basket in integer cents",
+      "difficulty": "Foundation",
+      "minutes": 20,
+      "concept": "Arithmetic \u00b7 loops \u00b7 rounding",
+      "prompt": "Implement quoteBasket(items, discountPercent = 0). Each item is {priceCents, quantity}, both non-negative safe integers. discountPercent must be an integer from 0 to 100. Return {subtotalCents, discountCents, totalCents}, rounding the discount to the nearest cent with Math.round. Invalid fields throw RangeError. Inputs will have safe-integer aggregate totals. Leave the input unchanged.",
+      "examples": [
+        {
+          "input": "quoteBasket([{priceCents: 999, quantity: 2}], 15)",
+          "output": "{subtotalCents:1998, discountCents:300, totalCents:1698}"
+        }
+      ],
+      "starter": "function quoteBasket(items, discountPercent = 0) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function quoteBasket(items, discountPercent = 0) {\n  if (!Number.isInteger(discountPercent) || discountPercent < 0 || discountPercent > 100) throw new RangeError(\"Invalid discount\");\n  let subtotalCents = 0;\n  for (const {priceCents, quantity} of items) {\n    if (![priceCents, quantity].every(n => Number.isSafeInteger(n) && n >= 0)) throw new RangeError(\"Invalid line\");\n    subtotalCents += priceCents * quantity;\n  }\n  const discountCents = Math.round(subtotalCents * discountPercent / 100);\n  return {subtotalCents, discountCents, totalCents: subtotalCents - discountCents};\n}",
+      "hints": [
+        "Use integer cents throughout; do not convert to currency units.",
+        "Subtotal each line as priceCents \u00d7 quantity, then apply one discount to the basket.",
+        "Round the discount once, and subtract that rounded amount from subtotalCents."
+      ],
+      "tests": [
+        {
+          "name": "Multiple quantities",
+          "code": "assertEqual(quoteBasket([{priceCents: 199, quantity: 2}, {priceCents: 50, quantity: 1}], 10), {subtotalCents:448, discountCents:45, totalCents:403});"
+        },
+        {
+          "name": "Empty and full discount",
+          "code": "assertEqual(quoteBasket([], 100), {subtotalCents:0, discountCents:0, totalCents:0}); assertEqual(quoteBasket([{priceCents:5, quantity:1}],100).totalCents,0);"
+        },
+        {
+          "name": "Input remains intact",
+          "code": "const items = [{priceCents:101, quantity:2}]; const before = JSON.stringify(items); quoteBasket(items, 5); assertEqual(JSON.stringify(items), before);"
+        },
+        {
+          "name": "Invalid line rejected",
+          "code": "let e; try { quoteBasket([{priceCents:1.5, quantity:2}]); } catch(x) { e=x; } assert(e instanceof RangeError, \"Reject fractional cents\");"
+        },
+        {
+          "name": "Invalid discount rejected",
+          "code": "let e; try { quoteBasket([], 101); } catch(x) { e=x; } assert(e instanceof RangeError, \"Reject excessive discount\");"
+        }
+      ]
+    },
+    {
+      "id": "lab-04",
+      "stage": 1,
+      "title": "The calendar edge case",
+      "difficulty": "Foundation",
+      "minutes": 15,
+      "concept": "Boolean algebra \u00b7 divisibility",
+      "prompt": "Implement daysInMonth(year, month). year is an integer from 1 through 9999; month is an integer from 1 through 12. Invalid arguments throw RangeError. Use Gregorian leap-year rules: divisible by 4, except centuries unless divisible by 400. Return the number of days without using Date.",
+      "examples": [
+        {
+          "input": "daysInMonth(2100, 2)",
+          "output": "28"
+        }
+      ],
+      "starter": "function daysInMonth(year, month) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function daysInMonth(year, month) {\n  if (!Number.isInteger(year) || year < 1 || year > 9999 || !Number.isInteger(month) || month < 1 || month > 12) throw new RangeError(\"Invalid calendar date\");\n  const leap = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);\n  return [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month - 1];\n}",
+      "hints": [
+        "Separate input validation, leap-year detection, and month lookup.",
+        "A century such as 1900 is special, but 2000 passes the 400-year exception.",
+        "Index a twelve-element array with month - 1."
+      ],
+      "tests": [
+        {
+          "name": "Ordinary February",
+          "code": "assertEqual(daysInMonth(2023, 2), 28);"
+        },
+        {
+          "name": "Century exceptions",
+          "code": "assertEqual([daysInMonth(1900, 2), daysInMonth(2000, 2), daysInMonth(2024,2)], [28,29,29]);"
+        },
+        {
+          "name": "Thirty and thirty-one",
+          "code": "assertEqual([daysInMonth(2025,4), daysInMonth(2025,12)], [30,31]);"
+        },
+        {
+          "name": "Reject invalid range and types",
+          "code": "for (const args of [[0,1],[2024,13],[2024,0],[2024,2.5],[\"2024\",2]]) { let e; try { daysInMonth(...args); } catch(x) { e=x; } assert(e instanceof RangeError, \"Validate both calendar arguments\"); }"
+        }
+      ]
+    },
+    {
+      "id": "lab-05",
+      "stage": 1,
+      "title": "Price a progressive delivery route",
+      "difficulty": "Foundation",
+      "minutes": 20,
+      "concept": "Piecewise functions \u00b7 boundary values",
+      "prompt": "Implement deliveryFee(distanceKm, express = false). Finite distances greater than zero and up to 100 are allowed; otherwise throw RangeError. Charge 500 cents for the first 3 km, 120 cents for each started km after 3 through 10, then 80 cents for each started km beyond 10. Express adds 50% to the complete fee, rounded with Math.round. Return cents.",
+      "examples": [
+        {
+          "input": "deliveryFee(4.2)",
+          "output": "740"
+        }
+      ],
+      "starter": "function deliveryFee(distanceKm, express = false) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function deliveryFee(distanceKm, express = false) {\n  if (!Number.isFinite(distanceKm) || distanceKm <= 0 || distanceKm > 100) throw new RangeError(\"Unsupported distance\");\n  const middle = Math.ceil(Math.max(0, Math.min(distanceKm, 10) - 3));\n  const far = Math.ceil(Math.max(0, distanceKm - 10));\n  const base = 500 + middle * 120 + far * 80;\n  return express ? Math.round(base * 1.5) : base;\n}",
+      "hints": [
+        "Treat the journey as three independent distance bands.",
+        "Use Math.ceil for each started kilometer, after clipping to the band.",
+        "Apply the express multiplier after summing every distance band."
+      ],
+      "tests": [
+        {
+          "name": "Base band",
+          "code": "assertEqual([deliveryFee(0.1), deliveryFee(3)], [500,500]);"
+        },
+        {
+          "name": "Started kilometers",
+          "code": "assertEqual([deliveryFee(3.01), deliveryFee(10)], [620,1340]);"
+        },
+        {
+          "name": "Far band and express",
+          "code": "assertEqual(deliveryFee(10.01), 1420); assertEqual(deliveryFee(11,true), 2130);"
+        },
+        {
+          "name": "Reject unsupported values",
+          "code": "for (const n of [0,-1,101,Infinity,\"4\"]) { let e; try { deliveryFee(n); } catch(x) {e=x;} assert(e instanceof RangeError, \"Invalid route distance\"); }"
+        }
+      ]
+    },
+    {
+      "id": "lab-06",
+      "stage": 1,
+      "title": "Describe a password without storing it",
+      "difficulty": "Foundation",
+      "minutes": 20,
+      "concept": "Strings \u00b7 predicates \u00b7 structured output",
+      "prompt": "Implement passwordReport(text). Return {valid, missing}, where missing lists unmet rules in this exact order: length (at least 12 Unicode code points), lowercase (ASCII a-z), uppercase (ASCII A-Z), digit (ASCII 0-9), symbol (one of !@#$%^&*). Do not trim or otherwise transform text. valid is true exactly when no rules are missing. Assume text is a string. This exercise checks stated rules, not real-world password strength.",
+      "examples": [
+        {
+          "input": "passwordReport(\"short\")",
+          "output": "{valid:false, missing:[\"length\",\"uppercase\",\"digit\",\"symbol\"]}"
+        }
+      ],
+      "starter": "function passwordReport(text) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function passwordReport(text) {\n  const checks = [[\"length\", [...text].length >= 12], [\"lowercase\", /[a-z]/.test(text)], [\"uppercase\", /[A-Z]/.test(text)], [\"digit\", /[0-9]/.test(text)], [\"symbol\", /[!@#$%^&*]/.test(text)]];\n  const missing = checks.filter(([, passed]) => !passed).map(([rule]) => rule);\n  return {valid: missing.length === 0, missing};\n}",
+      "hints": [
+        "Represent rules as ordered [name, passed] pairs.",
+        "Use [...text].length to count code points, since some characters use two UTF-16 code units.",
+        "Filter failed rules and derive valid from the resulting array length."
+      ],
+      "tests": [
+        {
+          "name": "All rules passed",
+          "code": "assertEqual(passwordReport(\"LongPass123!\"), {valid:true,missing:[]});"
+        },
+        {
+          "name": "Empty string",
+          "code": "assertEqual(passwordReport(\"\"), {valid:false,missing:[\"length\",\"lowercase\",\"uppercase\",\"digit\",\"symbol\"]});"
+        },
+        {
+          "name": "Ordered missing rules",
+          "code": "assertEqual(passwordReport(\"abcdefghijkl\"), {valid:false,missing:[\"uppercase\",\"digit\",\"symbol\"]});"
+        },
+        {
+          "name": "Unicode code points",
+          "code": "assertEqual(passwordReport(\"Aa1!\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\").missing, [\"length\"]);"
+        },
+        {
+          "name": "Only specified symbols count",
+          "code": "assertEqual(passwordReport(\"Abcdefgh123?\").missing, [\"symbol\"]);"
+        }
+      ]
+    },
+    {
+      "id": "lab-07",
+      "stage": 1,
+      "title": "Reduce a fraction with Euclid",
+      "difficulty": "Foundation",
+      "minutes": 20,
+      "concept": "Loops \u00b7 remainder \u00b7 normalization",
+      "prompt": "Implement reduceFraction(numerator, denominator). Both inputs are safe integers and denominator cannot be zero; otherwise throw RangeError. Return [n, d] in lowest terms with a positive denominator. Zero always becomes [0, 1]. Use the Euclidean algorithm rather than testing every possible divisor.",
+      "examples": [
+        {
+          "input": "reduceFraction(-18, 24)",
+          "output": "[-3, 4]"
+        }
+      ],
+      "starter": "function reduceFraction(numerator, denominator) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function reduceFraction(numerator, denominator) {\n  if (!Number.isSafeInteger(numerator) || !Number.isSafeInteger(denominator) || denominator === 0) throw new RangeError(\"Invalid fraction\");\n  if (numerator === 0) return [0, 1];\n  let a = Math.abs(numerator), b = Math.abs(denominator);\n  while (b !== 0) [a, b] = [b, a % b];\n  const sign = denominator < 0 ? -1 : 1;\n  return [sign * numerator / a, Math.abs(denominator) / a];\n}",
+      "hints": [
+        "Take absolute values while finding the greatest common divisor.",
+        "Repeatedly replace [a, b] with [b, a % b] until b is zero.",
+        "Normalize the sign only after dividing both inputs by the divisor."
+      ],
+      "tests": [
+        {
+          "name": "Common divisor",
+          "code": "assertEqual(reduceFraction(42, 56), [3,4]);"
+        },
+        {
+          "name": "Normalize signs",
+          "code": "assertEqual(reduceFraction(4,-6), [-2,3]); assertEqual(reduceFraction(-4,-6), [2,3]);"
+        },
+        {
+          "name": "Zero normalization",
+          "code": "assertEqual(reduceFraction(0,-99), [0,1]);"
+        },
+        {
+          "name": "Already reduced",
+          "code": "assertEqual(reduceFraction(17,31), [17,31]);"
+        },
+        {
+          "name": "Invalid fractions",
+          "code": "for (const args of [[1,0],[1.5,2],[1,\"2\"]]) {let e; try {reduceFraction(...args);} catch(x) {e=x;} assert(e instanceof RangeError, \"Invalid fraction must fail\");}"
+        }
+      ]
+    },
+    {
+      "id": "lab-08",
+      "stage": 1,
+      "title": "Build a directional range",
+      "difficulty": "Foundation",
+      "minutes": 20,
+      "concept": "Iteration \u00b7 defaults \u00b7 termination",
+      "prompt": "Implement integerRange(start, end, step = 1), returning an array that includes start and excludes end. Arguments must be safe integers and step must not be zero; otherwise throw RangeError. Positive steps move upward; negative steps move downward. A step pointing away from end returns an empty array. Inputs will produce at most 1000 values and will not overflow safe integers.",
+      "examples": [
+        {
+          "input": "integerRange(10, 3, -2)",
+          "output": "[10, 8, 6, 4]"
+        }
+      ],
+      "starter": "function integerRange(start, end, step = 1) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function integerRange(start, end, step = 1) {\n  if (![start,end,step].every(Number.isSafeInteger) || step === 0) throw new RangeError(\"Invalid range\");\n  const result = [];\n  for (let value = start; step > 0 ? value < end : value > end; value += step) result.push(value);\n  return result;\n}",
+      "hints": [
+        "The loop condition depends on the sign of step.",
+        "Exclude end even when the progression lands exactly on it.",
+        "A conditional expression in the loop condition can choose value < end or value > end."
+      ],
+      "tests": [
+        {
+          "name": "Default upward range",
+          "code": "assertEqual(integerRange(2,5), [2,3,4]);"
+        },
+        {
+          "name": "Downward range",
+          "code": "assertEqual(integerRange(7,0,-3), [7,4,1]);"
+        },
+        {
+          "name": "Equal or wrong direction",
+          "code": "assertEqual(integerRange(2,2), []); assertEqual(integerRange(1,5,-1), []);"
+        },
+        {
+          "name": "Non-dividing step",
+          "code": "assertEqual(integerRange(-2,5,3), [-2,1,4]);"
+        },
+        {
+          "name": "Guard termination",
+          "code": "let e; try {integerRange(1,5,0);} catch(x) {e=x;} assert(e instanceof RangeError,\"Zero step must throw\");"
+        }
+      ]
+    },
+    {
+      "id": "lab-09",
+      "stage": 2,
+      "title": "Group records without prototype surprises",
+      "difficulty": "Foundation",
+      "minutes": 20,
+      "concept": "Arrays \u00b7 Map \u00b7 callback functions",
+      "prompt": "Implement groupBy(items, keyOf). Return a Map from each callback-produced key to a new array of matching items, preserving first-seen key order and original item order. Call keyOf once per item with (item, index). Keys may be strings, objects, or undefined. Do not mutate items.",
+      "examples": [
+        {
+          "input": "[...groupBy([\"ant\", \"bear\", \"ape\"], s => s[0])]",
+          "output": "[[\"a\", [\"ant\", \"ape\"]], [\"b\", [\"bear\"]]]"
+        }
+      ],
+      "starter": "function groupBy(items, keyOf) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function groupBy(items, keyOf) {\n  const groups = new Map();\n  items.forEach((item,index) => {\n    const key = keyOf(item,index);\n    if (!groups.has(key)) groups.set(key, []);\n    groups.get(key).push(item);\n  });\n  return groups;\n}",
+      "hints": [
+        "A Map supports object keys and avoids special string property names.",
+        "Create an array when a key first appears, then append each item.",
+        "Pass the original array index to the callback, without changing the source array."
+      ],
+      "tests": [
+        {
+          "name": "Groups and stable order",
+          "code": "assertEqual([...groupBy([3,2,5,4], n=>n%2)], [[1,[3,5]],[0,[2,4]]]);"
+        },
+        {
+          "name": "Object identity keys",
+          "code": "const key={}; const a={key}; const b={key}; assertEqual(groupBy([a,b], x=>x.key).get(key), [a,b]);"
+        },
+        {
+          "name": "Callback index and count",
+          "code": "let calls=0; const result=groupBy([\"a\",\"b\",\"c\"],(x,i)=>{calls++;return i%2;}); assertEqual([...result], [[0,[\"a\",\"c\"]],[1,[\"b\"]]]); assertEqual(calls,3);"
+        },
+        {
+          "name": "Special keys and empty input",
+          "code": "assertEqual(groupBy([],x=>x).size,0); assertEqual(groupBy([1],()=>\"__proto__\").get(\"__proto__\"),[1]);"
+        },
+        {
+          "name": "No input mutation",
+          "code": "const input=Object.freeze([1,2]); groupBy(input,x=>x); assertEqual(input,[1,2]);"
+        }
+      ]
+    },
+    {
+      "id": "lab-10",
+      "stage": 2,
+      "title": "Deduplicate by a chosen identity",
+      "difficulty": "Foundation",
+      "minutes": 20,
+      "concept": "Set \u00b7 identity \u00b7 immutable transforms",
+      "prompt": "Implement uniqueBy(items, keyOf), returning the first item for each distinct key. Use SameValueZero equality, as Set does: NaN equals NaN and 0 equals -0; object keys compare by identity. Preserve order, invoke keyOf(item, index) once per item, and return a new array without mutating the input.",
+      "examples": [
+        {
+          "input": "uniqueBy([\"A\", \"a\", \"B\"], s => s.toLowerCase())",
+          "output": "[\"A\", \"B\"]"
+        }
+      ],
+      "starter": "function uniqueBy(items, keyOf) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function uniqueBy(items, keyOf) {\n  const seen = new Set();\n  return items.filter((item,index) => {\n    const key = keyOf(item,index);\n    if (seen.has(key)) return false;\n    seen.add(key);\n    return true;\n  });\n}",
+      "hints": [
+        "Track seen keys, rather than seen items.",
+        "A Set already implements the requested equality semantics.",
+        "A filter callback should add a previously unseen key and return true."
+      ],
+      "tests": [
+        {
+          "name": "First matching record wins",
+          "code": "const a={id:1,v:\"first\"}; assertEqual(uniqueBy([a,{id:2},{id:1,v:\"last\"}],x=>x.id),[a,{id:2}]);"
+        },
+        {
+          "name": "NaN and signed zero",
+          "code": "const result=uniqueBy([NaN,NaN,0,-0],x=>x); assertEqual(result.length,2); assert(Number.isNaN(result[0]),\"Keep first NaN\");"
+        },
+        {
+          "name": "Distinct object identities",
+          "code": "const a={},b={}; assertEqual(uniqueBy([a,b,a],x=>x).length,2);"
+        },
+        {
+          "name": "New array and callback count",
+          "code": "const source=[1,1,2]; let calls=0; const result=uniqueBy(source,(x,i)=>{assert(i>=0,\"Pass index\");calls++;return x;}); assert(result!==source,\"Return new array\"); assertEqual(calls,3); assertEqual(source,[1,1,2]);"
+        }
+      ]
+    },
+    {
+      "id": "lab-11",
+      "stage": 2,
+      "title": "Build a word-frequency report",
+      "difficulty": "Foundation",
+      "minutes": 25,
+      "concept": "Regular expressions \u00b7 maps \u00b7 sorting",
+      "prompt": "Implement wordFrequencies(text). A word is a maximal sequence of ASCII letters a-z, case-insensitive; punctuation and digits are separators. Return an array of {word, count}, sorted by count descending, then word ascending using ordinary lexical comparison. Empty or punctuation-only input returns [].",
+      "examples": [
+        {
+          "input": "wordFrequencies(\"red blue red\")",
+          "output": "[{word:\"red\",count:2},{word:\"blue\",count:1}]"
+        }
+      ],
+      "starter": "function wordFrequencies(text) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function wordFrequencies(text) {\n  const counts = new Map();\n  for (const word of text.toLowerCase().match(/[a-z]+/g) || []) counts.set(word, (counts.get(word) || 0) + 1);\n  return [...counts].map(([word,count])=>({word,count})).sort((a,b)=>b.count-a.count || (a.word < b.word ? -1 : a.word > b.word ? 1 : 0));\n}",
+      "hints": [
+        "Normalize case before extracting tokens.",
+        "Count with a Map, defaulting unseen words to zero.",
+        "Your comparator needs a deterministic secondary ordering when counts tie."
+      ],
+      "tests": [
+        {
+          "name": "Normalize and count",
+          "code": "assertEqual(wordFrequencies(\"Tea, tea! Coffee.\"),[{word:\"tea\",count:2},{word:\"coffee\",count:1}]);"
+        },
+        {
+          "name": "Alphabetical ties",
+          "code": "assertEqual(wordFrequencies(\"zoo ant bee\"),[{word:\"ant\",count:1},{word:\"bee\",count:1},{word:\"zoo\",count:1}]);"
+        },
+        {
+          "name": "Digits are separators",
+          "code": "assertEqual(wordFrequencies(\"a12b a\"),[{word:\"a\",count:2},{word:\"b\",count:1}]);"
+        },
+        {
+          "name": "No tokens",
+          "code": "assertEqual(wordFrequencies(\" 123 !?! \"),[]); assertEqual(wordFrequencies(\"\"),[]);"
+        }
+      ]
+    },
+    {
+      "id": "lab-12",
+      "stage": 2,
+      "title": "Compose a small data pipeline",
+      "difficulty": "Foundation",
+      "minutes": 20,
+      "concept": "Higher-order functions \u00b7 rest parameters \u00b7 closures",
+      "prompt": "Implement pipe(...functions). Validate every supplied value is a function when pipe is called; otherwise throw TypeError. Return a unary function applying the functions left to right. With no functions, return the input unchanged. Propagate exceptions and preserve object identity where a stage returns the same reference. This is a synchronous pipeline.",
+      "examples": [
+        {
+          "input": "pipe(x => x + 1, x => x * 2)(3)",
+          "output": "8"
+        }
+      ],
+      "starter": "function pipe(...functions) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function pipe(...functions) {\n  if (!functions.every(fn=>typeof fn === \"function\")) throw new TypeError(\"Pipeline stages must be functions\");\n  return value => functions.reduce((current,fn)=>fn(current), value);\n}",
+      "hints": [
+        "The outer function captures a list of stages.",
+        "The inner function can reduce that list, starting with its own input.",
+        "Validate the stage list before returning the inner function, so invalid pipelines fail early."
+      ],
+      "tests": [
+        {
+          "name": "Left-to-right order",
+          "code": "assertEqual(pipe(x=>x+2,x=>x*3)(4),18);"
+        },
+        {
+          "name": "Identity pipeline",
+          "code": "const value={}; assert(pipe()(value)===value,\"An empty pipeline preserves identity\");"
+        },
+        {
+          "name": "Any value type",
+          "code": "assertEqual(pipe(s=>s.split(\",\"),xs=>xs.map(Number),xs=>xs.reduce((a,b)=>a+b,0))(\"2,3,5\"),10);"
+        },
+        {
+          "name": "Early validation",
+          "code": "let e; try {pipe(x=>x,42);} catch(x) {e=x;} assert(e instanceof TypeError,\"Reject invalid stages immediately\");"
+        },
+        {
+          "name": "Error propagation",
+          "code": "const expected=new Error(\"stop\"); let e; try {pipe(()=>{throw expected;})(1);} catch(x) {e=x;} assert(e===expected,\"Propagate original error\");"
+        }
+      ]
+    },
+    {
+      "id": "lab-13",
+      "stage": 2,
+      "title": "Memoize a single argument safely",
+      "difficulty": "Foundation",
+      "minutes": 25,
+      "concept": "Closures \u00b7 caching \u00b7 this binding",
+      "prompt": "Implement memoizeUnary(fn), returning a wrapper that caches successful results by its single argument in a Map. Cache undefined and falsy results too. Preserve the calling this value when invoking fn; the cache key is only the argument, so assume the meaning of fn does not vary by receiver. Synchronous exceptions must not be cached. Object arguments use identity.",
+      "examples": [
+        {
+          "input": "const square = memoizeUnary(n => n * n); square(5)",
+          "output": "25 (computed once per distinct key)"
+        }
+      ],
+      "starter": "function memoizeUnary(fn) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function memoizeUnary(fn) {\n  const cache = new Map();\n  return function(arg) {\n    if (cache.has(arg)) return cache.get(arg);\n    const value = fn.call(this,arg);\n    cache.set(arg,value);\n    return value;\n  };\n}",
+      "hints": [
+        "Use Map.has rather than truthiness of Map.get.",
+        "An ordinary function can forward this using fn.call(this, arg).",
+        "Set the cache after invoking fn; if fn throws, no entry will be written."
+      ],
+      "tests": [
+        {
+          "name": "Cache successful work",
+          "code": "let count=0; const twice=memoizeUnary(x=>{count++;return x*2;}); assertEqual([twice(3),twice(3),twice(4)],[6,6,8]); assertEqual(count,2);"
+        },
+        {
+          "name": "Cache undefined",
+          "code": "let count=0; const fn=memoizeUnary(()=>{count++;}); fn(1); fn(1); assertEqual(count,1);"
+        },
+        {
+          "name": "Exceptions are retried",
+          "code": "let count=0; const fn=memoizeUnary(()=>{count++;throw new Error(\"x\");}); for(let i=0;i<2;i++){try{fn(1);}catch{}} assertEqual(count,2);"
+        },
+        {
+          "name": "Receiver forwarded",
+          "code": "const obj={factor:3,run:memoizeUnary(function(x){return this.factor*x;})}; assertEqual(obj.run(4),12);"
+        },
+        {
+          "name": "Object identity",
+          "code": "let count=0; const fn=memoizeUnary(()=>++count); const key={}; assertEqual([fn(key),fn(key),fn({})],[1,1,2]);"
+        }
+      ]
+    },
+    {
+      "id": "lab-14",
+      "stage": 2,
+      "title": "Flatten a nested settings object",
+      "difficulty": "Foundation",
+      "minutes": 30,
+      "concept": "Recursion \u00b7 object traversal \u00b7 path building",
+      "prompt": "Implement flattenRecord(record), returning an array of [dotPath, value] pairs for leaves in Object.entries traversal order. Recurse into non-null plain objects only; arrays and null are leaves. Empty nested objects are leaves too. The root is always a plain object; an empty root returns []. Keys contain no dots, and there are no cycles. Do not mutate the source.",
+      "examples": [
+        {
+          "input": "flattenRecord({user:{name:\"Ada\"}})",
+          "output": "[[\"user.name\", \"Ada\"]]"
+        }
+      ],
+      "starter": "function flattenRecord(record) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function flattenRecord(record) {\n  const result=[];\n  function visit(object,prefix) {\n    for (const [key,value] of Object.entries(object)) {\n      const path=prefix ? prefix+\".\"+key : key;\n      const plain=value !== null && typeof value === \"object\" && Object.getPrototypeOf(value) === Object.prototype;\n      if (plain && Object.keys(value).length) visit(value,path);\n      else result.push([path,value]);\n    }\n  }\n  visit(record,\"\");\n  return result;\n}",
+      "hints": [
+        "Keep the prefix separate from the current object.",
+        "Arrays should be emitted as a single leaf, not expanded into numeric paths.",
+        "An empty nested object needs its own leaf entry; otherwise that setting disappears."
+      ],
+      "tests": [
+        {
+          "name": "Nested paths",
+          "code": "assertEqual(flattenRecord({app:{theme:\"dark\",size:2},ok:true}),[[\"app.theme\",\"dark\"],[\"app.size\",2],[\"ok\",true]]);"
+        },
+        {
+          "name": "Array and null leaves",
+          "code": "assertEqual(flattenRecord({a:[1,2],b:null}),[[\"a\",[1,2]],[\"b\",null]]);"
+        },
+        {
+          "name": "Empty root and nested object",
+          "code": "assertEqual(flattenRecord({}),[]); assertEqual(flattenRecord({a:{}}),[[\"a\",{}]]);"
+        },
+        {
+          "name": "No mutation",
+          "code": "const source={a:{b:3}}; const before=JSON.stringify(source); flattenRecord(source); assertEqual(JSON.stringify(source),before);"
+        }
+      ]
+    },
+    {
+      "id": "lab-15",
+      "stage": 2,
+      "title": "Apply a ledger without changing history",
+      "difficulty": "Foundation",
+      "minutes": 25,
+      "concept": "Immutable updates \u00b7 validation \u00b7 accumulation",
+      "prompt": "Implement applyTransactions(balances, transactions). balances is a plain object of account IDs to non-negative integer cents; transactions are {from, to, amount}. Validate each amount is a positive safe integer and both accounts exist as own properties. Apply transactions in order to a fresh object. Insufficient funds throw RangeError; unknown accounts throw Error. Transfers to the same account still require sufficient funds but leave its balance unchanged. Never mutate either input, even if a later transfer fails.",
+      "examples": [
+        {
+          "input": "applyTransactions({a:100,b:20}, [{from:\"a\",to:\"b\",amount:30}])",
+          "output": "{a:70,b:50}"
+        }
+      ],
+      "starter": "function applyTransactions(balances, transactions) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function applyTransactions(balances, transactions) {\n  const result = {...balances};\n  for (const {from,to,amount} of transactions) {\n    if (!Object.hasOwn(result,from) || !Object.hasOwn(result,to)) throw new Error(\"Unknown account\");\n    if (!Number.isSafeInteger(amount) || amount <= 0 || result[from] < amount) throw new RangeError(\"Invalid transfer\");\n    result[from] -= amount;\n    result[to] += amount;\n  }\n  return result;\n}",
+      "hints": [
+        "Copy balances before applying any transaction.",
+        "Check own properties rather than using the in operator.",
+        "Validate a transfer fully, then subtract and add; this also handles self-transfers."
+      ],
+      "tests": [
+        {
+          "name": "Sequential transfers",
+          "code": "assertEqual(applyTransactions({a:100,b:0,c:0},[{from:\"a\",to:\"b\",amount:40},{from:\"b\",to:\"c\",amount:10}]),{a:60,b:30,c:10});"
+        },
+        {
+          "name": "Self-transfer",
+          "code": "assertEqual(applyTransactions({a:50},[{from:\"a\",to:\"a\",amount:20}]),{a:50});"
+        },
+        {
+          "name": "Failure does not mutate input",
+          "code": "const source={a:50,b:0}; let e; try{applyTransactions(source,[{from:\"a\",to:\"b\",amount:10},{from:\"a\",to:\"b\",amount:100}]);}catch(x){e=x;} assert(e instanceof RangeError,\"Reject overdraft\"); assertEqual(source,{a:50,b:0});"
+        },
+        {
+          "name": "Inherited account rejected",
+          "code": "let e; try{applyTransactions({a:50},[{from:\"a\",to:\"toString\",amount:1}]);}catch(x){e=x;} assert(e instanceof Error,\"Reject inherited properties\");"
+        },
+        {
+          "name": "Positive amounts only",
+          "code": "let e; try{applyTransactions({a:50,b:0},[{from:\"a\",to:\"b\",amount:0}]);}catch(x){e=x;} assert(e instanceof RangeError,\"Reject zero transfer\");"
+        }
+      ]
+    },
+    {
+      "id": "lab-16",
+      "stage": 2,
+      "title": "Compute moving averages in one pass",
+      "difficulty": "Foundation",
+      "minutes": 25,
+      "concept": "Sliding windows \u00b7 algorithmic cost",
+      "prompt": "Implement movingAverage(values, size), returning the average of every complete consecutive window of size values. size must be a positive integer or throw RangeError. If size exceeds the array length, return []. Assume values are finite numbers. Do not mutate values. Aim for O(n) time with a running sum; do not sum each window from scratch.",
+      "examples": [
+        {
+          "input": "movingAverage([10, 20, 30, 40], 3)",
+          "output": "[20, 30]"
+        }
+      ],
+      "starter": "function movingAverage(values, size) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function movingAverage(values, size) {\n  if (!Number.isInteger(size) || size <= 0) throw new RangeError(\"Invalid window size\");\n  const result=[];\n  let sum=0;\n  for (let i=0;i<values.length;i++) {\n    sum+=values[i];\n    if (i>=size) sum-=values[i-size];\n    if (i>=size-1) result.push(sum/size);\n  }\n  return result;\n}",
+      "hints": [
+        "Track a running sum as the right edge moves.",
+        "Once the window is too large, subtract the element leaving on the left.",
+        "Emit an average only after you have seen size elements."
+      ],
+      "tests": [
+        {
+          "name": "Overlapping windows",
+          "code": "assertEqual(movingAverage([2,4,6,8],2),[3,5,7]);"
+        },
+        {
+          "name": "Single-element windows",
+          "code": "assertEqual(movingAverage([-2,0,5],1),[-2,0,5]);"
+        },
+        {
+          "name": "Insufficient values",
+          "code": "assertEqual(movingAverage([],3),[]); assertEqual(movingAverage([1,2],3),[]);"
+        },
+        {
+          "name": "Do not mutate",
+          "code": "const input=Object.freeze([1,2,3]); assertEqual(movingAverage(input,3),[2]);"
+        },
+        {
+          "name": "Invalid size",
+          "code": "for(const size of [0,-2,1.5]){let e;try{movingAverage([1,2],size);}catch(x){e=x;}assert(e instanceof RangeError,\"Validate window size\");}"
+        }
+      ]
+    },
+    {
+      "id": "lab-17",
+      "stage": 3,
+      "title": "An undoable counter with private history",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "concept": "Closures \u00b7 encapsulation \u00b7 command history",
+      "prompt": "Implement createCounter(initial = 0). Return {value, add, undo, reset}, where value() reads the current number, add(delta) records the old value then adds a finite number and returns the new value, undo() restores the most recent recorded value (or leaves the value unchanged if none), and reset() restores initial and clears history. initial and delta must be finite numbers or throw TypeError. Each instance must have independent private state.",
+      "examples": [
+        {
+          "input": "const c = createCounter(2); c.add(3); c.undo()",
+          "output": "2"
+        }
+      ],
+      "starter": "function createCounter(initial = 0) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function createCounter(initial = 0) {\n  if (!Number.isFinite(initial)) throw new TypeError(\"Invalid initial value\");\n  let current=initial;\n  const history=[];\n  return {\n    value:()=>current,\n    add(delta) { if(!Number.isFinite(delta)) throw new TypeError(\"Invalid delta\"); history.push(current); current+=delta; return current; },\n    undo() { if(history.length) current=history.pop(); return current; },\n    reset() { current=initial; history.length=0; return current; }\n  };\n}",
+      "hints": [
+        "Keep current and history in the factory closure.",
+        "Record the previous value only after validating an addition.",
+        "Reset must clear history; otherwise undo could resurrect an old session."
+      ],
+      "tests": [
+        {
+          "name": "Add and undo",
+          "code": "const c=createCounter(10); assertEqual([c.add(5),c.add(-2),c.undo(),c.undo(),c.undo()],[15,13,15,10,10]);"
+        },
+        {
+          "name": "Reset erases history",
+          "code": "const c=createCounter(3); c.add(7); assertEqual(c.reset(),3); assertEqual(c.undo(),3);"
+        },
+        {
+          "name": "Independent instances",
+          "code": "const a=createCounter(),b=createCounter(); a.add(1); assertEqual(b.value(),0);"
+        },
+        {
+          "name": "Invalid addition leaves state",
+          "code": "const c=createCounter(4); let e;try{c.add(NaN);}catch(x){e=x;} assert(e instanceof TypeError,\"Reject invalid delta\"); assertEqual(c.value(),4); assertEqual(c.undo(),4);"
+        }
+      ]
+    },
+    {
+      "id": "lab-18",
+      "stage": 3,
+      "title": "A predictable event bus",
+      "difficulty": "Intermediate",
+      "minutes": 35,
+      "concept": "Publish/subscribe \u00b7 Set \u00b7 mutation during iteration",
+      "prompt": "Implement createEventBus() returning on(event, listener), emit(event, payload), and listenerCount(event). on adds a function once per event and returns an idempotent unsubscribe function. emit invokes a snapshot of listeners in registration order and returns the invocation count; changes to subscriptions during emission only affect future emissions. Listener errors propagate immediately. Unknown events have zero listeners.",
+      "examples": [
+        {
+          "input": "const bus = createEventBus(); bus.listenerCount(\"saved\")",
+          "output": "0"
+        }
+      ],
+      "starter": "function createEventBus() {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function createEventBus() {\n  const events=new Map();\n  return {\n    on(event, listener) {\n      if(typeof listener!==\"function\") throw new TypeError(\"Listener must be a function\");\n      if(!events.has(event)) events.set(event,new Set());\n      const listeners=events.get(event);\n      listeners.add(listener);\n      return ()=>listeners.delete(listener);\n    },\n    emit(event,payload) {\n      const listeners=[...(events.get(event)||[])];\n      for(const listener of listeners) listener(payload);\n      return listeners.length;\n    },\n    listenerCount:event=>events.get(event)?.size||0\n  };\n}",
+      "hints": [
+        "Map each event to a Set of listeners.",
+        "Copy the Set into an array before emitting.",
+        "The unsubscribe closure captures the Set and listener; Set.delete is safe to repeat."
+      ],
+      "tests": [
+        {
+          "name": "Delivery order and payload",
+          "code": "const bus=createEventBus(),seen=[]; bus.on(\"x\",v=>seen.push(v));bus.on(\"x\",v=>seen.push(v*2)); assertEqual(bus.emit(\"x\",3),2);assertEqual(seen,[3,6]);"
+        },
+        {
+          "name": "Deduplicate and unsubscribe",
+          "code": "const bus=createEventBus(),fn=()=>{};const off=bus.on(\"x\",fn);bus.on(\"x\",fn);assertEqual(bus.listenerCount(\"x\"),1);off();off();assertEqual(bus.listenerCount(\"x\"),0);"
+        },
+        {
+          "name": "Snapshot behavior",
+          "code": "const bus=createEventBus(),seen=[];let offB;bus.on(\"x\",()=>{seen.push(\"a\");offB();});offB=bus.on(\"x\",()=>seen.push(\"b\"));bus.emit(\"x\");bus.emit(\"x\");assertEqual(seen,[\"a\",\"b\",\"a\"]);"
+        },
+        {
+          "name": "Unknown events and errors",
+          "code": "const bus=createEventBus();assertEqual(bus.emit(\"missing\",1),0);const expected=new Error(\"listener\");bus.on(\"x\",()=>{throw expected;});let e;try{bus.emit(\"x\");}catch(x){e=x;}assert(e===expected,\"Preserve listener error\");"
+        }
+      ]
+    },
+    {
+      "id": "lab-19",
+      "stage": 3,
+      "title": "Reserve stock as a small domain model",
+      "difficulty": "Intermediate",
+      "minutes": 35,
+      "concept": "Class design \u00b7 invariants \u00b7 defensive copies",
+      "prompt": "Implement class Inventory with constructor(initial), available(sku), reserve(sku, quantity), restock(sku, quantity), and snapshot(). initial is a record of SKU to non-negative integer stock. reserve and restock require a known own-property SKU and a positive integer quantity, otherwise throw RangeError. reserve throws RangeError if insufficient stock. Both methods return the remaining quantity. available returns undefined for unknown SKUs. snapshot returns an independent plain object. Initial stock must also be validated.",
+      "examples": [
+        {
+          "input": "new Inventory({pen: 10}).reserve(\"pen\", 3)",
+          "output": "7"
+        }
+      ],
+      "starter": "class Inventory {\n  constructor(initial) {\n    // Initialize private stock.\n  }\n  available(sku) { throw new Error(\"Not implemented yet\"); }\n  reserve(sku, quantity) { throw new Error(\"Not implemented yet\"); }\n  restock(sku, quantity) { throw new Error(\"Not implemented yet\"); }\n  snapshot() { throw new Error(\"Not implemented yet\"); }\n}",
+      "solution": "class Inventory {\n  #stock;\n  constructor(initial) {\n    if(!Object.values(initial).every(n=>Number.isInteger(n)&&n>=0)) throw new RangeError(\"Invalid stock\");\n    this.#stock={...initial};\n  }\n  available(sku) { return Object.hasOwn(this.#stock,sku) ? this.#stock[sku] : undefined; }\n  #validate(sku,quantity) { if(!Object.hasOwn(this.#stock,sku)||!Number.isInteger(quantity)||quantity<=0) throw new RangeError(\"Invalid stock operation\"); }\n  reserve(sku,quantity) { this.#validate(sku,quantity);if(this.#stock[sku]<quantity) throw new RangeError(\"Insufficient stock\");return this.#stock[sku]-=quantity; }\n  restock(sku,quantity) { this.#validate(sku,quantity);return this.#stock[sku]+=quantity; }\n  snapshot() { return {...this.#stock}; }\n}",
+      "hints": [
+        "Copy and validate initial before storing it.",
+        "Use a private field to keep callers from bypassing validation.",
+        "Return a copy from snapshot, and distinguish unknown keys from stock equal to zero."
+      ],
+      "tests": [
+        {
+          "name": "Reserve and restock",
+          "code": "const stock=new Inventory({book:5});assertEqual(stock.reserve(\"book\",2),3);assertEqual(stock.restock(\"book\",4),7);"
+        },
+        {
+          "name": "Defensive copies",
+          "code": "const initial={book:5};const stock=new Inventory(initial);initial.book=0;const copy=stock.snapshot();copy.book=99;assertEqual(stock.available(\"book\"),5);"
+        },
+        {
+          "name": "Over-reservation atomicity",
+          "code": "const stock=new Inventory({book:2});let e;try{stock.reserve(\"book\",3);}catch(x){e=x;}assert(e instanceof RangeError,\"Reject over-reservation\");assertEqual(stock.available(\"book\"),2);"
+        },
+        {
+          "name": "Unknown and invalid quantities",
+          "code": "const stock=new Inventory({book:0});assert(stock.available(\"toString\")===undefined,\"Own keys only\");for(const args of [[\"missing\",1],[\"book\",0],[\"book\",1.5]]){let e;try{stock.restock(...args);}catch(x){e=x;}assert(e instanceof RangeError,\"Validate operation\");}"
+        }
+      ]
+    },
+    {
+      "id": "lab-20",
+      "stage": 3,
+      "title": "Model a request lifecycle explicitly",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "concept": "Finite-state machines \u00b7 pure transitions",
+      "prompt": "Implement transitionRequest(state, event). States are idle, loading, success, and error. Allowed transitions: idle + FETCH \u2192 loading; loading + RESOLVE \u2192 success; loading + REJECT \u2192 error; success/error + FETCH \u2192 loading; any known state + RESET \u2192 idle. Return a state string. Every unsupported state/event pair throws Error. The function must have no hidden mutable state.",
+      "examples": [
+        {
+          "input": "transitionRequest(\"success\", \"FETCH\")",
+          "output": "\"loading\""
+        }
+      ],
+      "starter": "function transitionRequest(state, event) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function transitionRequest(state,event) {\n  const transitions={idle:{FETCH:\"loading\",RESET:\"idle\"},loading:{RESOLVE:\"success\",REJECT:\"error\",RESET:\"idle\"},success:{FETCH:\"loading\",RESET:\"idle\"},error:{FETCH:\"loading\",RESET:\"idle\"}};\n  if(!Object.hasOwn(transitions,state)||!Object.hasOwn(transitions[state],event)) throw new Error(\"Unsupported transition\");\n  return transitions[state][event];\n}",
+      "hints": [
+        "Represent the allowed pairs directly in a transition table.",
+        "Validate both the state key and the event key as own properties.",
+        "RESET should be present for every known state, but not for unknown states."
+      ],
+      "tests": [
+        {
+          "name": "Success path",
+          "code": "let s=\"idle\";s=transitionRequest(s,\"FETCH\");assertEqual(s,\"loading\");s=transitionRequest(s,\"RESOLVE\");assertEqual(s,\"success\");"
+        },
+        {
+          "name": "Failure and retry",
+          "code": "assertEqual(transitionRequest(\"loading\",\"REJECT\"),\"error\");assertEqual(transitionRequest(\"error\",\"FETCH\"),\"loading\");"
+        },
+        {
+          "name": "Reset all states",
+          "code": "for(const state of [\"idle\",\"loading\",\"success\",\"error\"])assertEqual(transitionRequest(state,\"RESET\"),\"idle\");"
+        },
+        {
+          "name": "Illegal transitions",
+          "code": "for(const pair of [[\"idle\",\"RESOLVE\"],[\"loading\",\"FETCH\"],[\"missing\",\"RESET\"],[\"idle\",\"toString\"]]){let e;try{transitionRequest(...pair);}catch(x){e=x;}assert(e instanceof Error,\"Reject unsupported transition\");}"
+        }
+      ]
+    },
+    {
+      "id": "lab-21",
+      "stage": 3,
+      "title": "Freeze a cyclic object graph",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "concept": "Object descriptors \u00b7 WeakSet \u00b7 graph traversal",
+      "prompt": "Implement deepFreeze(value). Recursively freeze objects and arrays reachable through own data properties, including non-enumerable and symbol properties. Return the same root reference. Handle cycles without infinite recursion. Primitive values and functions are returned unchanged. Do not invoke getters; freeze their containing object while leaving the getter function untouched.",
+      "examples": [
+        {
+          "input": "Object.isFrozen(deepFreeze({settings:{mode:\"dark\"}}).settings)",
+          "output": "true"
+        }
+      ],
+      "starter": "function deepFreeze(value) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function deepFreeze(value) {\n  const seen=new WeakSet();\n  function visit(current) {\n    if(current===null||typeof current!==\"object\"||seen.has(current)) return current;\n    seen.add(current);\n    for(const key of Reflect.ownKeys(current)) {\n      const descriptor=Object.getOwnPropertyDescriptor(current,key);\n      if(Object.hasOwn(descriptor,\"value\")) visit(descriptor.value);\n    }\n    return Object.freeze(current);\n  }\n  return visit(value);\n}",
+      "hints": [
+        "Track visited objects in a WeakSet before descending.",
+        "Reflect.ownKeys includes symbols and non-enumerable property names.",
+        "Read property descriptors; descriptor.value is safe, while current[key] could execute a getter."
+      ],
+      "tests": [
+        {
+          "name": "Nested arrays and identity",
+          "code": "const root={a:[{b:2}]};assert(deepFreeze(root)===root,\"Return same root\");assert(Object.isFrozen(root)&&Object.isFrozen(root.a)&&Object.isFrozen(root.a[0]),\"Freeze all descendants\");"
+        },
+        {
+          "name": "Cycles",
+          "code": "const root={};root.self=root;deepFreeze(root);assert(Object.isFrozen(root),\"Handle cyclic graph\");"
+        },
+        {
+          "name": "Do not invoke getters",
+          "code": "let count=0;const root={get value(){count++;return {};}};deepFreeze(root);assertEqual(count,0);"
+        },
+        {
+          "name": "Symbol and hidden data",
+          "code": "const symbol=Symbol();const root={[symbol]:{}};Object.defineProperty(root,\"hidden\",{value:{}});deepFreeze(root);assert(Object.isFrozen(root[symbol])&&Object.isFrozen(root.hidden),\"Visit every own data property\");"
+        },
+        {
+          "name": "Primitives unchanged",
+          "code": "assertEqual(deepFreeze(3),3);assertEqual(deepFreeze(null),null);"
+        }
+      ]
+    },
+    {
+      "id": "lab-22",
+      "stage": 3,
+      "title": "Make failure an explicit value",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "concept": "Result types \u00b7 function composition \u00b7 error handling",
+      "prompt": "Implement attempt(fn) and mapResult(result, transform). attempt calls a zero-argument synchronous function and returns {ok:true,value} or {ok:false,error}, preserving a thrown value exactly. mapResult leaves failed results unchanged by reference; successful values pass through transform using attempt, so a thrown transform becomes a failed result. No promises are involved.",
+      "examples": [
+        {
+          "input": "mapResult(attempt(() => JSON.parse(\"{bad}\")), value => value.name)",
+          "output": "A failed Result containing the parse error"
+        }
+      ],
+      "starter": "function attempt(fn) {\n  throw new Error(\"Not implemented yet\");\n}\n\nfunction mapResult(result, transform) {\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function attempt(fn) {\n  try { return {ok:true,value:fn()}; } catch(error) { return {ok:false,error}; }\n}\nfunction mapResult(result,transform) {\n  return result.ok ? attempt(()=>transform(result.value)) : result;\n}",
+      "hints": [
+        "A try/catch can turn either branch into a tagged object.",
+        "The ok field distinguishes success even when the value is undefined.",
+        "For a failed result, return the original object without calling transform."
+      ],
+      "tests": [
+        {
+          "name": "Success and undefined",
+          "code": "assertEqual(attempt(()=>4),{ok:true,value:4});const result=attempt(()=>undefined);assert(result.ok&&Object.hasOwn(result,\"value\"),\"Preserve undefined success\");"
+        },
+        {
+          "name": "Thrown value identity",
+          "code": "const error={code:7};assert(attempt(()=>{throw error;}).error===error,\"Keep thrown identity\");"
+        },
+        {
+          "name": "Map success and transformation failure",
+          "code": "assertEqual(mapResult(attempt(()=>3),x=>x*2),{ok:true,value:6});assertEqual(mapResult(attempt(()=>3),()=>{throw \"bad\";}),{ok:false,error:\"bad\"});"
+        },
+        {
+          "name": "Short-circuit failure",
+          "code": "const failed={ok:false,error:\"first\"};let called=false;assert(mapResult(failed,()=>{called=true;})===failed,\"Return same failure\");assert(!called,\"Do not invoke transform\");"
+        }
+      ]
+    },
+    {
+      "id": "lab-23",
+      "stage": 3,
+      "title": "Merge settings with explicit rules",
+      "difficulty": "Intermediate",
+      "minutes": 35,
+      "concept": "Recursion \u00b7 structural sharing \u00b7 configuration contracts",
+      "prompt": "Implement mergeSettings(base, override). Inputs are JSON-compatible plain objects with no cycles or dangerous property names. Recursively merge when both values at a key are non-null plain objects. Otherwise the override value replaces the base value, including arrays and null. Deep-copy all objects and arrays in the result so no mutable references are shared with either input. Preserve keys that only occur in base.",
+      "examples": [
+        {
+          "input": "mergeSettings({ui:{size:12,color:\"blue\"}}, {ui:{size:14}})",
+          "output": "{ui:{size:14,color:\"blue\"}}"
+        }
+      ],
+      "starter": "function mergeSettings(base, override) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function mergeSettings(base,override) {\n  const plain=value=>value!==null&&typeof value===\"object\"&&!Array.isArray(value);\n  const clone=value=>Array.isArray(value)?value.map(clone):plain(value)?Object.fromEntries(Object.entries(value).map(([k,v])=>[k,clone(v)])):value;\n  const result=clone(base);\n  for(const [key,value] of Object.entries(override)) {\n    result[key]=plain(base[key])&&plain(value)?mergeSettings(base[key],value):clone(value);\n  }\n  return result;\n}",
+      "hints": [
+        "Write a clone helper before writing the merge step.",
+        "Recurse only when both values are plain objects; arrays are replacement values.",
+        "Cloning untouched base branches is necessary to satisfy the no-shared-references contract."
+      ],
+      "tests": [
+        {
+          "name": "Merge nested settings",
+          "code": "assertEqual(mergeSettings({a:{x:1,y:2},z:0},{a:{y:3}}),{a:{x:1,y:3},z:0});"
+        },
+        {
+          "name": "Arrays and null replace",
+          "code": "assertEqual(mergeSettings({a:[1,2],b:{x:1}},{a:[3],b:null}),{a:[3],b:null});"
+        },
+        {
+          "name": "No shared references",
+          "code": "const base={a:{x:1},b:[{v:2}]},override={c:{z:3}};const result=mergeSettings(base,override);result.a.x=9;result.b[0].v=9;result.c.z=9;assertEqual(base,{a:{x:1},b:[{v:2}]});assertEqual(override,{c:{z:3}});"
+        },
+        {
+          "name": "Object replaces primitive",
+          "code": "assertEqual(mergeSettings({a:1},{a:{b:2},c:true}),{a:{b:2},c:true});"
+        }
+      ]
+    },
+    {
+      "id": "lab-24",
+      "stage": 3,
+      "title": "Keep an undoable history of snapshots",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "concept": "Encapsulation \u00b7 undo/redo \u00b7 branching history",
+      "prompt": "Implement createHistory(initial). JSON-compatible snapshots must be copied on storage and read. Return current(), commit(value), undo(), redo(). commit replaces the redo branch and returns the stored value as a copy. undo and redo move one step when possible, otherwise remain at their boundary; both return a copy of the current snapshot. History starts with initial. Use structuredClone for copying.",
+      "examples": [
+        {
+          "input": "const h = createHistory(\"draft\"); h.commit(\"ready\"); h.undo()",
+          "output": "\"draft\""
+        }
+      ],
+      "starter": "function createHistory(initial) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function createHistory(initial) {\n  const entries=[structuredClone(initial)];\n  let index=0;\n  const current=()=>structuredClone(entries[index]);\n  return {\n    current,\n    commit(value) { entries.splice(index+1);entries.push(structuredClone(value));index++;return current(); },\n    undo() { if(index>0) index--;return current(); },\n    redo() { if(index<entries.length-1) index++;return current(); }\n  };\n}",
+      "hints": [
+        "Keep an array of snapshots and an index into that array.",
+        "When committing after undo, discard entries after the current index.",
+        "Clone both incoming values and returned values to protect historical snapshots."
+      ],
+      "tests": [
+        {
+          "name": "Undo and redo",
+          "code": "const h=createHistory(0);h.commit(1);h.commit(2);assertEqual([h.undo(),h.undo(),h.undo(),h.redo()],[1,0,0,1]);"
+        },
+        {
+          "name": "New branch drops redo",
+          "code": "const h=createHistory(\"a\");h.commit(\"b\");h.commit(\"c\");h.undo();h.commit(\"d\");assertEqual(h.redo(),\"d\");"
+        },
+        {
+          "name": "Input copying",
+          "code": "const input={n:1};const h=createHistory(input);input.n=9;assertEqual(h.current(),{n:1});"
+        },
+        {
+          "name": "Output copying",
+          "code": "const h=createHistory({n:1});const value=h.current();value.n=5;const next={n:2};h.commit(next);next.n=8;assertEqual(h.current(),{n:2});assertEqual(h.undo(),{n:1});"
+        }
+      ]
+    },
+    {
+      "id": "lab-25",
+      "stage": 4,
+      "title": "Create a reusable lazy number sequence",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "concept": "Generators \u00b7 iterable protocol \u00b7 laziness",
+      "prompt": "Implement rangeIterable(start, end, step = 1). Return a reusable iterable producing start inclusive to end exclusive. Accept safe integers only and reject zero step with RangeError, at factory-call time. Positive and negative steps are allowed; wrong-direction ranges are empty. Each iteration starts afresh. Do not create an array of the full range. Test inputs do not overflow safe integers.",
+      "examples": [
+        {
+          "input": "[...rangeIterable(2, 8, 2)]",
+          "output": "[2, 4, 6]"
+        }
+      ],
+      "starter": "function rangeIterable(start, end, step = 1) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function rangeIterable(start,end,step=1) {\n  if(![start,end,step].every(Number.isSafeInteger)||step===0) throw new RangeError(\"Invalid range\");\n  return {\n    *[Symbol.iterator]() {\n      for(let value=start;step>0?value<end:value>end;value+=step) yield value;\n    }\n  };\n}",
+      "hints": [
+        "The factory should validate immediately, before returning an iterable.",
+        "Return an object whose Symbol.iterator method is a generator.",
+        "A fresh generator per iteration makes the iterable reusable."
+      ],
+      "tests": [
+        {
+          "name": "Ascending and descending",
+          "code": "assertEqual([...rangeIterable(1,6,2)],[1,3,5]);assertEqual([...rangeIterable(5,0,-2)],[5,3,1]);"
+        },
+        {
+          "name": "Reusable iteration",
+          "code": "const range=rangeIterable(0,3);assertEqual([...range],[0,1,2]);assertEqual([...range],[0,1,2]);"
+        },
+        {
+          "name": "Laziness",
+          "code": "const iterator=rangeIterable(0,1000000000)[Symbol.iterator]();assertEqual(iterator.next().value,0);assertEqual(iterator.next().value,1);iterator.return?.();"
+        },
+        {
+          "name": "Empty and validation",
+          "code": "assertEqual([...rangeIterable(3,1)],[]);let e;try{rangeIterable(1,5,0);}catch(x){e=x;}assert(e instanceof RangeError,\"Validate at factory call\");"
+        }
+      ]
+    },
+    {
+      "id": "lab-26",
+      "stage": 4,
+      "title": "Chunk any iterable lazily",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "concept": "Generators \u00b7 resource cleanup \u00b7 streaming",
+      "prompt": "Implement chunked(iterable, size), returning an iterable of arrays of at most size elements. The final partial chunk must be emitted. Validate size is a positive integer at factory-call time, otherwise throw RangeError. Consume the source only as output is requested. If the consumer stops early, close the source iterator through normal iterator cleanup. Strings, Sets, and generators must work.",
+      "examples": [
+        {
+          "input": "[...chunked([\"a\",\"b\",\"c\"], 2)]",
+          "output": "[[\"a\",\"b\"],[\"c\"]]"
+        }
+      ],
+      "starter": "function chunked(iterable, size) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function chunked(iterable,size) {\n  if(!Number.isInteger(size)||size<=0) throw new RangeError(\"Invalid chunk size\");\n  return (function*(){\n    let chunk=[];\n    for(const value of iterable) {\n      chunk.push(value);\n      if(chunk.length===size) { yield chunk;chunk=[]; }\n    }\n    if(chunk.length) yield chunk;\n  })();\n}",
+      "hints": [
+        "A generator can collect one chunk, yield it, then start a new array.",
+        "Use for...of inside the generator so early termination closes the underlying iterator.",
+        "Place validation outside the generator body to make it happen immediately."
+      ],
+      "tests": [
+        {
+          "name": "Complete and partial chunks",
+          "code": "assertEqual([...chunked([1,2,3,4,5],2)],[[1,2],[3,4],[5]]);"
+        },
+        {
+          "name": "Generic iterables",
+          "code": "assertEqual([...chunked(new Set([1,2,3]),2)],[[1,2],[3]]);assertEqual([...chunked(\"abc\",2)],[[\"a\",\"b\"],[\"c\"]]);"
+        },
+        {
+          "name": "Laziness and closing",
+          "code": "let read=0,closed=false;function* source(){try{for(let n=0;n<10;n++){read++;yield n;}}finally{closed=true;}}const iterator=chunked(source(),2)[Symbol.iterator]();assertEqual(read,0);assertEqual(iterator.next().value,[0,1]);assertEqual(read,2);iterator.return();assert(closed,\"Close source on early return\");"
+        },
+        {
+          "name": "Empty and invalid size",
+          "code": "assertEqual([...chunked([],3)],[]);let e;try{chunked([],0);}catch(x){e=x;}assert(e instanceof RangeError,\"Validate size eagerly\");"
+        }
+      ]
+    },
+    {
+      "id": "lab-27",
+      "stage": 4,
+      "title": "Limit asynchronous work without losing order",
+      "difficulty": "Intermediate",
+      "minutes": 45,
+      "concept": "Promise coordination \u00b7 worker pools \u00b7 concurrency",
+      "prompt": "Implement async mapLimit(items, limit, mapper). Run at most limit mapper calls simultaneously, passing (item, index). Return results in input order even when work finishes out of order. limit must be a positive integer or reject with RangeError. Propagate a mapper rejection. Empty input returns []. Do not mutate items. Once a rejection has been observed, workers must not schedule new items; already-running work may finish.",
+      "examples": [
+        {
+          "input": "await mapLimit([2,3,4], 2, async n => n * n)",
+          "output": "[4, 9, 16]"
+        }
+      ],
+      "starter": "async function mapLimit(items, limit, mapper) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "async function mapLimit(items,limit,mapper) {\n  if(!Number.isInteger(limit)||limit<=0) throw new RangeError(\"Invalid concurrency\");\n  const results=new Array(items.length);\n  let next=0,failed=false;\n  async function worker() {\n    while(!failed&&next<items.length) {\n      const index=next++;\n      try { results[index]=await mapper(items[index],index); }\n      catch(error) { failed=true;throw error; }\n    }\n  }\n  await Promise.all(Array.from({length:Math.min(limit,items.length)},()=>worker()));\n  return results;\n}",
+      "hints": [
+        "Use a shared next index and a fixed number of worker functions.",
+        "Each worker claims an index before awaiting; JavaScript executes that claim synchronously.",
+        "Store output by the claimed index, and set a shared failure flag before rethrowing."
+      ],
+      "tests": [
+        {
+          "name": "Order and indices",
+          "code": "assertEqual(await mapLimit([3,1,2],2,async(n,i)=>{for(let k=0;k<n;k++)await Promise.resolve();return n+i;}),[3,2,4]);"
+        },
+        {
+          "name": "Concurrency bounded",
+          "code": "let active=0,max=0;const result=await mapLimit([1,2,3,4,5],2,async n=>{active++;max=Math.max(max,active);await Promise.resolve();await Promise.resolve();active--;return n*2;});assertEqual(result,[2,4,6,8,10]);assertEqual(max,2);"
+        },
+        {
+          "name": "Empty and invalid limit",
+          "code": "assertEqual(await mapLimit([],2,()=>0),[]);let e;try{await mapLimit([1],0,x=>x);}catch(x){e=x;}assert(e instanceof RangeError,\"Reject invalid limit\");"
+        },
+        {
+          "name": "Propagate error and stop scheduling",
+          "code": "const expected=new Error(\"fail\");const called=[];let e;try{await mapLimit([1,2,3],1,async n=>{called.push(n);throw expected;});}catch(x){e=x;}assert(e===expected,\"Preserve original rejection\");assertEqual(called,[1]);"
+        },
+        {
+          "name": "Input unchanged",
+          "code": "const source=Object.freeze([1,2]);assertEqual(await mapLimit(source,9,n=>n+1),[2,3]);"
+        }
+      ]
+    },
+    {
+      "id": "lab-28",
+      "stage": 4,
+      "title": "Collect outcomes without short-circuiting",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "concept": "Promise settlement \u00b7 ordered results",
+      "prompt": "Implement async settleAll(values) without using Promise.allSettled. Values may be promises, thenables, or ordinary values. Return an ordered array of {status:\"fulfilled\", value} or {status:\"rejected\", reason}. One rejection must not discard the other outcomes. Preserve rejection reasons exactly, and resolve an empty input to [].",
+      "examples": [
+        {
+          "input": "await settleAll([42, Promise.reject(\"offline\")])",
+          "output": "[{status:\"fulfilled\",value:42},{status:\"rejected\",reason:\"offline\"}]"
+        }
+      ],
+      "starter": "async function settleAll(values) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "async function settleAll(values) {\n  return Promise.all(values.map(value=>Promise.resolve(value).then(\n    value=>({status:\"fulfilled\",value}),\n    reason=>({status:\"rejected\",reason})\n  )));\n}",
+      "hints": [
+        "Normalize each value with Promise.resolve.",
+        "Attach both success and rejection handlers, each returning an outcome object.",
+        "Promise.all can now collect those normalized outcomes because the wrappers fulfill."
+      ],
+      "tests": [
+        {
+          "name": "Mixed outcomes",
+          "code": "const rejected=Promise.reject(\"no\"); rejected.catch(()=>{}); assertEqual(await settleAll([Promise.resolve(2),rejected,3]),[{status:\"fulfilled\",value:2},{status:\"rejected\",reason:\"no\"},{status:\"fulfilled\",value:3}]);"
+        },
+        {
+          "name": "Thenable support",
+          "code": "assertEqual(await settleAll([{then(resolve){resolve(7);}}]),[{status:\"fulfilled\",value:7}]);"
+        },
+        {
+          "name": "Identity of reasons",
+          "code": "const reason={code:9}; const rejected=Promise.reject(reason); rejected.catch(()=>{}); const results=await settleAll([rejected]); assert(results[0].reason===reason,\"Preserve reason identity\");"
+        },
+        {
+          "name": "Empty and undefined",
+          "code": "assertEqual(await settleAll([]),[]);const [outcome]=await settleAll([undefined]);assert(outcome.status===\"fulfilled\"&&Object.hasOwn(outcome,\"value\"),\"Preserve undefined outcome\");"
+        }
+      ]
+    },
+    {
+      "id": "lab-29",
+      "stage": 4,
+      "title": "Retry with an injectable waiting strategy",
+      "difficulty": "Intermediate",
+      "minutes": 40,
+      "concept": "Async control flow \u00b7 dependency injection \u00b7 backoff",
+      "prompt": "Implement async retry(operation, {attempts = 3, delay = async () => {}, shouldRetry = () => true} = {}). Call operation(attemptNumber), starting at 1. Return its first successful result. On failure, stop if attempts are exhausted or shouldRetry(error, attemptNumber) is false; rethrow the last error unchanged. Otherwise await delay(attemptNumber) before trying again. attempts must be a positive integer or reject with RangeError. A failure in delay or shouldRetry propagates immediately.",
+      "examples": [
+        {
+          "input": "await retry(async attempt => { if (attempt < 2) throw \"busy\"; return 42; })",
+          "output": "42"
+        }
+      ],
+      "starter": "async function retry(operation, options = {}) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "async function retry(operation,{attempts=3,delay=async()=>{},shouldRetry=()=>true}={}) {\n  if(!Number.isInteger(attempts)||attempts<=0) throw new RangeError(\"Invalid attempt count\");\n  for(let attempt=1;attempt<=attempts;attempt++) {\n    try { return await operation(attempt); }\n    catch(error) {\n      if(attempt===attempts||!shouldRetry(error,attempt)) throw error;\n      await delay(attempt);\n    }\n  }\n}",
+      "hints": [
+        "A for loop is often clearer than a recursive promise chain.",
+        "Only wait after a retryable failure with attempts remaining.",
+        "Keep the delay outside a new retry-catching region so delay failures do not trigger another operation."
+      ],
+      "tests": [
+        {
+          "name": "Success after retries",
+          "code": "const calls=[],waits=[];const value=await retry(async n=>{calls.push(n);if(n<3)throw new Error(\"transient\");return \"ok\";},{delay:async n=>waits.push(n)});assertEqual(value,\"ok\");assertEqual(calls,[1,2,3]);assertEqual(waits,[1,2]);"
+        },
+        {
+          "name": "Immediate success",
+          "code": "let waits=0;assertEqual(await retry(()=>0,{delay:()=>waits++}),0);assertEqual(waits,0);"
+        },
+        {
+          "name": "Stop on non-retryable error",
+          "code": "const expected=new Error(\"permanent\");let calls=0,e;try{await retry(()=>{calls++;throw expected;},{shouldRetry:()=>false});}catch(x){e=x;}assert(e===expected,\"Preserve error\");assertEqual(calls,1);"
+        },
+        {
+          "name": "Exhaustion and invalid attempts",
+          "code": "let calls=0,e;try{await retry(()=>{calls++;throw \"last\";},{attempts:2});}catch(x){e=x;}assertEqual(e,\"last\");assertEqual(calls,2);let invalid;try{await retry(()=>1,{attempts:0});}catch(x){invalid=x;}assert(invalid instanceof RangeError,\"Reject zero attempts\");"
+        },
+        {
+          "name": "Delay failure propagates",
+          "code": "let calls=0,e;try{await retry(()=>{calls++;throw \"operation\";},{delay:()=>{throw \"delay\";}});}catch(x){e=x;}assertEqual(e,\"delay\");assertEqual(calls,1);"
+        }
+      ]
+    },
+    {
+      "id": "lab-30",
+      "stage": 4,
+      "title": "Implement a tiny LRU cache",
+      "difficulty": "Intermediate",
+      "minutes": 35,
+      "concept": "Map insertion order \u00b7 cache eviction",
+      "prompt": "Implement createLRU(capacity), where capacity is a positive integer or throw RangeError. Return get(key), set(key, value), has(key), and keys(). A successful get refreshes recency, even for an undefined value. set refreshes existing keys and evicts the least-recently-used key when over capacity. has does not refresh recency. keys returns a new array ordered oldest to newest. Missing get returns undefined; set returns the stored value.",
+      "examples": [
+        {
+          "input": "const c = createLRU(1); c.set(\"a\",1); c.set(\"b\",2); c.keys()",
+          "output": "[\"b\"]"
+        }
+      ],
+      "starter": "function createLRU(capacity) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function createLRU(capacity) {\n  if(!Number.isInteger(capacity)||capacity<=0) throw new RangeError(\"Invalid capacity\");\n  const cache=new Map();\n  function set(key,value) { cache.delete(key);cache.set(key,value);if(cache.size>capacity)cache.delete(cache.keys().next().value);return value; }\n  return {\n    get(key) { if(!cache.has(key))return undefined;const value=cache.get(key);set(key,value);return value; },\n    set,\n    has:key=>cache.has(key),\n    keys:()=>[...cache.keys()]\n  };\n}",
+      "hints": [
+        "Map preserves insertion order.",
+        "Deleting and reinserting a key moves it to the newest position.",
+        "Use has before get so stored undefined remains distinguishable from a missing entry."
+      ],
+      "tests": [
+        {
+          "name": "Evict oldest",
+          "code": "const c=createLRU(2);c.set(\"a\",1);c.set(\"b\",2);c.set(\"c\",3);assertEqual(c.keys(),[\"b\",\"c\"]);assert(!c.has(\"a\"),\"Oldest entry evicted\");"
+        },
+        {
+          "name": "Read refreshes recency",
+          "code": "const c=createLRU(2);c.set(\"a\",1);c.set(\"b\",2);assertEqual(c.get(\"a\"),1);c.set(\"c\",3);assertEqual(c.keys(),[\"a\",\"c\"]);"
+        },
+        {
+          "name": "has does not refresh",
+          "code": "const c=createLRU(2);c.set(\"a\",1);c.set(\"b\",2);c.has(\"a\");c.set(\"c\",3);assertEqual(c.keys(),[\"b\",\"c\"]);"
+        },
+        {
+          "name": "Undefined is a stored value",
+          "code": "const c=createLRU(2);c.set(\"a\",undefined);c.set(\"b\",2);c.get(\"a\");assertEqual(c.keys(),[\"b\",\"a\"]);c.set(\"a\",3);assertEqual(c.get(\"a\"),3);"
+        },
+        {
+          "name": "Capacity validation",
+          "code": "let e;try{createLRU(0);}catch(x){e=x;}assert(e instanceof RangeError,\"Reject invalid capacity\");"
+        }
+      ]
+    },
+    {
+      "id": "lab-31",
+      "stage": 4,
+      "title": "Find the next UTC weekday",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "concept": "Date \u00b7 UTC arithmetic \u00b7 immutable values",
+      "prompt": "Implement nextWeekdayUTC(isoDate, weekday). isoDate is a valid ISO timestamp and weekday is an integer 0 (Sunday) through 6 (Saturday), otherwise throw RangeError. Return the ISO timestamp of the next strictly later occurrence of that weekday, preserving the UTC time of day and milliseconds. If the date is already on that weekday, advance seven days. Reject invalid date strings. Use UTC operations so local daylight-saving time cannot change the result.",
+      "examples": [
+        {
+          "input": "nextWeekdayUTC(\"2024-01-05T08:00:00.000Z\", 1)",
+          "output": "\"2024-01-08T08:00:00.000Z\""
+        }
+      ],
+      "starter": "function nextWeekdayUTC(isoDate, weekday) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function nextWeekdayUTC(isoDate,weekday) {\n  const date=new Date(isoDate);\n  if(typeof isoDate!==\"string\"||Number.isNaN(date.getTime())||!Number.isInteger(weekday)||weekday<0||weekday>6) throw new RangeError(\"Invalid date or weekday\");\n  const days=(weekday-date.getUTCDay()+7)%7||7;\n  date.setUTCDate(date.getUTCDate()+days);\n  return date.toISOString();\n}",
+      "hints": [
+        "Find the forward distance with modular arithmetic.",
+        "A modular result of zero means seven days because the next occurrence must be later.",
+        "Use getUTCDay and setUTCDate, then serialize with toISOString."
+      ],
+      "tests": [
+        {
+          "name": "Next day",
+          "code": "assertEqual(nextWeekdayUTC(\"2024-01-01T12:30:00.000Z\",2),\"2024-01-02T12:30:00.000Z\");"
+        },
+        {
+          "name": "Same weekday means next week",
+          "code": "assertEqual(nextWeekdayUTC(\"2024-01-01T12:30:00.123Z\",1),\"2024-01-08T12:30:00.123Z\");"
+        },
+        {
+          "name": "Cross month and leap day",
+          "code": "assertEqual(nextWeekdayUTC(\"2024-02-28T09:00:00.000Z\",4),\"2024-02-29T09:00:00.000Z\");assertEqual(nextWeekdayUTC(\"2023-12-31T00:00:00.000Z\",1),\"2024-01-01T00:00:00.000Z\");"
+        },
+        {
+          "name": "Reject invalid arguments",
+          "code": "for(const args of [[\"bad\",1],[\"2024-01-01\",7],[\"2024-01-01\",1.5]]){let e;try{nextWeekdayUTC(...args);}catch(x){e=x;}assert(e instanceof RangeError,\"Validate date and weekday\");}"
+        }
+      ]
+    },
+    {
+      "id": "lab-32",
+      "stage": 4,
+      "title": "Serialize BigInt through a tagged boundary",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "concept": "JSON replacers \u00b7 revivers \u00b7 representation design",
+      "prompt": "Implement encodeBigInts(value) and decodeBigInts(text). Encode BigInt values as objects with exactly one key \"$bigint\" and a decimal string value. Decode only such single-key objects whose string matches /^-?(0|[1-9][0-9]*)$/. Other objects remain ordinary objects. Inputs are otherwise JSON-compatible, without cycles. The marker shape is reserved for BigInts: explain to yourself why this creates a collision boundary for ordinary user data.",
+      "examples": [
+        {
+          "input": "encodeBigInts({total: 123n})",
+          "output": "'{\"total\":{\"$bigint\":\"123\"}}'"
+        }
+      ],
+      "starter": "function encodeBigInts(value) {\n  throw new Error(\"Not implemented yet\");\n}\n\nfunction decodeBigInts(text) {\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function encodeBigInts(value) {\n  return JSON.stringify(value,(_,item)=>typeof item===\"bigint\"?{$bigint:item.toString()}:item);\n}\nfunction decodeBigInts(text) {\n  return JSON.parse(text,(_,item)=>item&&typeof item===\"object\"&&!Array.isArray(item)&&Object.keys(item).length===1&&typeof item.$bigint===\"string\"&&/^-?(0|[1-9][0-9]*)$/.test(item.$bigint)?BigInt(item.$bigint):item);\n}",
+      "hints": [
+        "JSON.stringify accepts a replacer that transforms values before serialization.",
+        "JSON.parse accepts a reviver that transforms parsed children before their parent.",
+        "Check the exact object shape and decimal grammar before calling BigInt."
+      ],
+      "tests": [
+        {
+          "name": "Nested round trip",
+          "code": "const result=decodeBigInts(encodeBigInts({id:9007199254740993n,items:[-2n,0n]}));assert(result.id===9007199254740993n,\"Preserve precision\");assert(result.items[0]===-2n&&result.items[1]===0n,\"Preserve nested values\");"
+        },
+        {
+          "name": "Exact encoding",
+          "code": "assertEqual(encodeBigInts({n:12n}),'{\"n\":{\"$bigint\":\"12\"}}');"
+        },
+        {
+          "name": "Extra keys remain ordinary",
+          "code": "assertEqual(decodeBigInts('{\"$bigint\":\"12\",\"label\":\"x\"}'),{$bigint:\"12\",label:\"x\"});"
+        },
+        {
+          "name": "Invalid marker strings remain ordinary",
+          "code": "for(const value of [\"01\",\"1.5\",\"+2\",\"x\",\"\"]){assertEqual(decodeBigInts(JSON.stringify({$bigint:value})),{$bigint:value});}"
+        },
+        {
+          "name": "Ordinary values",
+          "code": "assertEqual(decodeBigInts(encodeBigInts([null,true,3,\"hello\"])),[null,true,3,\"hello\"]);"
+        }
+      ]
+    },
+    {
+      "id": "lab-33",
+      "stage": 5,
+      "title": "Normalize a catalog URL query",
+      "difficulty": "Advanced",
+      "minutes": 30,
+      "concept": "URLSearchParams \u00b7 boundary normalization",
+      "prompt": "Implement parseCatalogQuery(search). Use URLSearchParams to return {q, page, tags}. q is the first q parameter trimmed, defaulting to \"\". page is the first page parameter if it contains only decimal digits and represents a positive safe integer, otherwise 1. tags collects every tag parameter, trimmed and lowercased, discarding empty strings and duplicates while preserving order. Unknown parameters are ignored. Plus signs and percent escapes follow URLSearchParams decoding.",
+      "examples": [
+        {
+          "input": "parseCatalogQuery(\"?q=closures&tag=JS&page=2\")",
+          "output": "{q:\"closures\",page:2,tags:[\"js\"]}"
+        }
+      ],
+      "starter": "function parseCatalogQuery(search) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function parseCatalogQuery(search) {\n  const params=new URLSearchParams(search);\n  const rawPage=params.get(\"page\")||\"\";\n  const candidate=/^[0-9]+$/.test(rawPage)?Number(rawPage):NaN;\n  return {q:(params.get(\"q\")||\"\").trim(),page:Number.isSafeInteger(candidate)&&candidate>0?candidate:1,tags:[...new Set(params.getAll(\"tag\").map(tag=>tag.trim().toLowerCase()).filter(Boolean))]};\n}",
+      "hints": [
+        "URLSearchParams handles decoding and repeated keys.",
+        "parseInt alone would incorrectly accept 2oops.",
+        "Normalize tags before deduplicating them."
+      ],
+      "tests": [
+        {
+          "name": "Decode and normalize",
+          "code": "assertEqual(parseCatalogQuery(\"?q=hello+world&page=3&tag=JS&tag=%20js%20&tag=Web\"),{q:\"hello world\",page:3,tags:[\"js\",\"web\"]});"
+        },
+        {
+          "name": "Defaults",
+          "code": "assertEqual(parseCatalogQuery(\"\"),{q:\"\",page:1,tags:[]});"
+        },
+        {
+          "name": "Invalid pages",
+          "code": "for(const page of [\"0\",\"-2\",\"2x\",\"1.5\",\"9007199254740993\"])assertEqual(parseCatalogQuery(\"page=\"+page).page,1);"
+        },
+        {
+          "name": "First scalar and all tags",
+          "code": "assertEqual(parseCatalogQuery(\"q=first&q=last&page=02&page=9&tag=&tag=%20&tag=A\"),{q:\"first\",page:2,tags:[\"a\"]});"
+        }
+      ]
+    },
+    {
+      "id": "lab-34",
+      "stage": 5,
+      "title": "Paginate with stable boundary behavior",
+      "difficulty": "Advanced",
+      "minutes": 25,
+      "concept": "Pure UI logic \u00b7 slicing \u00b7 metadata",
+      "prompt": "Implement paginate(items, requestedPage, pageSize). Both numeric arguments must be positive integers or throw RangeError. Return {items, page, pageSize, totalItems, totalPages, hasPrevious, hasNext}. Clamp requestedPage to the last available page. Empty collections use page 1, totalPages 0, and false navigation flags. Return a new items array without mutating the source.",
+      "examples": [
+        {
+          "input": "paginate([\"a\",\"b\",\"c\"], 2, 2).items",
+          "output": "[\"c\"]"
+        }
+      ],
+      "starter": "function paginate(items, requestedPage, pageSize) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function paginate(items,requestedPage,pageSize) {\n  if(!Number.isInteger(requestedPage)||requestedPage<1||!Number.isInteger(pageSize)||pageSize<1)throw new RangeError(\"Invalid pagination\");\n  const totalItems=items.length,totalPages=Math.ceil(totalItems/pageSize),page=Math.min(requestedPage,Math.max(1,totalPages));\n  return {items:items.slice((page-1)*pageSize,page*pageSize),page,pageSize,totalItems,totalPages,hasPrevious:page>1,hasNext:page<totalPages};\n}",
+      "hints": [
+        "Compute totalPages before clamping the requested page.",
+        "Use one as the minimum current page even when totalPages is zero.",
+        "Slice from (page - 1) \u00d7 pageSize through page \u00d7 pageSize."
+      ],
+      "tests": [
+        {
+          "name": "Middle page",
+          "code": "assertEqual(paginate([1,2,3,4,5],2,2),{items:[3,4],page:2,pageSize:2,totalItems:5,totalPages:3,hasPrevious:true,hasNext:true});"
+        },
+        {
+          "name": "Clamp beyond end",
+          "code": "const r=paginate([1,2,3],99,2);assertEqual(r.items,[3]);assertEqual(r.page,2);assert(!r.hasNext,\"No next page\");"
+        },
+        {
+          "name": "Empty collection",
+          "code": "assertEqual(paginate([],8,10),{items:[],page:1,pageSize:10,totalItems:0,totalPages:0,hasPrevious:false,hasNext:false});"
+        },
+        {
+          "name": "Immutability and validation",
+          "code": "const input=Object.freeze([1,2]);assert(paginate(input,1,10).items!==input,\"Return new array\");let e;try{paginate([],0,2);}catch(x){e=x;}assert(e instanceof RangeError,\"Validate page\");"
+        }
+      ]
+    },
+    {
+      "id": "lab-35",
+      "stage": 5,
+      "title": "Validate a signup form deterministically",
+      "difficulty": "Advanced",
+      "minutes": 30,
+      "concept": "Validation \u00b7 error ordering \u00b7 normalization",
+      "prompt": "Implement validateSignup(form), returning {valid, values, errors}. values is {name, email}: trim name and trim/lowercase email, treating non-strings as \"\". errors is ordered: {field:\"name\",code:\"required\"} for empty name, or code \"too_long\" for more than 60 Unicode code points; {field:\"email\",code:\"invalid\"} unless email matches /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/; {field:\"terms\",code:\"required\"} unless form.terms === true. valid means no errors. Leave form unchanged. This is a UI exercise, not comprehensive email validation.",
+      "examples": [
+        {
+          "input": "validateSignup({name:\"Ada\",email:\"ada@example.com\",terms:true}).valid",
+          "output": "true"
+        }
+      ],
+      "starter": "function validateSignup(form) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function validateSignup(form) {\n  const values={name:typeof form.name===\"string\"?form.name.trim():\"\",email:typeof form.email===\"string\"?form.email.trim().toLowerCase():\"\"},errors=[];\n  if(!values.name)errors.push({field:\"name\",code:\"required\"});else if([...values.name].length>60)errors.push({field:\"name\",code:\"too_long\"});\n  if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(values.email))errors.push({field:\"email\",code:\"invalid\"});\n  if(form.terms!==true)errors.push({field:\"terms\",code:\"required\"});\n  return {valid:errors.length===0,values,errors};\n}",
+      "hints": [
+        "Normalize once, then validate normalized values.",
+        "Build errors in the requested field order.",
+        "Use a strict boolean check for terms."
+      ],
+      "tests": [
+        {
+          "name": "Normalized values",
+          "code": "assertEqual(validateSignup({name:\" Ada \",email:\" ADA@Example.COM \",terms:true}),{valid:true,values:{name:\"Ada\",email:\"ada@example.com\"},errors:[]});"
+        },
+        {
+          "name": "Ordered errors",
+          "code": "assertEqual(validateSignup({}).errors,[{field:\"name\",code:\"required\"},{field:\"email\",code:\"invalid\"},{field:\"terms\",code:\"required\"}]);"
+        },
+        {
+          "name": "Unicode length",
+          "code": "assert(validateSignup({name:\"\ud83d\ude00\".repeat(60),email:\"a@b.co\",terms:true}).valid,\"Count code points\");assertEqual(validateSignup({name:\"a\".repeat(61),email:\"a@b.co\",terms:true}).errors,[{field:\"name\",code:\"too_long\"}]);"
+        },
+        {
+          "name": "Strict terms and immutability",
+          "code": "const form={name:\" A \",email:\"a@b.co\",terms:\"true\"};const before=JSON.stringify(form);assertEqual(validateSignup(form).errors,[{field:\"terms\",code:\"required\"}]);assertEqual(JSON.stringify(form),before);"
+        }
+      ]
+    },
+    {
+      "id": "lab-36",
+      "stage": 5,
+      "title": "Rank a small local search index",
+      "difficulty": "Advanced",
+      "minutes": 40,
+      "concept": "Tokenization \u00b7 scoring \u00b7 deterministic ordering",
+      "prompt": "Implement searchDocuments(documents, query). Documents have unique string id, title, and body. Tokenize text into lowercase ASCII letter sequences and deduplicate query tokens. Results must contain every query token in title or body. Score each title occurrence as 3 and body occurrence as 1. Return {id, score} sorted by score descending then id lexically ascending. Tokenless queries return []. Do not modify documents.",
+      "examples": [
+        {
+          "input": "searchDocuments([{id:\"guide\",title:\"Closures\",body:\"closures in JS\"}], \"closures\")",
+          "output": "[{id:\"guide\",score:4}]"
+        }
+      ],
+      "starter": "function searchDocuments(documents, query) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function searchDocuments(documents,query) {\n  const tokens=text=>text.toLowerCase().match(/[a-z]+/g)||[],terms=[...new Set(tokens(query))],results=[];\n  if(!terms.length)return [];\n  for(const document of documents){\n    const counts=new Map();\n    for(const word of tokens(document.title))counts.set(word,(counts.get(word)||0)+3);\n    for(const word of tokens(document.body))counts.set(word,(counts.get(word)||0)+1);\n    if(terms.every(term=>counts.has(term)))results.push({id:document.id,score:terms.reduce((sum,term)=>sum+counts.get(term),0)});\n  }\n  return results.sort((a,b)=>b.score-a.score||(a.id<b.id?-1:a.id>b.id?1:0));\n}",
+      "hints": [
+        "Use the same tokenizer for documents and queries.",
+        "Build weighted token counts for each document.",
+        "Deduplicate query tokens so repeated words do not inflate scores."
+      ],
+      "tests": [
+        {
+          "name": "Title weighting",
+          "code": "assertEqual(searchDocuments([{id:\"a\",title:\"JavaScript\",body:\"guide\"},{id:\"b\",title:\"Guide\",body:\"javascript javascript\"}],\"javascript\"),[{id:\"a\",score:3},{id:\"b\",score:2}]);"
+        },
+        {
+          "name": "Require all terms",
+          "code": "assertEqual(searchDocuments([{id:\"a\",title:\"Async\",body:\"promises\"},{id:\"b\",title:\"Async\",body:\"callbacks\"}],\"async promises\"),[{id:\"a\",score:4}]);"
+        },
+        {
+          "name": "Query deduplication and ties",
+          "code": "assertEqual(searchDocuments([{id:\"b\",title:\"JS\",body:\"\"},{id:\"a\",title:\"JS\",body:\"\"}],\"js JS\"),[{id:\"a\",score:3},{id:\"b\",score:3}]);"
+        },
+        {
+          "name": "Whole tokens and empty query",
+          "code": "const docs=[{id:\"a\",title:\"JavaScript\",body:\"\"}];assertEqual(searchDocuments(docs,\"java\"),[]);assertEqual(searchDocuments(docs,\"123 !\"),[]);"
+        },
+        {
+          "name": "No mutation",
+          "code": "const docs=[{id:\"a\",title:\"one\",body:\"one\"}],before=JSON.stringify(docs);searchDocuments(docs,\"one\");assertEqual(JSON.stringify(docs),before);"
+        }
+      ]
+    },
+    {
+      "id": "lab-37",
+      "stage": 5,
+      "title": "Reduce a cart with structural sharing",
+      "difficulty": "Advanced",
+      "minutes": 35,
+      "concept": "Reducers \u00b7 immutable state \u00b7 reference contracts",
+      "prompt": "Implement cartReducer(state, action). state is an array of {id, quantity}. ADD with id and positive integer quantity appends or increments. SET with existing id and non-negative integer quantity replaces quantity; zero removes. REMOVE deletes an existing id. CLEAR empties the cart. Unknown actions and missing IDs for SET/REMOVE return original state. Invalid ADD/SET quantities throw RangeError. Changes return a new array and preserve unchanged item references. Same-value SET and CLEAR of empty state return original state. Never mutate state.",
+      "examples": [
+        {
+          "input": "cartReducer([], {type:\"ADD\",id:\"book\",quantity:1})",
+          "output": "[{id:\"book\",quantity:1}]"
+        }
+      ],
+      "starter": "function cartReducer(state, action) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function cartReducer(state,action) {\n  const index=state.findIndex(item=>item.id===action.id);\n  if((action.type===\"ADD\"||action.type===\"SET\")&&(!Number.isInteger(action.quantity)||action.quantity<(action.type===\"ADD\"?1:0)))throw new RangeError(\"Invalid quantity\");\n  if(action.type===\"ADD\")return index<0?[...state,{id:action.id,quantity:action.quantity}]:state.map((item,i)=>i===index?{...item,quantity:item.quantity+action.quantity}:item);\n  if(action.type===\"SET\"){\n    if(index<0||state[index].quantity===action.quantity)return state;\n    return action.quantity===0?state.filter((_,i)=>i!==index):state.map((item,i)=>i===index?{...item,quantity:action.quantity}:item);\n  }\n  if(action.type===\"REMOVE\")return index<0?state:state.filter((_,i)=>i!==index);\n  if(action.type===\"CLEAR\")return state.length?[]:state;\n  return state;\n}",
+      "hints": [
+        "Identify no-ops before allocating replacements.",
+        "Map only changed items to new objects.",
+        "Validate quantity before applying ADD or SET."
+      ],
+      "tests": [
+        {
+          "name": "Add new and existing",
+          "code": "const state=cartReducer([],{type:\"ADD\",id:\"a\",quantity:2});assertEqual(cartReducer(state,{type:\"ADD\",id:\"a\",quantity:3}),[{id:\"a\",quantity:5}]);"
+        },
+        {
+          "name": "Zero removes",
+          "code": "assertEqual(cartReducer([{id:\"a\",quantity:2}],{type:\"SET\",id:\"a\",quantity:0}),[]);"
+        },
+        {
+          "name": "Structural sharing",
+          "code": "const a={id:\"a\",quantity:1},b={id:\"b\",quantity:2},state=[a,b];const next=cartReducer(state,{type:\"SET\",id:\"a\",quantity:3});assert(next!==state&&next[0]!==a&&next[1]===b,\"Copy only changed item\");assertEqual(a.quantity,1);"
+        },
+        {
+          "name": "No-op identity",
+          "code": "const state=[{id:\"a\",quantity:2}];assert(cartReducer(state,{type:\"SET\",id:\"a\",quantity:2})===state,\"Same quantity\");assert(cartReducer(state,{type:\"REMOVE\",id:\"x\"})===state,\"Missing item\");assert(cartReducer(state,{type:\"OTHER\"})===state,\"Unknown action\");"
+        },
+        {
+          "name": "Invalid quantity",
+          "code": "let e;try{cartReducer([],{type:\"ADD\",id:\"a\",quantity:0});}catch(x){e=x;}assert(e instanceof RangeError,\"Validate quantity\");"
+        }
+      ]
+    },
+    {
+      "id": "lab-38",
+      "stage": 5,
+      "title": "Calculate a virtual list window",
+      "difficulty": "Advanced",
+      "minutes": 35,
+      "concept": "Geometry \u00b7 index bounds \u00b7 rendering performance",
+      "prompt": "Implement virtualWindow({count, rowHeight, viewportHeight, scrollTop, overscan = 0}). count and overscan are non-negative integers; rowHeight and viewportHeight are finite positive numbers; scrollTop is finite. Otherwise throw RangeError. Clamp scrollTop to [0, max(0, count * rowHeight - viewportHeight)]. Return {start, end, offsetTop, totalHeight}, covering visible rows plus overscan, with start inclusive and end exclusive. Empty lists return zeros. Use no DOM.",
+      "examples": [
+        {
+          "input": "virtualWindow({count:1000,rowHeight:32,viewportHeight:320,scrollTop:640})",
+          "output": "{start:20,end:30,offsetTop:640,totalHeight:32000}"
+        }
+      ],
+      "starter": "function virtualWindow({count, rowHeight, viewportHeight, scrollTop, overscan = 0}) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function virtualWindow({count,rowHeight,viewportHeight,scrollTop,overscan=0}) {\n  if(!Number.isInteger(count)||count<0||!Number.isInteger(overscan)||overscan<0||![rowHeight,viewportHeight].every(n=>Number.isFinite(n)&&n>0)||!Number.isFinite(scrollTop))throw new RangeError(\"Invalid geometry\");\n  const totalHeight=count*rowHeight;\n  if(!count)return {start:0,end:0,offsetTop:0,totalHeight:0};\n  const top=Math.max(0,Math.min(scrollTop,Math.max(0,totalHeight-viewportHeight))),start=Math.max(0,Math.floor(top/rowHeight)-overscan),end=Math.min(count,Math.ceil((top+viewportHeight)/rowHeight)+overscan);\n  return {start,end,offsetTop:start*rowHeight,totalHeight};\n}",
+      "hints": [
+        "Clamp scrolling before calculating indices.",
+        "Floor the first visible row and ceil the exclusive end.",
+        "Expand by overscan and clamp to available rows."
+      ],
+      "tests": [
+        {
+          "name": "Middle and overscan",
+          "code": "assertEqual(virtualWindow({count:100,rowHeight:20,viewportHeight:60,scrollTop:100,overscan:2}),{start:3,end:10,offsetTop:60,totalHeight:2000});"
+        },
+        {
+          "name": "Partial rows",
+          "code": "assertEqual(virtualWindow({count:10,rowHeight:20,viewportHeight:30,scrollTop:5}),{start:0,end:2,offsetTop:0,totalHeight:200});"
+        },
+        {
+          "name": "Scroll bounds",
+          "code": "assertEqual(virtualWindow({count:5,rowHeight:20,viewportHeight:40,scrollTop:999}),{start:3,end:5,offsetTop:60,totalHeight:100});assertEqual(virtualWindow({count:5,rowHeight:20,viewportHeight:40,scrollTop:-20}).start,0);"
+        },
+        {
+          "name": "Empty and large viewport",
+          "code": "assertEqual(virtualWindow({count:0,rowHeight:20,viewportHeight:40,scrollTop:0}),{start:0,end:0,offsetTop:0,totalHeight:0});assertEqual(virtualWindow({count:2,rowHeight:20,viewportHeight:100,scrollTop:0}).end,2);"
+        },
+        {
+          "name": "Invalid geometry",
+          "code": "let e;try{virtualWindow({count:5,rowHeight:0,viewportHeight:40,scrollTop:0});}catch(x){e=x;}assert(e instanceof RangeError,\"Validate geometry\");"
+        }
+      ]
+    },
+    {
+      "id": "lab-39",
+      "stage": 5,
+      "title": "Deduplicate requests only while pending",
+      "difficulty": "Advanced",
+      "minutes": 40,
+      "concept": "Promises \u00b7 identity \u00b7 cache lifecycle",
+      "prompt": "Implement createInFlightCache(loader), returning load(key). Concurrent calls with the same key return the exact same Promise and invoke loader once. Remove the entry after settlement so a later call invokes loader again. Convert synchronous throws to rejected promises. Preserve results and rejection identity. Map key equality applies. Do not permanently cache successes or failures.",
+      "examples": [
+        {
+          "input": "const load=createInFlightCache(async key=>key); load(\"a\")===load(\"a\")",
+          "output": "true while pending"
+        }
+      ],
+      "starter": "function createInFlightCache(loader) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function createInFlightCache(loader) {\n  const pending=new Map();\n  return function load(key){\n    if(pending.has(key))return pending.get(key);\n    const promise=Promise.resolve().then(()=>loader(key));pending.set(key,promise);\n    const cleanup=()=>{if(pending.get(key)===promise)pending.delete(key);};\n    promise.then(cleanup,cleanup);return promise;\n  };\n}",
+      "hints": [
+        "An async wrapper would change the returned promise identity.",
+        "Promise.resolve().then captures synchronous loader throws.",
+        "Register cleanup on both fulfillment and rejection."
+      ],
+      "tests": [
+        {
+          "name": "Share pending promise",
+          "code": "let calls=0;const load=createInFlightCache(async key=>{calls++;return key+\"!\";});const a=load(\"x\"),b=load(\"x\");assert(a===b,\"Share promise identity\");assertEqual(await a,\"x!\");assertEqual(calls,1);"
+        },
+        {
+          "name": "Reload after settlement",
+          "code": "let calls=0;const load=createInFlightCache(()=>++calls);assertEqual(await load(\"x\"),1);assertEqual(await load(\"x\"),2);"
+        },
+        {
+          "name": "Rejections are evicted",
+          "code": "const expected=new Error(\"offline\");let calls=0;const load=createInFlightCache(()=>{calls++;throw expected;});let e;try{await load(\"x\");}catch(x){e=x;}assert(e===expected,\"Preserve error\");try{await load(\"x\");}catch{}assertEqual(calls,2);"
+        },
+        {
+          "name": "Independent keys",
+          "code": "const load=createInFlightCache(key=>key),a=load(\"a\"),b=load(\"b\");assert(a!==b,\"Independent promises\");assertEqual(await Promise.all([a,b]),[\"a\",\"b\"]);"
+        }
+      ]
+    },
+    {
+      "id": "lab-40",
+      "stage": 5,
+      "title": "Project pending edits over server data",
+      "difficulty": "Advanced",
+      "minutes": 35,
+      "concept": "Optimistic UI \u00b7 ordered reconciliation \u00b7 immutability",
+      "prompt": "Implement projectOptimistic(serverItems, operations). Items have unique string IDs. Operations are {type:\"upsert\", item} or {type:\"remove\", id}. Start with a deep copy of serverItems. Upsert completely replaces an existing item at its position, or appends a new item. Remove deletes a matching ID; unknown IDs do nothing. Apply in order. Unknown operation types throw TypeError. Return an array sharing no mutable references with inputs. structuredClone is available.",
+      "examples": [
+        {
+          "input": "projectOptimistic([{id:\"a\"}], [{type:\"remove\",id:\"a\"}])",
+          "output": "[]"
+        }
+      ],
+      "starter": "function projectOptimistic(serverItems, operations) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function projectOptimistic(serverItems,operations) {\n  const items=structuredClone(serverItems);\n  for(const op of operations){\n    if(op.type===\"upsert\"){const index=items.findIndex(item=>item.id===op.item.id),value=structuredClone(op.item);if(index<0)items.push(value);else items[index]=value;}\n    else if(op.type===\"remove\"){const index=items.findIndex(item=>item.id===op.id);if(index>=0)items.splice(index,1);}\n    else throw new TypeError(\"Unknown operation\");\n  }\n  return items;\n}",
+      "hints": [
+        "Copy the server snapshot before applying edits.",
+        "Replacement keeps position; insertion appends.",
+        "Clone operation items too, avoiding another mutation path."
+      ],
+      "tests": [
+        {
+          "name": "Replace and append",
+          "code": "assertEqual(projectOptimistic([{id:\"a\",n:1},{id:\"b\",n:2}],[{type:\"upsert\",item:{id:\"a\",n:3}},{type:\"upsert\",item:{id:\"c\",n:4}}]),[{id:\"a\",n:3},{id:\"b\",n:2},{id:\"c\",n:4}]);"
+        },
+        {
+          "name": "Remove then reinsert",
+          "code": "assertEqual(projectOptimistic([{id:\"a\"},{id:\"b\"}],[{type:\"remove\",id:\"a\"},{type:\"upsert\",item:{id:\"a\",new:true}}]),[{id:\"b\"},{id:\"a\",new:true}]);"
+        },
+        {
+          "name": "Missing removal",
+          "code": "assertEqual(projectOptimistic([{id:\"a\"}],[{type:\"remove\",id:\"missing\"}]),[{id:\"a\"}]);"
+        },
+        {
+          "name": "Independent nested values",
+          "code": "const server=[{id:\"a\",meta:{n:1}}],item={id:\"b\",meta:{n:2}},result=projectOptimistic(server,[{type:\"upsert\",item}]);result[0].meta.n=9;result[1].meta.n=9;assertEqual(server[0].meta.n,1);assertEqual(item.meta.n,2);"
+        },
+        {
+          "name": "Unknown operation",
+          "code": "let e;try{projectOptimistic([],[{type:\"magic\"}]);}catch(x){e=x;}assert(e instanceof TypeError,\"Reject unknown operation\");"
+        }
+      ]
+    },
+    {
+      "id": "lab-41",
+      "stage": 6,
+      "title": "Tokenize an arithmetic language",
+      "difficulty": "Advanced",
+      "minutes": 40,
+      "concept": "Lexing \u00b7 regular expressions \u00b7 error positions",
+      "prompt": "Implement tokenizeExpression(source), returning tokens {type, value, start}. Types: \"number\", \"operator\", \"paren\". Numbers accept one or more digits optionally followed by a dot and one or more digits; their values are Numbers. Operators + - * / and parentheses ( ) have string values. Ignore whitespace. Unary signs are separate operators. Unsupported characters throw SyntaxError with their zero-based offset in its message. Do not evaluate source or use eval.",
+      "examples": [
+        {
+          "input": "tokenizeExpression(\"2*3\").map(token => token.value)",
+          "output": "[2, \"*\", 3]"
+        }
+      ],
+      "starter": "function tokenizeExpression(source) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function tokenizeExpression(source) {\n  const tokens=[];let index=0;\n  while(index<source.length){\n    const char=source[index];\n    if(/\\s/.test(char)){index++;continue;}\n    const match=source.slice(index).match(/^[0-9]+(?:\\.[0-9]+)?/);\n    if(match){tokens.push({type:\"number\",value:Number(match[0]),start:index});index+=match[0].length;continue;}\n    if(\"+-*/\".includes(char)){tokens.push({type:\"operator\",value:char,start:index});index++;continue;}\n    if(\"()\".includes(char)){tokens.push({type:\"paren\",value:char,start:index});index++;continue;}\n    throw new SyntaxError(\"Unexpected character at \"+index);\n  }\n  return tokens;\n}",
+      "hints": [
+        "Keep a cursor in the original string for accurate offsets.",
+        "Anchor number matching at the cursor and advance by the whole match.",
+        "Interpreting unary minus belongs to a parser; emit a minus token here."
+      ],
+      "tests": [
+        {
+          "name": "Token positions",
+          "code": "assertEqual(tokenizeExpression(\"12 + 3.5\"),[{type:\"number\",value:12,start:0},{type:\"operator\",value:\"+\",start:3},{type:\"number\",value:3.5,start:5}]);"
+        },
+        {
+          "name": "Parentheses and signs",
+          "code": "assertEqual(tokenizeExpression(\"(-2)\").map(t=>[t.type,t.value]),[[\"paren\",\"(\"],[\"operator\",\"-\"],[\"number\",2],[\"paren\",\")\"]]);"
+        },
+        {
+          "name": "Whitespace only",
+          "code": "assertEqual(tokenizeExpression(\" \\t\\n\"),[]);"
+        },
+        {
+          "name": "Error offset",
+          "code": "let e;try{tokenizeExpression(\"1 + x\");}catch(x){e=x;}assert(e instanceof SyntaxError&&e.message.includes(\"4\"),\"Report offset\");"
+        },
+        {
+          "name": "Incomplete decimal",
+          "code": "let e;try{tokenizeExpression(\"2.\");}catch(x){e=x;}assert(e instanceof SyntaxError&&e.message.includes(\"1\"),\"Reject trailing dot\");"
+        }
+      ]
+    },
+    {
+      "id": "lab-42",
+      "stage": 6,
+      "title": "Order build tasks by dependency",
+      "difficulty": "Advanced",
+      "minutes": 45,
+      "concept": "Directed graphs \u00b7 DFS \u00b7 cycle detection",
+      "prompt": "Implement orderTasks(graph). graph maps task names to dependency arrays. Return every task once, dependencies before consumers. Visit roots in Object.keys order and dependencies left to right with depth-first traversal for deterministic output. Missing dependencies throw Error. Cycles throw Error with \"cycle\" in the message. Do not mutate graph. Use own-property checks.",
+      "examples": [
+        {
+          "input": "orderTasks({app:[\"core\"],core:[]})",
+          "output": "[\"core\", \"app\"]"
+        }
+      ],
+      "starter": "function orderTasks(graph) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function orderTasks(graph) {\n  const visiting=new Set(),done=new Set(),result=[];\n  function visit(task){\n    if(!Object.hasOwn(graph,task))throw new Error(\"Missing dependency: \"+task);\n    if(visiting.has(task))throw new Error(\"Dependency cycle: \"+task);\n    if(done.has(task))return;\n    visiting.add(task);for(const dependency of graph[task])visit(dependency);\n    visiting.delete(task);done.add(task);result.push(task);\n  }\n  for(const task of Object.keys(graph))visit(task);\n  return result;\n}",
+      "hints": [
+        "Track both the current recursion path and completed tasks.",
+        "Append a task only after visiting its dependencies.",
+        "A task already on the recursion path reveals a cycle."
+      ],
+      "tests": [
+        {
+          "name": "Dependencies first",
+          "code": "assertEqual(orderTasks({deploy:[\"build\"],build:[\"lint\",\"test\"],lint:[],test:[\"lint\"]}),[\"lint\",\"test\",\"build\",\"deploy\"]);"
+        },
+        {
+          "name": "Stable independent tasks",
+          "code": "assertEqual(orderTasks({a:[],b:[],c:[\"a\"]}),[\"a\",\"b\",\"c\"]);"
+        },
+        {
+          "name": "Cycle detection",
+          "code": "let e;try{orderTasks({a:[\"b\"],b:[\"a\"]});}catch(x){e=x;}assert(e instanceof Error&&/cycle/i.test(e.message),\"Report cycle\");"
+        },
+        {
+          "name": "Missing dependency",
+          "code": "let e;try{orderTasks({a:[\"toString\"]});}catch(x){e=x;}assert(e instanceof Error,\"Own tasks only\");"
+        },
+        {
+          "name": "Empty and immutable",
+          "code": "const graph={a:[\"b\"],b:[]},before=JSON.stringify(graph);orderTasks(graph);assertEqual(JSON.stringify(graph),before);assertEqual(orderTasks({}),[]);"
+        }
+      ]
+    },
+    {
+      "id": "lab-43",
+      "stage": 6,
+      "title": "Render a deliberately limited text template",
+      "difficulty": "Advanced",
+      "minutes": 35,
+      "concept": "Escaping \u00b7 own-property lookup \u00b7 regular expressions",
+      "prompt": "Implement renderTemplate(template, data). Replace {{ user.name }} placeholders using own properties only. Path segments match [A-Za-z_][A-Za-z0-9_]*, separated by dots; whitespace is allowed only around the entire path. Missing, null, and undefined become \"\". Other values use String(value), escaped for HTML text: & < > double quote and apostrophe become &amp; &lt; &gt; &quot; and &#39;. Malformed placeholders remain unchanged. This helper is for HTML text content only, never script, style, or URL contexts.",
+      "examples": [
+        {
+          "input": "renderTemplate(\"<p>{{name}}</p>\", {name:\"A&B\"})",
+          "output": "\"<p>A&amp;B</p>\""
+        }
+      ],
+      "starter": "function renderTemplate(template, data) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function renderTemplate(template,data) {\n  const escape=value=>String(value).replace(/[&<>\"']/g,char=>({\"&\":\"&amp;\",\"<\":\"&lt;\",\">\":\"&gt;\",'\"':\"&quot;\",\"'\":\"&#39;\"}[char]));\n  return template.replace(/{{\\s*([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)\\s*}}/g,(_,path)=>{\n    let value=data;\n    for(const key of path.split(\".\")){if(value==null||!Object.hasOwn(Object(value),key))return \"\";value=value[key];}\n    return value==null?\"\":escape(value);\n  });\n}",
+      "hints": [
+        "Match only the specified placeholder grammar.",
+        "Check Object.hasOwn at every path segment.",
+        "Escape the final string once using a five-character replacement map."
+      ],
+      "tests": [
+        {
+          "name": "Nested lookup and escaping",
+          "code": "assertEqual(renderTemplate(\"Hello {{ user.name }}\",{user:{name:\"<Ada & Co>\"}}),\"Hello &lt;Ada &amp; Co&gt;\");"
+        },
+        {
+          "name": "Falsy values",
+          "code": "assertEqual(renderTemplate(\"{{a}}/{{b}}/{{c}}\",{a:0,b:false,c:null}),\"0/false/\");"
+        },
+        {
+          "name": "Own properties",
+          "code": "const data=Object.create({secret:\"hidden\"});data.user={};assertEqual(renderTemplate(\"{{secret}} {{user.toString}}\",data),\" \");"
+        },
+        {
+          "name": "Malformed placeholders",
+          "code": "assertEqual(renderTemplate(\"{{ user . name }} {{ 12 }}\",{}),\"{{ user . name }} {{ 12 }}\");"
+        },
+        {
+          "name": "Quotes escaped",
+          "code": "assertEqual(renderTemplate(\"{{x}}\",{x:String.fromCharCode(34,39)}),\"&quot;&#39;\");"
+        }
+      ]
+    },
+    {
+      "id": "lab-44",
+      "stage": 6,
+      "title": "Protect a record with a validating proxy",
+      "difficulty": "Advanced",
+      "minutes": 45,
+      "concept": "Proxy \u00b7 Reflect \u00b7 validation traps",
+      "prompt": "Implement createValidatedRecord(initial, validators). Both inputs have the same string keys; validators are functions returning booleans. Validate initial values, then return a Proxy over a shallow copy. Assignments to known keys must pass validation. Unknown keys or failed validation throw TypeError without changing state. Deleting or Object.defineProperty also throws TypeError. Reads are normal. Values are primitives. Validator exceptions propagate.",
+      "examples": [
+        {
+          "input": "const r=createValidatedRecord({count:0},{count:n=>Number.isInteger(n)&&n>=0}); r.count=2",
+          "output": "Assignment succeeds; negative counts throw TypeError"
+        }
+      ],
+      "starter": "function createValidatedRecord(initial, validators) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function createValidatedRecord(initial,validators) {\n  const keys=Object.keys(validators);\n  if(Object.keys(initial).length!==keys.length||keys.some(key=>!Object.hasOwn(initial,key)||typeof validators[key]!==\"function\"||!validators[key](initial[key])))throw new TypeError(\"Invalid initial record\");\n  const rules={...validators};\n  return new Proxy({...initial},{\n    set(target,key,value){if(!Object.hasOwn(rules,key)||!rules[key](value))throw new TypeError(\"Invalid assignment\");return Reflect.set(target,key,value);},\n    deleteProperty(){throw new TypeError(\"Deletion is forbidden\");},\n    defineProperty(){throw new TypeError(\"Definitions are forbidden\");}\n  });\n}",
+      "hints": [
+        "Validate initial state before exposing it.",
+        "Reflect.set on the raw target avoids triggering your own defineProperty trap.",
+        "Deletion and property definition need their own traps."
+      ],
+      "tests": [
+        {
+          "name": "Valid assignment",
+          "code": "const r=createValidatedRecord({age:20},{age:n=>Number.isInteger(n)&&n>=0});r.age=21;assertEqual(r.age,21);"
+        },
+        {
+          "name": "Invalid assignment atomicity",
+          "code": "const r=createValidatedRecord({age:20},{age:n=>typeof n===\"number\"});let e;try{r.age=\"21\";}catch(x){e=x;}assert(e instanceof TypeError,\"Reject invalid value\");assertEqual(r.age,20);"
+        },
+        {
+          "name": "Bypass paths blocked",
+          "code": "const r=createValidatedRecord({x:1},{x:Number.isFinite});for(const action of [()=>{r.y=2;},()=>{delete r.x;},()=>Object.defineProperty(r,\"x\",{value:9})]){let e;try{action();}catch(x){e=x;}assert(e instanceof TypeError,\"Reject bypass\");}assertEqual(r.x,1);"
+        },
+        {
+          "name": "Validate and copy initial",
+          "code": "let e;try{createValidatedRecord({x:-1},{x:n=>n>=0});}catch(x){e=x;}assert(e instanceof TypeError,\"Validate initial\");const initial={x:1},r=createValidatedRecord(initial,{x:Number.isFinite});r.x=2;assertEqual(initial.x,1);"
+        }
+      ]
+    },
+    {
+      "id": "lab-45",
+      "stage": 6,
+      "title": "Diff JSON records into deterministic patches",
+      "difficulty": "Advanced",
+      "minutes": 50,
+      "concept": "Tree comparison \u00b7 JSON Pointer \u00b7 deterministic output",
+      "prompt": "Implement diffJSON(before, after), returning operations {op:\"add\"|\"remove\"|\"replace\", path, value?}. Recurse when both values are non-null plain objects, visiting the sorted union of keys. Missing keys emit add/remove. Arrays are atomic: emit one replace if their JSON structure differs. Changed primitives/types emit replace. Root replacement uses path \"\". Escape each JSON Pointer segment: ~ to ~0 and / to ~1. Inputs are JSON-compatible without cycles. Deep-copy emitted values. Equivalent objects compare equal regardless of key insertion order.",
+      "examples": [
+        {
+          "input": "diffJSON({enabled:false},{enabled:true})",
+          "output": "[{op:\"replace\",path:\"/enabled\",value:true}]"
+        }
+      ],
+      "starter": "function diffJSON(before, after) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function diffJSON(before,after) {\n  const plain=v=>v!==null&&typeof v===\"object\"&&!Array.isArray(v);\n  function equal(a,b){\n    if(a===b)return true;\n    if(Array.isArray(a)&&Array.isArray(b))return a.length===b.length&&a.every((v,i)=>equal(v,b[i]));\n    if(plain(a)&&plain(b)){const keys=Object.keys(a);return keys.length===Object.keys(b).length&&keys.every(k=>Object.hasOwn(b,k)&&equal(a[k],b[k]));}\n    return false;\n  }\n  const result=[],escape=key=>key.replace(/~/g,\"~0\").replace(/\\//g,\"~1\");\n  function visit(a,b,path){\n    if(equal(a,b))return;\n    if(plain(a)&&plain(b)){\n      for(const key of [...new Set([...Object.keys(a),...Object.keys(b)])].sort()){\n        const next=path+\"/\"+escape(key);\n        if(!Object.hasOwn(b,key))result.push({op:\"remove\",path:next});\n        else if(!Object.hasOwn(a,key))result.push({op:\"add\",path:next,value:structuredClone(b[key])});\n        else visit(a[key],b[key],next);\n      }\n    }else result.push({op:\"replace\",path,value:structuredClone(b)});\n  }\n  visit(before,after,\"\");return result;\n}",
+      "hints": [
+        "Separate structural equality from patch generation.",
+        "Visit a sorted union of keys for stable ordering.",
+        "Escape path segments individually and clone emitted values."
+      ],
+      "tests": [
+        {
+          "name": "Nested changes",
+          "code": "assertEqual(diffJSON({a:1,b:{x:2},d:4},{a:3,b:{x:2,y:5},c:6}),[{op:\"replace\",path:\"/a\",value:3},{op:\"add\",path:\"/b/y\",value:5},{op:\"add\",path:\"/c\",value:6},{op:\"remove\",path:\"/d\"}]);"
+        },
+        {
+          "name": "Atomic array root",
+          "code": "assertEqual(diffJSON([1,2],[1,3]),[{op:\"replace\",path:\"\",value:[1,3]}]);"
+        },
+        {
+          "name": "Pointer escaping",
+          "code": "assertEqual(diffJSON({},{\"a/b~c\":1}),[{op:\"add\",path:\"/a~1b~0c\",value:1}]);"
+        },
+        {
+          "name": "Equivalent key order",
+          "code": "assertEqual(diffJSON([{a:1,b:2}],[{b:2,a:1}]),[]);"
+        },
+        {
+          "name": "Independent patch values",
+          "code": "const after={a:{x:1}},patch=diffJSON({},after);patch[0].value.x=9;assertEqual(after.a.x,1);"
+        }
+      ]
+    },
+    {
+      "id": "lab-46",
+      "stage": 6,
+      "title": "Migrate versioned data without rewriting history",
+      "difficulty": "Advanced",
+      "minutes": 40,
+      "concept": "Schema evolution \u00b7 pure boundaries \u00b7 defensive copies",
+      "prompt": "Implement migrateRecord(record, migrations, targetVersion = migrations.length). record is {version, data}; migrations[i] upgrades version i to i+1 and returns new data. Validate integer versions with 0 <= record.version <= targetVersion <= migrations.length, otherwise throw RangeError. Deep-copy initial data before running migrations, which may mutate their input. Run required migrations in order and return {version:targetVersion, data}. Propagate errors. Leave original record unchanged even on failure.",
+      "examples": [
+        {
+          "input": "migrateRecord({version:0,data:{n:1}}, [data=>({...data,n:data.n+1})])",
+          "output": "{version:1,data:{n:2}}"
+        }
+      ],
+      "starter": "function migrateRecord(record, migrations, targetVersion = migrations.length) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function migrateRecord(record,migrations,targetVersion=migrations.length) {\n  if(!Number.isInteger(record.version)||!Number.isInteger(targetVersion)||record.version<0||targetVersion<record.version||targetVersion>migrations.length)throw new RangeError(\"Invalid migration range\");\n  let data=structuredClone(record.data);\n  for(let version=record.version;version<targetVersion;version++)data=migrations[version](data);\n  return {version:targetVersion,data};\n}",
+      "hints": [
+        "The stored version indexes the next migration.",
+        "Clone before any migration can mutate the data.",
+        "A no-op migration still returns independent data."
+      ],
+      "tests": [
+        {
+          "name": "Sequential upgrades",
+          "code": "const migrations=[data=>({name:data}),data=>({...data,active:true})];assertEqual(migrateRecord({version:0,data:\"Ada\"},migrations),{version:2,data:{name:\"Ada\",active:true}});"
+        },
+        {
+          "name": "Resume at stored version",
+          "code": "const calls=[],migrations=[data=>{calls.push(0);return data;},data=>{calls.push(1);return {...data,x:2};}];assertEqual(migrateRecord({version:1,data:{}},migrations),{version:2,data:{x:2}});assertEqual(calls,[1]);"
+        },
+        {
+          "name": "Failure preserves original",
+          "code": "const record={version:0,data:{x:1}};let e;try{migrateRecord(record,[data=>{data.x=9;throw \"broken\";}]);}catch(x){e=x;}assertEqual(e,\"broken\");assertEqual(record,{version:0,data:{x:1}});"
+        },
+        {
+          "name": "No-op clones",
+          "code": "const record={version:1,data:{x:1}},result=migrateRecord(record,[x=>x],1);result.data.x=9;assertEqual(record.data.x,1);"
+        },
+        {
+          "name": "No downgrade",
+          "code": "let e;try{migrateRecord({version:2,data:{}},[x=>x,x=>x],1);}catch(x){e=x;}assert(e instanceof RangeError,\"Reject downgrade\");"
+        }
+      ]
+    },
+    {
+      "id": "lab-47",
+      "stage": 6,
+      "title": "Parse environment configuration at one boundary",
+      "difficulty": "Advanced",
+      "minutes": 40,
+      "concept": "Configuration \u00b7 explicit coercion \u00b7 aggregate errors",
+      "prompt": "Implement parseEnvironment(env, schema). schema maps keys to {type:\"string\"|\"number\"|\"boolean\", required?:boolean, default?:value}. Read only own env keys. Missing/empty-string values use an own default if present, otherwise required fields add \"KEY: required\" and optional fields are omitted. Present values must be strings. Strings are preserved. Numbers use Number after rejecting whitespace-only strings and must be finite. Booleans accept exactly \"true\" or \"false\". Invalid values add \"KEY: invalid TYPE\". Ignore unknown env keys. Return {values, errors} in schema key order. Defaults are already correctly typed.",
+      "examples": [
+        {
+          "input": "parseEnvironment({PORT:\"4000\"},{PORT:{type:\"number\",required:true}})",
+          "output": "{values:{PORT:4000},errors:[]}"
+        }
+      ],
+      "starter": "function parseEnvironment(env, schema) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "function parseEnvironment(env,schema) {\n  const values={},errors=[];\n  const put=(key,value)=>Object.defineProperty(values,key,{value,enumerable:true,writable:true,configurable:true});\n  for(const [key,rule] of Object.entries(schema)){\n    const raw=Object.hasOwn(env,key)?env[key]:undefined;\n    if(raw===undefined||raw===\"\"){if(Object.hasOwn(rule,\"default\"))put(key,rule.default);else if(rule.required)errors.push(key+\": required\");continue;}\n    let value,valid=typeof raw===\"string\";\n    if(rule.type===\"string\")value=raw;\n    else if(rule.type===\"number\"){value=valid?Number(raw):NaN;valid=valid&&raw.trim()!==\"\"&&Number.isFinite(value);}\n    else if(rule.type===\"boolean\"){valid=valid&&(raw===\"true\"||raw===\"false\");value=raw===\"true\";}\n    else valid=false;\n    if(valid)put(key,value);else errors.push(key+\": invalid \"+rule.type);\n  }\n  return {values,errors};\n}",
+      "hints": [
+        "Handle missing values before type conversion.",
+        "Boolean(\"false\") is true; use explicit string comparisons.",
+        "Aggregate errors so all invalid settings can be fixed together."
+      ],
+      "tests": [
+        {
+          "name": "Typed configuration",
+          "code": "assertEqual(parseEnvironment({PORT:\"8080\",DEBUG:\"false\",NAME:\" app \"},{PORT:{type:\"number\"},DEBUG:{type:\"boolean\"},NAME:{type:\"string\"}}),{values:{PORT:8080,DEBUG:false,NAME:\" app \"},errors:[]});"
+        },
+        {
+          "name": "Defaults and required",
+          "code": "assertEqual(parseEnvironment({PORT:\"\"},{PORT:{type:\"number\",default:3000},TOKEN:{type:\"string\",required:true},OPTIONAL:{type:\"string\"}}),{values:{PORT:3000},errors:[\"TOKEN: required\"]});"
+        },
+        {
+          "name": "Aggregate failures",
+          "code": "assertEqual(parseEnvironment({N:\"Infinity\",B:\"yes\",S:42},{N:{type:\"number\"},B:{type:\"boolean\"},S:{type:\"string\"}}),{values:{},errors:[\"N: invalid number\",\"B: invalid boolean\",\"S: invalid string\"]});"
+        },
+        {
+          "name": "Whitespace and inheritance",
+          "code": "const env=Object.create({TOKEN:\"secret\"});env.N=\" \";assertEqual(parseEnvironment(env,{TOKEN:{type:\"string\",required:true},N:{type:\"number\"}}),{values:{},errors:[\"TOKEN: required\",\"N: invalid number\"]});"
+        },
+        {
+          "name": "Falsy defaults",
+          "code": "assertEqual(parseEnvironment({},{FLAG:{type:\"boolean\",default:false}}),{values:{FLAG:false},errors:[]});"
+        },
+        {
+          "name": "Do not coerce non-string objects",
+          "code": "const raw={valueOf(){throw new Error(\"Do not coerce\");}};assertEqual(parseEnvironment({N:raw},{N:{type:\"number\"}}),{values:{},errors:[\"N: invalid number\"]});"
+        }
+      ]
+    },
+    {
+      "id": "lab-48",
+      "stage": 6,
+      "title": "Build the smallest useful async test runner",
+      "difficulty": "Advanced",
+      "minutes": 45,
+      "concept": "Async execution \u00b7 error reporting \u00b7 deterministic tools",
+      "prompt": "Implement async runChecks(checks). Checks are {name, run}; run can return, fulfill, throw, or reject. Execute sequentially in order and continue after failures. Return {passed, failed, results}. Results are {name, status:\"passed\"} or {name, status:\"failed\", error}. Error objects use their message; other thrown values use String(value). Any normal return including false passes: assertions must throw to fail. Empty input returns zero counts and empty results. Never mutate checks.",
+      "examples": [
+        {
+          "input": "await runChecks([{name:\"addition\",run:()=>{if(1+1!==2)throw Error(\"math\");}}])",
+          "output": "{passed:1,failed:0,results:[{name:\"addition\",status:\"passed\"}]}"
+        }
+      ],
+      "starter": "async function runChecks(checks) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
+      "solution": "async function runChecks(checks) {\n  const results=[];let passed=0,failed=0;\n  for(const check of checks){\n    try{await check.run();passed++;results.push({name:check.name,status:\"passed\"});}\n    catch(error){failed++;results.push({name:check.name,status:\"failed\",error:error instanceof Error?error.message:String(error)});}\n  }\n  return {passed,failed,results};\n}",
+      "hints": [
+        "Use for...of with await to keep execution sequential.",
+        "Catch inside the loop so later checks still execute.",
+        "Convert thrown values to serializable text."
+      ],
+      "tests": [
+        {
+          "name": "Mixed outcomes",
+          "code": "assertEqual(await runChecks([{name:\"one\",run:()=>1},{name:\"two\",run:()=>{throw new Error(\"broken\");}},{name:\"three\",run:async()=>3}]),{passed:2,failed:1,results:[{name:\"one\",status:\"passed\"},{name:\"two\",status:\"failed\",error:\"broken\"},{name:\"three\",status:\"passed\"}]});"
+        },
+        {
+          "name": "Sequential execution",
+          "code": "const order=[];await runChecks([{name:\"a\",run:async()=>{order.push(\"start a\");await Promise.resolve();order.push(\"end a\");}},{name:\"b\",run:()=>order.push(\"b\")}]);assertEqual(order,[\"start a\",\"end a\",\"b\"]);"
+        },
+        {
+          "name": "Rejected values and false success",
+          "code": "assertEqual(await runChecks([{name:\"reject\",run:()=>Promise.reject(\"offline\")},{name:\"false\",run:()=>false}]),{passed:1,failed:1,results:[{name:\"reject\",status:\"failed\",error:\"offline\"},{name:\"false\",status:\"passed\"}]});"
+        },
+        {
+          "name": "Empty suite",
+          "code": "assertEqual(await runChecks([]),{passed:0,failed:0,results:[]});"
+        },
+        {
+          "name": "Immutable checks",
+          "code": "const checks=Object.freeze([Object.freeze({name:\"a\",run:()=>{}})]);assertEqual((await runChecks(checks)).passed,1);"
+        }
+      ]
+    }
+  ]
+}

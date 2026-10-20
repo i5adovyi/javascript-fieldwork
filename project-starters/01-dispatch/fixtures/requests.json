@@ -1,0 +1,44 @@
+[
+  {
+    "id": "REQ-001",
+    "severity": "critical",
+    "tier": "standard",
+    "ageHours": 0,
+    "businessHours": true
+  },
+  {
+    "id": "REQ-002",
+    "severity": "normal",
+    "tier": "premium",
+    "ageHours": 24,
+    "businessHours": false
+  },
+  {
+    "id": "REQ-003",
+    "severity": "low",
+    "tier": "standard",
+    "ageHours": 0,
+    "businessHours": true
+  },
+  {
+    "id": "REQ-004",
+    "severity": "normal",
+    "tier": "standard",
+    "ageHours": 23.99,
+    "businessHours": true
+  },
+  {
+    "id": "REQ-005",
+    "severity": "normal",
+    "tier": "standard",
+    "ageHours": 24,
+    "businessHours": true
+  },
+  {
+    "id": "REQ-006",
+    "severity": "low",
+    "tier": "premium",
+    "ageHours": -1,
+    "businessHours": false
+  }
+]

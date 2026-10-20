@@ -1,0 +1,24 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { once } from "node:events";
+import { createApp } from "../src/app.js";
+test("the scaffold serves a healthy API and reports unfinished and unknown routes honestly", async t => {
+  const server = createApp();
+  server.listen(0, "127.0.0.1");
+  await once(server, "listening");
+  t.after(() => new Promise((resolve, reject) => server.close(error => error ? reject(error) : resolve())));
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const health = await fetch(`${base}/api/health`);
+  assert.equal(health.status, 200);
+  assert.deepEqual(await health.json(), { ok: true, service: "signal-desk-starter" });
+  const unfinished = await fetch(`${base}/api/incidents`);
+  assert.equal(unfinished.status, 501);
+  assert.match((await unfinished.json()).error, /no data has been saved/);
+  assert.equal((await fetch(`${base}/api/unknown`)).status, 404);
+  const page = await fetch(base);
+  assert.equal(page.status, 200);
+  assert.match(await page.text(), /Signal Desk/);
+});
+test.todo("POST then GET returns the created incident, while invalid input returns a useful client error and saves nothing");
+test.todo("a forbidden transition preserves the incident state, and an unknown identifier returns a documented 404");
+test.todo("an incident survives repository reload, while a simulated storage failure never returns a success response");

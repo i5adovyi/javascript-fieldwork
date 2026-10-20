@@ -1,0 +1,1099 @@
+{
+  "resources": [
+    {
+      "id": "definitive-guide",
+      "title": "JavaScript: The Definitive Guide, 7th Edition",
+      "author": "David Flanagan · O’Reilly",
+      "type": "Book",
+      "url": "https://www.oreilly.com/library/view/javascript-the-definitive/9781491952016/",
+      "description": "The reading backbone for this program. Read your own copy alongside the chapter map; this portal does not redistribute the book.",
+      "stage": 1,
+      "level": "Beginner → advanced",
+      "access": "Paid / preview",
+      "verified": "2026-10-20"
+    },
+    {
+      "id": "mdn-guide",
+      "title": "The JavaScript Guide",
+      "author": "MDN contributors",
+      "type": "Documentation",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide",
+      "description": "Your first reference when an expression surprises you. Read one relevant section, then prove the behavior with a tiny experiment.",
+      "stage": 1,
+      "level": "All levels",
+      "access": "Free",
+      "verified": "2026-10-20"
+    },
+    {
+      "id": "javascript-info",
+      "title": "The Modern JavaScript Tutorial",
+      "author": "Ilya Kantor and contributors",
+      "type": "Course",
+      "url": "https://javascript.info/",
+      "description": "A second explanation when the book feels dense. Use its chapter exercises after attempting the matching Fieldwork lesson.",
+      "stage": 1,
+      "level": "Beginner → advanced",
+      "access": "Free",
+      "verified": "2026-10-20"
+    },
+    {
+      "id": "eloquent",
+      "title": "Eloquent JavaScript",
+      "author": "Marijn Haverbeke",
+      "type": "Book",
+      "url": "https://eloquentjavascript.net/",
+      "description": "A complete author-published book available online. Pair its exercises and larger programs with stages 1–4 for a different style of reasoning.",
+      "stage": 2,
+      "level": "Beginner → intermediate",
+      "access": "Free",
+      "verified": "2026-10-20"
+    },
+    {
+      "id": "ydkjs",
+      "title": "You Don’t Know JS Yet",
+      "author": "Kyle Simpson",
+      "type": "Book",
+      "url": "https://github.com/getify/You-Dont-Know-JS",
+      "description": "Author-maintained book series with online reading. Especially useful when scope, closures, and coercion deserve a slower second pass.",
+      "stage": 2,
+      "level": "Intermediate",
+      "access": "Free",
+      "verified": "2026-10-20"
+    },
+    {
+      "id": "odin",
+      "title": "The Odin Project: JavaScript",
+      "author": "The Odin Project",
+      "type": "Course",
+      "url": "https://www.theodinproject.com/paths/full-stack-javascript/courses/javascript",
+      "description": "Project-led follow-through for objects, modules, asynchronous code, and browser work. Use selected projects after completing the fundamentals.",
+      "stage": 3,
+      "level": "Intermediate",
+      "access": "Free",
+      "verified": "2026-10-20"
+    },
+    {
+      "id": "js30",
+      "title": "JavaScript30",
+      "author": "Wes Bos",
+      "type": "Course",
+      "url": "https://javascript30.com/",
+      "description": "Thirty vanilla JavaScript build-alongs. Rebuild one without the video afterward, then change a requirement to test independence. Free registration may be required.",
+      "stage": 5,
+      "level": "Intermediate",
+      "access": "Free",
+      "verified": "2026-10-20"
+    },
+    {
+      "id": "fullstackopen",
+      "title": "Full Stack Open",
+      "author": "University of Helsinki and contributors",
+      "type": "Course",
+      "url": "https://fullstackopen.com/en/",
+      "description": "A substantial next step after stage 6, covering modern web application development. This is an extension track, not a prerequisite for the portal.",
+      "stage": 6,
+      "level": "Advanced",
+      "access": "Free",
+      "verified": "2026-10-20"
+    },
+    {
+      "id": "exercism",
+      "title": "JavaScript practice track",
+      "author": "Exercism",
+      "type": "Practice",
+      "url": "https://exercism.org/tracks/javascript",
+      "description": "Small exercises for repeated retrieval and careful naming. Complete an attempt before reading community solutions; account required to save progress.",
+      "stage": 2,
+      "level": "Beginner → intermediate",
+      "access": "Free",
+      "verified": "2026-10-20"
+    },
+    {
+      "id": "codewars",
+      "title": "JavaScript kata",
+      "author": "Codewars",
+      "type": "Practice",
+      "url": "https://www.codewars.com/kata/search/javascript",
+      "description": "Choose small kata that match the current stage. Explain complexity and edge cases rather than optimizing for the shortest answer.",
+      "stage": 2,
+      "level": "Beginner → advanced",
+      "access": "Free",
+      "verified": "2026-10-20"
+    },
+    {
+      "id": "closures",
+      "title": "Closures, explained with examples",
+      "author": "MDN contributors",
+      "type": "Documentation",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Closures",
+      "description": "Read when practicing factories, callbacks, and private state. Trace which lexical environment each function retains.",
+      "stage": 2,
+      "level": "Intermediate",
+      "access": "Free",
+      "verified": "2026-10-20"
+    },
+    {
+      "id": "promises",
+      "title": "Using promises",
+      "author": "MDN contributors",
+      "type": "Documentation",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises",
+      "description": "Reference for chaining, composition, rejection handling, and timing. Pair with the async article and stage 4 race-condition experiments.",
+      "stage": 4,
+      "level": "Intermediate",
+      "access": "Free",
+      "verified": "2026-10-20"
+    },
+    {
+      "id": "devtools",
+      "title": "Debug JavaScript with Chrome DevTools",
+      "author": "Chrome for Developers",
+      "type": "Documentation",
+      "url": "https://developer.chrome.com/docs/devtools/javascript",
+      "description": "Practice breakpoints, stepping, scope inspection, and reproduction. Use the debugger to test a written hypothesis during every project.",
+      "stage": 1,
+      "level": "Beginner → intermediate",
+      "access": "Free",
+      "verified": "2026-10-20"
+    },
+    {
+      "id": "fetch",
+      "title": "Using the Fetch API",
+      "author": "MDN contributors",
+      "type": "Documentation",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch",
+      "description": "Use for response status checks, JSON parsing, cancellation, and request options. Read before connecting a stage 4 or 5 project to a real service.",
+      "stage": 4,
+      "level": "Intermediate",
+      "access": "Free",
+      "verified": "2026-10-20"
+    },
+    {
+      "id": "modules",
+      "title": "JavaScript modules",
+      "author": "MDN contributors",
+      "type": "Documentation",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules",
+      "description": "Reference for import/export boundaries and browser module loading. Turn one growing file into a small set of coherent modules.",
+      "stage": 3,
+      "level": "Intermediate",
+      "access": "Free",
+      "verified": "2026-10-20"
+    },
+    {
+      "id": "node-test",
+      "title": "The built-in Node.js test runner",
+      "author": "Node.js contributors",
+      "type": "Documentation",
+      "url": "https://nodejs.org/api/test.html",
+      "description": "A dependency-light way to test functions and modules. Use documentation that matches your installed Node version when adopting newer features.",
+      "stage": 6,
+      "level": "Intermediate",
+      "access": "Free",
+      "verified": "2026-10-20"
+    },
+    {
+      "id": "node-intro",
+      "title": "Introduction to Node.js",
+      "author": "Node.js contributors",
+      "type": "Documentation",
+      "url": "https://nodejs.org/learn/getting-started/introduction-to-nodejs",
+      "description": "Learn where the JavaScript language ends and the Node runtime begins. Start here before the stage 6 command-line and server work.",
+      "stage": 6,
+      "level": "Intermediate",
+      "access": "Free",
+      "verified": "2026-10-20"
+    },
+    {
+      "id": "playwright",
+      "title": "Playwright: getting started",
+      "author": "Microsoft and Playwright contributors",
+      "type": "Documentation",
+      "url": "https://playwright.dev/docs/intro",
+      "description": "Build a small browser test around a valuable user journey. Assert visible behavior and accessible controls rather than private implementation details.",
+      "stage": 6,
+      "level": "Intermediate → advanced",
+      "access": "Free",
+      "verified": "2026-10-20"
+    },
+    {
+      "id": "accessibility",
+      "title": "Learn Accessibility",
+      "author": "web.dev · Google",
+      "type": "Course",
+      "url": "https://web.dev/learn/accessibility/",
+      "description": "Apply semantic HTML, focus management, and usable interaction patterns while building the stage 5 interface.",
+      "stage": 5,
+      "level": "All levels",
+      "access": "Free",
+      "verified": "2026-10-20"
+    },
+    {
+      "id": "owasp-dom",
+      "title": "DOM based XSS prevention",
+      "author": "OWASP Cheat Sheet Series",
+      "type": "Documentation",
+      "url": "https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html",
+      "description": "Understand why strings from URLs, forms, files, and APIs must not become executable markup. Use this during the security review of your browser project.",
+      "stage": 5,
+      "level": "Intermediate",
+      "access": "Free",
+      "verified": "2026-10-20"
+    },
+    {
+      "id": "iterators",
+      "title": "Iterators and generators",
+      "author": "MDN contributors",
+      "type": "Documentation",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Iterators_and_generators",
+      "description": "Learn the iteration protocol and lazy sequences. Implement a small iterator, then decide whether a generator actually improves your project.",
+      "stage": 4,
+      "level": "Intermediate",
+      "access": "Free",
+      "verified": "2026-10-20"
+    },
+    {
+      "id": "event-loop-video",
+      "title": "What the heck is the event loop anyway?",
+      "author": "Philip Roberts · JSConf EU",
+      "type": "Video",
+      "url": "https://www.youtube.com/watch?v=8aGhZQkoFbQ",
+      "description": "A foundational conference talk from 2014. Predict the examples first; pair the older overview with current promise documentation for microtasks.",
+      "stage": 4,
+      "level": "Intermediate",
+      "access": "Free",
+      "verified": "2026-10-20"
+    },
+    {
+      "id": "archibald-loop",
+      "title": "The browser event loop, visualized",
+      "author": "Jake Archibald · JSConf",
+      "type": "Video",
+      "url": "https://www.youtube.com/watch?v=cCOL7MC4Pl0",
+      "description": "A visual conference explanation of tasks, microtasks, timers, and rendering. Pause to draw the ordering before the speaker reveals it.",
+      "stage": 4,
+      "level": "Intermediate",
+      "access": "Free",
+      "verified": "2026-10-20"
+    },
+    {
+      "id": "fcc-video",
+      "title": "Learn JavaScript: full course for beginners",
+      "author": "Beau Carnes · freeCodeCamp.org",
+      "type": "Video",
+      "url": "https://www.youtube.com/watch?v=PkZNo7MFNFg",
+      "description": "A long-form foundations course from 2018. Use selected segments for reinforcement and compare syntax and tooling with current MDN guidance.",
+      "stage": 1,
+      "level": "Beginner",
+      "access": "Free",
+      "verified": "2026-10-20"
+    },
+    {
+      "id": "async-video",
+      "title": "The Async Await Episode I Promised",
+      "author": "Fireship",
+      "type": "Video",
+      "url": "https://www.youtube.com/watch?v=vn3tm0quoqE",
+      "description": "A compact async/await explanation from 2018. Reimplement the core examples in plain JavaScript; framework references are optional context.",
+      "stage": 4,
+      "level": "Intermediate",
+      "access": "Free",
+      "verified": "2026-10-20"
+    }
+  ],
+  "articles": [
+    {
+      "id": "practice-loop",
+      "title": "Stop collecting tutorials. Start collecting evidence.",
+      "subtitle": "A practical learning loop for turning a large reference book into skills you can use.",
+      "minutes": 7,
+      "tags": [
+        "Learning",
+        "All stages"
+      ],
+      "body": [
+        {
+          "heading": "Choose a claim you can prove",
+          "paragraphs": [
+            "A chapter is a container, not a unit of progress. “Read functions” gives you no clear finish line. “Explain why two counters keep independent state, then implement one” gives you an observable result. Before each session, write one sentence beginning with “After this session I can…”. Keep it small enough to demonstrate in five minutes. A concrete target helps you recognize both success and the exact place where you are stuck.",
+            "Treat the book as your main explanation and the portal as your practice space. Read the assigned section, pause, and close it. Write the key rule in your own words. Include one example and one counterexample. If you cannot invent a counterexample, you probably have a rule that is too vague: “objects are weird” is much less useful than “two bindings can refer to the same object.”"
+          ]
+        },
+        {
+          "heading": "Predict before you run",
+          "paragraphs": [
+            "Before executing an example, write the output, the types involved, and your reason. Being wrong is valuable because it exposes a specific model to repair. Running first removes that information: once you have seen the result, it is easy to mistake familiarity for understanding. Keep the wrong prediction in your notes and add a corrected explanation underneath it.",
+            "Change one input after the first successful run. Try an empty collection, zero, a missing property, a duplicate identifier, or an asynchronous operation that rejects. This is where an explanation becomes a tool. Do not change five things at once; a controlled variation tells you which assumption mattered."
+          ]
+        },
+        {
+          "heading": "Build, then remove the scaffolding",
+          "paragraphs": [
+            "Implement the smallest version that satisfies the exercise. If you need help, ask for a hint about the failing idea before requesting a full answer. A useful hint narrows the next experiment without completing it for you. When you do inspect a solution, close it and reproduce the approach in a fresh file. Explain each decision as you type.",
+            "Next, vary the requirement. Turn a minimum into a maximum. Preserve input order. Reject invalid values instead of silently filtering them. Support one more state. A copied answer often breaks under this small pressure; a learned idea transfers. Keep the original and variant together so you can explain what changed and why."
+          ]
+        },
+        {
+          "heading": "Leave a trail for your future self",
+          "paragraphs": [
+            "End with a tiny learning receipt: the rule you learned, the mistake you made, and the test that now protects you. Three precise sentences beat a page of copied definitions. Add a short “next experiment” so the next session starts with action instead of searching for motivation. Save the code even when it is incomplete; name the unresolved question.",
+            "Revisit the exercise after a day, then a week. Rebuild without notes before checking them. If retrieval is difficult, shrink the task and try again. Use the progress tracker as a record of completed work, not proof of mastery. Your stronger evidence is a working program, meaningful tests, and an explanation you can give without reading a solution."
+          ]
+        },
+        {
+          "heading": "A session you can actually finish",
+          "paragraphs": [
+            "For a 60-minute session, spend ten minutes reading, five predicting, twenty-five implementing, ten testing, and ten reflecting. These are starting allocations, not a speed contest. A difficult bug may deserve the whole session if you can leave a reproduction and a clear hypothesis. On a tired day, make one prediction and run one experiment. Keeping the loop intact matters more than collecting another completed video."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "values-identity",
+      "title": "The bug hiding between “a value” and “the same value”",
+      "subtitle": "An ownership model for objects, arrays, copies, and changes.",
+      "minutes": 7,
+      "tags": [
+        "Mental models",
+        "Objects",
+        "Stage 2"
+      ],
+      "body": [
+        {
+          "heading": "Name the thing that can change",
+          "paragraphs": [
+            "Imagine two teammates editing the same shopping list. Giving the list a second name does not create a second list. In JavaScript, assigning an object to another variable copies the reference value. Both bindings can now lead to one object. This distinction explains a large class of surprising bugs: the code changed the object you expected to be shared, but also the object you expected to be independent.",
+            "Primitive values such as numbers and strings behave differently from mutable objects. Reassigning a numeric variable changes the binding; it does not mutate the number another binding holds. A const declaration prevents reassignment of its binding. It does not freeze the object stored there. Read “constant binding,” not “everything reachable from this name is immutable.”"
+          ],
+          "code": "const original = { settings: { theme: \"dark\" } };\nconst alias = original;\nalias.settings.theme = \"light\";\nconsole.log(original.settings.theme); // light"
+        },
+        {
+          "heading": "Draw arrows before writing fixes",
+          "paragraphs": [
+            "When a state bug appears, draw each binding as a label and each object as a box. Use arrows for references. An assignment can add an arrow; a property write can change a box. A shallow copy creates a new outer box while retaining arrows to nested objects. This simple sketch is often more informative than staring at a console tree that may show values after later mutations.",
+            "Object spread and array spread are useful, but they are not general deep-copy operations. If you copy a record containing an array, the outer objects can be different while their arrays remain shared. Decide which level your operation owns. If your function updates a nested address, copying only the person record is insufficient to preserve the original address."
+          ]
+        },
+        {
+          "heading": "Make ownership part of the contract",
+          "paragraphs": [
+            "Give a transformation an explicit contract: “returns a new array and does not modify the input.” Then test that promise. Save a representation of the input before calling the function and compare afterward. For nested data, also inspect the relevant nested references. The right test depends on the intended boundary; unnecessary deep copying can conceal a confused design.",
+            "A mutation is not automatically a mistake. Updating a local accumulator inside a function can be easy to understand and efficient. Trouble begins when callers cannot tell what they own after a call. Prefer clear names and documentation over an ideological rule. A function named sortInPlace should communicate a different promise from sortedCopy."
+          ],
+          "code": "function renamePerson(person, name) {\n  return { ...person, name };\n}\nconst before = { name: \"Mira\", score: 10 };\nconst after = renamePerson(before, \"Noa\");\nconsole.assert(before.name === \"Mira\");\nconsole.assert(after !== before);"
+        },
+        {
+          "heading": "Design the experiment",
+          "paragraphs": [
+            "Build a tiny roster containing two people and nested preferences. Create an alias, a shallow copy, and a copy with an independently copied preferences object. Change one nested property through each version. Predict every result before execution. Repeat with an array of records. Explain which identities stayed equal and why.",
+            "Then write a reducer that renames one person by identifier. Preserve the array and all unaffected person objects; replace only the changed person. Test missing identifiers and duplicate identifiers according to an explicit policy. This exercise connects a language mechanism to a realistic interface update and forces you to decide what “unchanged” means."
+          ]
+        },
+        {
+          "heading": "Keep the model small",
+          "paragraphs": [
+            "You do not need a sophisticated state library to understand ownership. You need to identify shared objects, decide who may change them, and make that decision visible at function boundaries. When reviewing code, ask two questions: “Which object does this line change?” and “Who else can observe that object?” Those questions remain useful as the application grows. Consult the MDN JavaScript Guide in the library for object and array behavior."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "debug-experiment",
+      "title": "Debugging is an experiment you can repeat",
+      "subtitle": "A workflow for finding the cause instead of collecting plausible edits.",
+      "minutes": 7,
+      "tags": [
+        "Debugging",
+        "Developer tools",
+        "All stages"
+      ],
+      "body": [
+        {
+          "heading": "Write the discrepancy",
+          "paragraphs": [
+            "“The app is broken” gives you no search boundary. “Submitting a blank quantity creates a line item with zero units” does. Record the exact input, expected behavior, actual behavior, and shortest action sequence that reveals the difference. Include whether the problem survives a reload and whether it depends on saved data. This first artifact is already useful to another developer.",
+            "Freeze the experiment while you investigate. Keep the input, browser state, and execution path stable. If the bug happens intermittently, add a record of event order or request identifiers. Do not erase the state that triggers it before capturing enough evidence to rebuild it. The goal is a repeatable observation, not a screenshot of an accident."
+          ]
+        },
+        {
+          "heading": "Separate observations from stories",
+          "paragraphs": [
+            "An observation is “the handler receives the string 12.” A story is “the browser converted the number incorrectly.” Write both in separate columns. Then propose the smallest inspection that distinguishes your story from alternatives. A breakpoint before the conversion may reveal that the input was always a string. An inspected network response may show that the server returned a different shape.",
+            "Choose the tool that exposes the boundary. Use the debugger for scope and call order, the network panel for request and response behavior, and a focused unit test for a transformation. Console output is useful when it includes context: identifier, state, and time. A hundred unlabelled values make a noisy diary rather than evidence."
+          ]
+        },
+        {
+          "heading": "Reduce before repairing",
+          "paragraphs": [
+            "Remove unrelated code until the failure becomes easy to explain. Can you reproduce it with one function and three records? Can you replace the network with a fixed response? Can you remove styling while keeping the same keyboard failure? Each reduction tests whether a suspected dependency is necessary. Keep a copy of the original reproduction so you can confirm the final fix in context.",
+            "Use a change budget of one hypothesis at a time. If you alter parsing, rendering, and event handling together, a successful result does not tell you which change helped. Small edits also make reversals inexpensive. Write down what outcome would disprove your hypothesis before running the experiment."
+          ]
+        },
+        {
+          "heading": "Fix the rule, then protect it",
+          "paragraphs": [
+            "Suppose a blank text field becomes zero after conversion. The defect may be the order of validation: the program discarded the distinction between blank input and a valid numeric zero. Fix the contract at that boundary. Do not special-case the display after the invalid value has spread through the application. Add cases for blank input, whitespace, zero, a valid positive number, and invalid text.",
+            "After the focused test passes, replay the original user action. A correct helper function can still be wired into the wrong event or called with stale state. Then inspect the nearest neighboring behavior. This is a deliberate regression check, not a reason to rerun every possible test forever."
+          ],
+          "code": "function parseQuantity(text) {\n  if (typeof text !== \"string\" || text.trim() === \"\") {\n    throw new Error(\"Enter a quantity\");\n  }\n  const quantity = Number(text);\n  if (!Number.isInteger(quantity) || quantity < 0) {\n    throw new Error(\"Use a non-negative whole number\");\n  }\n  return quantity;\n}"
+        },
+        {
+          "heading": "Finish with a causal explanation",
+          "paragraphs": [
+            "A useful bug note has four parts: trigger, cause, fix, and prevention. “Added validation” is weaker than “blank input was converted before emptiness was checked; validation now preserves that distinction.” Save the smallest reproduction and its test. Over time, these notes become a personal map of the assumptions you repeatedly miss. The Chrome DevTools tutorial in the library provides a practical starting point for breakpoints and stepping."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "function-boundaries",
+      "title": "Write functions that tell the truth",
+      "subtitle": "Use contracts, explicit dependencies, and small modules to make code easier to reason about.",
+      "minutes": 7,
+      "tags": [
+        "Architecture",
+        "Functions",
+        "Stage 3"
+      ],
+      "body": [
+        {
+          "heading": "Begin with a promise",
+          "paragraphs": [
+            "A function is a promise to its caller. A useful promise states which inputs it accepts, which result it returns, what errors it can produce, and whether it changes anything outside itself. You do not need a formal specification for every helper, but you should be able to say that promise aloud. If the explanation requires a tour of the whole application, the boundary may be carrying too much responsibility.",
+            "Consider a function named saveTask. Does it validate a title, generate an identifier, write storage, send a request, and repaint the screen? These actions have different reasons to change. Start by making the policy visible: what counts as a valid task, and what should happen when persistence fails? Only then choose how to divide the implementation."
+          ]
+        },
+        {
+          "heading": "Keep decisions close and effects explicit",
+          "paragraphs": [
+            "A pure transformation is easy to experiment with because its result depends on its arguments. Network requests, clocks, randomness, browser storage, and DOM writes introduce other inputs or effects. They are necessary, but hiding them inside every helper makes reproduction harder. A practical design keeps the core decision testable and performs effects at a clear boundary.",
+            "For example, calculate an overdue status from a task and a supplied timestamp. Let the caller decide where that timestamp comes from. The test can now describe a precise instant without waiting for midnight. You have not made the code abstract for its own sake; you have removed an uncontrolled variable from the question you want to test."
+          ],
+          "code": "function isOverdue(task, nowMs) {\n  return task.status !== \"done\" && task.dueAt < nowMs;\n}\nconst task = { status: \"open\", dueAt: 1000 };\nconsole.assert(isOverdue(task, 1001));\nconsole.assert(!isOverdue(task, 1000));"
+        },
+        {
+          "heading": "Choose data before patterns",
+          "paragraphs": [
+            "Write three examples of real input data before creating a class hierarchy. Often an array of records and a few functions express the domain clearly. Use a class when grouping state with operations protects a meaningful invariant, such as a queue capacity that cannot be exceeded. Inheritance should solve an actual substitution problem; composition is often easier to adjust during early exploration.",
+            "Closures offer another way to keep private state. A factory can return a small public interface while retaining a variable internally. The important question is not whether classes or factories win universally. It is whether a reader can discover the allowed operations and whether those operations preserve the stated rules."
+          ]
+        },
+        {
+          "heading": "Make modules small for a reason",
+          "paragraphs": [
+            "Divide modules by responsibility rather than by arbitrary line count. A parser, a domain model, and a storage adapter have understandable boundaries. A folder of miscellaneous helpers often becomes a place where dependencies hide. Name exports around the problem being solved and keep implementation details private until another module has a concrete need for them.",
+            "Avoid a module that both defines low-level data and imports the entire interface that consumes it. Draw arrows between modules. If arrows loop back unexpectedly, extract the shared contract or pass a dependency explicitly. Do not introduce an elaborate framework just to remove a small cycle."
+          ]
+        },
+        {
+          "heading": "Review the interface as a customer",
+          "paragraphs": [
+            "Create a new file and use your module without looking inside it. Can you discover the correct call from its name and documentation? What happens with an empty collection or invalid record? Can you replace storage with an in-memory implementation for a test? This exercise reveals whether the public interface communicates the design you intended.",
+            "For the stage 3 project, include one usage example, one invalid-input example, and one invariant test per exported operation. The goal is a module another developer could trust after reading a short README. Consult the modules and closures references in the library when implementation details become uncertain."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "async-state",
+      "title": "Async code is a state problem",
+      "subtitle": "Reason about requests, ordering, cancellation, and what the user should see.",
+      "minutes": 7,
+      "tags": [
+        "Async",
+        "Promises",
+        "Stage 4"
+      ],
+      "body": [
+        {
+          "heading": "Start with the states",
+          "paragraphs": [
+            "A search interface can be idle, loading, successful with results, successful without results, or failed. Those states exist whether your implementation uses promise chains or async functions. Name them before writing a request. For each state, decide what remains visible, which actions are available, and what transition comes next. This prevents a spinner from becoming your entire error strategy.",
+            "Now add a timeline. The user types one query, then changes it. The second response arrives first. If both responses are allowed to render unconditionally, the screen can display an old answer for the new query. Nothing is wrong with the individual requests. The defect is that the application has no rule for which result still matters."
+          ]
+        },
+        {
+          "heading": "Own the result you render",
+          "paragraphs": [
+            "Give each request a sequence number or another identity. Before applying a result, check whether it still belongs to the current request. Cancellation can reduce wasted work, but identity checks also express the rendering rule. A cancelled operation may already have completed, and not every asynchronous abstraction supports cancellation.",
+            "Keep error and cleanup paths subject to the same ownership rule. An old request should not clear the loading indicator for a newer request or replace its useful content with an obsolete error. Model success, failure, and finalization as transitions associated with a particular operation."
+          ],
+          "code": "let latest = 0;\nasync function search(query) {\n  const request = ++latest;\n  render({ status: \"loading\", query });\n  try {\n    const items = await findItems(query);\n    if (request === latest) render({ status: \"success\", query, items });\n  } catch (error) {\n    if (request === latest) render({ status: \"error\", query, message: error.message });\n  }\n}"
+        },
+        {
+          "heading": "Choose concurrency deliberately",
+          "paragraphs": [
+            "Awaiting one operation before starting the next creates a dependency in time. Sometimes that is necessary: you need an identifier from the first response. Sometimes it is accidental: two unrelated datasets could load concurrently. Draw dependency arrows before choosing Promise.all or sequential awaits. The shortest code is not always the clearest expression of the dependency.",
+            "Consider failure policy too. If one result fails, is the whole screen unusable, or can you show partial data? A combined operation should reflect that product decision. For a larger collection, unrestricted concurrency may overwhelm a service or the browser. A bounded worker pool adds complexity, so introduce it when the workload justifies it and test the maximum number of active jobs."
+          ]
+        },
+        {
+          "heading": "Treat response handling as a boundary",
+          "paragraphs": [
+            "A completed network request does not guarantee a useful application result. Check the response status, parse the expected format, and validate the fields your program uses. A service can return a successful status with missing data, or an error status with a readable body. Keep enough context to diagnose the failure while showing the user a concise recovery action.",
+            "Retries also need a contract. Decide which failures are temporary, how many attempts are allowed, and whether repeating the operation is safe. Retrying a read is different from repeating a purchase or a write. In training projects, prefer predictable fake services until your failure behavior is explicit."
+          ]
+        },
+        {
+          "heading": "Test time without waiting for luck",
+          "paragraphs": [
+            "Use controllable promises to resolve requests in the opposite order from their creation. Assert that only the current result appears. Reject one operation, cancel another, and verify that the interface can recover on the next attempt. A test that passes only when your internet connection is fast is measuring the environment more than your logic.",
+            "The event-loop videos in the library help explain execution order, while the current MDN promises and Fetch guides provide the API details. Your application still needs its own policy for ownership, failure, and recovery. That policy is the most valuable thing to write down before adding another await."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tests-trust",
+      "title": "Tests that earn their place",
+      "subtitle": "Design a small suite around risks, contracts, and regressions.",
+      "minutes": 7,
+      "tags": [
+        "Testing",
+        "Quality",
+        "Stage 6"
+      ],
+      "body": [
+        {
+          "heading": "Name the failure you want to prevent",
+          "paragraphs": [
+            "A test should answer a useful question. “Does this return the same value as my implementation?” is circular. “Can a duplicate import silently double the total?” identifies a risk. Start from the user-facing contract and the mistakes that would violate it. Then choose examples that separate correct behavior from plausible incorrect implementations.",
+            "For a total calculator, ordinary positive values are only the beginning. Empty input, a zero amount, a negative adjustment, and an invalid record probe different assumptions. You do not need every possible value. You need representatives of meaningful categories and boundaries, with a documented policy for each."
+          ]
+        },
+        {
+          "heading": "Test at the cheapest useful boundary",
+          "paragraphs": [
+            "A pure function test can describe a calculation precisely and run quickly. An integration test can verify that parsing, validation, and persistence agree. A browser test can show that a person can complete a workflow with the real controls. These layers answer different questions. Use the least expensive layer that can detect the risk, then add a small number of broader checks for the wiring.",
+            "Do not make every calculation test click through the interface. Equally, do not assume a perfect collection of helper tests proves the submit button works. Choose one valuable end-to-end journey and make it reliable: create a record, find it, edit it, reload, and verify the saved result."
+          ]
+        },
+        {
+          "heading": "Control the inputs you do not see",
+          "paragraphs": [
+            "Time, random identifiers, network responses, and leftover storage can all change a test outcome. Supply a fixed clock, a deterministic identifier generator, or a test-specific adapter when those dependencies affect the behavior under test. Reset owned state between tests. A failure should come with a stable reproduction instead of instructions to rerun until it passes.",
+            "A fake dependency should mimic the contract you rely on, including failure. A storage fake that can never reject does not exercise the recovery path. A request fake that always resolves immediately will miss ordering bugs. Build only the fake behavior needed for the question, then keep one integration check against the real boundary when practical."
+          ]
+        },
+        {
+          "heading": "Prefer assertions a reader can explain",
+          "paragraphs": [
+            "Name the expected result explicitly. If you assert that an output “exists,” a completely wrong output may still pass. If order matters, compare order. If the operation promises not to mutate input, compare input before and after. If an error is part of the contract, test its category or stable message rather than a fragile internal stack trace.",
+            "For a browser test, locate controls by role and accessible name where possible. These selectors connect the test to the interface a person uses. Avoid reaching into a private array when the risk is that a saved task is invisible. Assert the observable result at the relevant boundary."
+          ],
+          "code": "import test from \"node:test\";\nimport assert from \"node:assert/strict\";\n\nfunction sumAmounts(items) {\n  return items.reduce((sum, item) => sum + item.amount, 0);\n}\n\ntest(\"an empty ledger has a zero total\", () => {\n  assert.equal(sumAmounts([]), 0);\n});\ntest(\"an adjustment reduces the total\", () => {\n  assert.equal(sumAmounts([{ amount: 20 }, { amount: -5 }]), 15);\n});"
+        },
+        {
+          "heading": "Make the suite prove its sensitivity",
+          "paragraphs": [
+            "Introduce one deliberate defect, such as removing a duplicate check or reversing a comparison. The relevant test should fail for the expected reason. Restore the code immediately. This small exercise reveals tests that execute code without protecting behavior.",
+            "When a real bug appears, add the smallest regression test that would have caught it. Remove tests that merely freeze incidental formatting or mirror private implementation choices unless those details are contractual. A trustworthy suite is a concise explanation of the product’s promises. The Node test runner and Playwright documentation in the library support the two main execution environments used in this program."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "browser-boundaries",
+      "title": "Every string has a boundary",
+      "subtitle": "Build browser features that treat imported data as data and remain usable when things go wrong.",
+      "minutes": 7,
+      "tags": [
+        "Security",
+        "Browser",
+        "Stage 5"
+      ],
+      "body": [
+        {
+          "heading": "Follow a value through the application",
+          "paragraphs": [
+            "A title can arrive from a form, a query parameter, a JSON import, browser storage, or an API. It may eventually appear inside a card, become part of a URL, or be saved for a later session. Draw that journey. At each step, ask what shape and meaning the next component expects. Security and reliability improve when those expectations are explicit.",
+            "“It came from our storage” is not a guarantee that a value is safe. Old versions may have saved another shape, the user may import a file, and other scripts on the same origin may write data. Validate records when they enter your application model. Keep a small, documented schema rather than allowing arbitrary properties to influence behavior."
+          ]
+        },
+        {
+          "heading": "Choose the right output mechanism",
+          "paragraphs": [
+            "If you intend to display plain text, use a text-oriented DOM API. Parsing a string as HTML gives that string a different kind of power. Avoid introducing that power just to insert a task title. If rich HTML is an actual requirement, use a maintained sanitizer and a clearly defined allowed subset; a homemade replacement of angle brackets is not a general solution.",
+            "Links need their own validation. A string that looks like a link label is different from a navigation destination. Parse the destination with URL and apply the allowed protocol policy for your feature. For a reading list that accepts web links, allowing only http and https is a reasonable starting contract."
+          ],
+          "code": "function webLink(rawUrl, title) {\n  const url = new URL(rawUrl);\n  if (![\"https:\", \"http:\"].includes(url.protocol)) {\n    throw new Error(\"Use an http or https link\");\n  }\n  const anchor = document.createElement(\"a\");\n  anchor.href = url.href;\n  anchor.textContent = title;\n  return anchor;\n}"
+        },
+        {
+          "heading": "Protect the state transition",
+          "paragraphs": [
+            "Before importing data, check its type, version, required fields, and reasonable size. Parse into temporary data first. Show a useful error if validation fails and leave the existing workspace intact. Only replace or merge saved state after the full import has passed. This makes recovery part of the design rather than an apology after data disappears.",
+            "Browser storage is convenient for personal tools, but it is not a secure vault or a backup service. Keep secrets out of a static client. Handle unavailable or full storage, offer an export, and describe the limits honestly. When the program cannot save, the interface should not confidently report that the work is safely persisted."
+          ]
+        },
+        {
+          "heading": "Make failures reachable and readable",
+          "paragraphs": [
+            "A secure interaction still needs to work with a keyboard. Use real buttons for actions, labels for inputs, and clear error text connected to the relevant field. After an action changes the page substantially, decide where focus belongs. A dialog that looks polished but traps a keyboard user in the background is a broken feature.",
+            "Test with long titles, empty lists, unexpected Unicode, and narrow screens. These cases expose assumptions about both data and layout. Do not rely on color alone to communicate a failed save or invalid field. An error should explain the next useful action without requiring the user to inspect a console."
+          ]
+        },
+        {
+          "heading": "Turn the boundary map into tests",
+          "paragraphs": [
+            "Import a title containing literal angle brackets and confirm that it renders as text. Try an unsupported link protocol and verify rejection. Load a malformed record and confirm that existing records survive. Then complete the primary flow using only the keyboard. These are concrete checks you can include in a portfolio review.",
+            "The OWASP DOM guidance and web.dev accessibility course in the library provide deeper treatment. Your responsibility in a small project is to know where untrusted values enter, where they gain meaning, and how a user recovers when the boundary rejects them."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "release-proof",
+      "title": "Ship proof, not just a screenshot",
+      "subtitle": "Turn a training project into a portfolio artifact another developer can evaluate.",
+      "minutes": 7,
+      "tags": [
+        "Portfolio",
+        "Delivery",
+        "Stage 6"
+      ],
+      "body": [
+        {
+          "heading": "Define a stranger’s first five minutes",
+          "paragraphs": [
+            "Imagine a reviewer opening your project with no knowledge of this course. They need to understand the problem, start the application, and complete one meaningful action. A beautiful screenshot helps them decide to look. A working path gives them a reason to trust you. Design those five minutes as carefully as the feature itself.",
+            "Write a short opening paragraph explaining who the tool serves and what it enables. Follow it with exact setup commands, prerequisites, and a sample workflow. Use realistic sample data without personal information. If a service key is required, explain how to supply it locally and provide a deterministic demo mode where practical."
+          ]
+        },
+        {
+          "heading": "Show the decisions behind the result",
+          "paragraphs": [
+            "A useful architecture note answers three questions: where does data enter, where do decisions happen, and where do effects happen? Draw a small diagram or list the module responsibilities. Explain one tradeoff you made, such as local persistence instead of accounts, or bounded concurrency instead of launching every request at once. State what would make you revisit that decision.",
+            "Include one bug story. Describe the trigger, the faulty assumption, the smallest reproduction, and the regression test. This demonstrates a process that a screenshot cannot. Keep it concrete and brief; a reader should be able to open the relevant code and verify your explanation."
+          ]
+        },
+        {
+          "heading": "Build a release checklist from promises",
+          "paragraphs": [
+            "List the behaviors you claim in the README, then attach evidence to each. “Works offline” needs an offline check in the intended environment. “Keyboard accessible” needs a complete keyboard walkthrough and appropriate focus behavior. “Saves progress” needs a reload test and a failure policy. If you have not established a claim, narrow the wording instead of decorating it with confidence.",
+            "Run the project from a clean checkout or a clean directory using only the documented steps. This catches hidden global tools, forgotten files, and machine-specific paths. Check that the final distribution contains the intended assets and does not contain private book PDFs, credentials, local exports, or unrelated downloads."
+          ]
+        },
+        {
+          "heading": "Choose honest measures",
+          "paragraphs": [
+            "Use a project rubric to assess correctness, clarity, resilience, and usability. Record which requirements are complete, which are deferred, and why. Passing your own tests is evidence of covered behavior, not proof that the program has no defects. Note the environments and important cases you actually checked.",
+            "For performance, measure one relevant scenario using a stated dataset and environment. A list rendering ten thousand items, an import of a specific size, or a constrained request queue can produce useful evidence. Do not invent benchmark numbers or claim universal speed from one run. A modest, repeatable measurement is more persuasive."
+          ]
+        },
+        {
+          "heading": "Package an invitation to inspect",
+          "paragraphs": [
+            "Your final delivery should include a runnable application, source, a focused test suite, a setup guide, known limitations, and a short demo script. Add screenshots for orientation, but make the project useful without them. If you publish a hosted version, verify its main flow after publication because a local success does not prove a deployed asset path is correct.",
+            "End the project with a reflection: what you can now do independently, what still requires documentation, and what you would improve with another day. That last question is a good way to choose your next lesson. A portfolio becomes stronger when each artifact demonstrates a new capability rather than repeating the same tutorial with another color palette."
+          ]
+        }
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "id": "dispatch",
+      "title": "Dispatch / a decision engine",
+      "stage": 1,
+      "subtitle": "Turn messy requests into explicit, testable decisions.",
+      "level": "Foundation",
+      "estimatedHours": 6,
+      "brief": "A support team needs consistent routing for incoming requests. Build a pure JavaScript rule engine that accepts severity, customer tier, age in hours, and business-hours status, then returns a queue, response target, and explanation. Define the policy yourself in a decision table before implementing it. The result must be deterministic and must reject invalid input rather than silently inventing defaults.",
+      "deliverables": [
+        "Decision table with at least 12 representative cases",
+        "A runnable function and example dataset",
+        "Boundary-case checks and a short explanation of each rule",
+        "One-page README with input/output contract"
+      ],
+      "milestones": [
+        {
+          "title": "1 · Specify the policy",
+          "tasks": [
+            "Define allowed severity and tier values and the meaning of ageHours.",
+            "Write expected outcomes for ordinary, urgent, zero-age, and invalid inputs before coding.",
+            "Resolve overlapping rules by an explicit precedence order."
+          ]
+        },
+        {
+          "title": "2 · Build the smallest engine",
+          "tasks": [
+            "Implement routeRequest(request) without a browser or network dependency.",
+            "Return an explanation that identifies the winning rule.",
+            "Demonstrate the same input produces the same result on repeated calls."
+          ]
+        },
+        {
+          "title": "3 · Prove the boundary",
+          "tasks": [
+            "Check the exact threshold and values immediately below and above it.",
+            "Reject missing severity, negative age, NaN, and unsupported tiers.",
+            "Walk a reviewer through three cases without reading your implementation."
+          ]
+        }
+      ],
+      "rubric": [
+        {
+          "criterion": "Correct routing and explicit rule precedence",
+          "points": 35
+        },
+        {
+          "criterion": "Boundary validation and useful errors",
+          "points": 25
+        },
+        {
+          "criterion": "Readable functions and meaningful names",
+          "points": 20
+        },
+        {
+          "criterion": "Decision table, examples, and explanation",
+          "points": 20
+        }
+      ],
+      "stretch": [
+        "Add a batch report grouped by queue.",
+        "Make the policy configurable without allowing arbitrary executable code.",
+        "Compare two policy versions and report which requests change queue."
+      ]
+    },
+    {
+      "id": "dataset-studio",
+      "title": "Dataset Studio / records with integrity",
+      "stage": 2,
+      "subtitle": "A small data toolkit that can explain every transformation.",
+      "level": "Foundation → intermediate",
+      "estimatedHours": 10,
+      "brief": "A community organizer receives inconsistent participant records. Build a toolkit to validate, normalize, deduplicate, search, and summarize them. Use a supplied fixture you create with at least 50 records, including intentional duplicates and invalid fields. Preserve the original input and report rejected records with reasons. Keep business rules separate from display formatting.",
+      "deliverables": [
+        "50-record fixture with documented anomalies",
+        "Functions for normalize, deduplicate, query, and summarize",
+        "Before/after report with rejected-record reasons",
+        "Tests for ownership, ordering, and duplicates"
+      ],
+      "milestones": [
+        {
+          "title": "1 · Establish the data contract",
+          "tasks": [
+            "Choose identifier, displayName, email, tags, and joinedAt fields.",
+            "Define a duplicate policy, including which version wins and why.",
+            "Record expected summary counts by hand for a small five-record fixture."
+          ]
+        },
+        {
+          "title": "2 · Implement a pipeline",
+          "tasks": [
+            "Return accepted and rejected records separately.",
+            "Keep stable order where the contract promises it.",
+            "Prove that processing does not modify the original records or their tag arrays."
+          ]
+        },
+        {
+          "title": "3 · Deliver useful queries",
+          "tasks": [
+            "Support case-insensitive name search and tag filtering.",
+            "Summarize counts without losing duplicate or rejection information.",
+            "Show empty, all-invalid, and duplicate-only datasets produce meaningful results."
+          ]
+        }
+      ],
+      "rubric": [
+        {
+          "criterion": "Correct normalization, queries, and summaries",
+          "points": 30
+        },
+        {
+          "criterion": "Duplicate and invalid-record policies",
+          "points": 25
+        },
+        {
+          "criterion": "Ownership and non-mutation guarantees",
+          "points": 20
+        },
+        {
+          "criterion": "Tests and realistic fixtures",
+          "points": 15
+        },
+        {
+          "criterion": "Usage guide and example report",
+          "points": 10
+        }
+      ],
+      "stretch": [
+        "Add CSV export with correct quoting for commas and double quotes.",
+        "Benchmark a 10,000-record synthetic fixture and document the environment.",
+        "Make a configurable pipeline from small functions."
+      ]
+    },
+    {
+      "id": "workflow-sdk",
+      "title": "Workflow Kit / a tiny reusable SDK",
+      "stage": 3,
+      "subtitle": "Design a public interface that protects its own rules.",
+      "level": "Intermediate",
+      "estimatedHours": 12,
+      "brief": "Create an ES module library for a task workflow with open, active, blocked, and done states. The library owns transition rules, identifiers, and task lookup. A small demo consumes only the public exports. Choose a class or a factory deliberately, document the decision, and keep persistence outside the core model. A forbidden transition must leave the task unchanged.",
+      "deliverables": [
+        "ES module library with a documented public API",
+        "State-transition table and invalid-transition examples",
+        "Two independent instances proving state isolation",
+        "Consumer demo, focused tests, and an architecture note"
+      ],
+      "milestones": [
+        {
+          "title": "1 · Specify the interface",
+          "tasks": [
+            "Define add, find, list, and transition operations and their return values.",
+            "Write the allowed transition table before implementation.",
+            "Choose and document error behavior for unknown identifiers and duplicate identifiers."
+          ]
+        },
+        {
+          "title": "2 · Protect the invariants",
+          "tasks": [
+            "Keep independent instances from sharing mutable task state.",
+            "Prevent consumers from accidentally mutating internal records through returned data.",
+            "Ensure a rejected transition cannot partially update a task."
+          ]
+        },
+        {
+          "title": "3 · Test the public promise",
+          "tasks": [
+            "Exercise every allowed transition and at least three forbidden ones.",
+            "Create a second consumer without importing implementation internals.",
+            "Document one design tradeoff and a realistic extension point."
+          ]
+        }
+      ],
+      "rubric": [
+        {
+          "criterion": "Correct transitions and invariant protection",
+          "points": 35
+        },
+        {
+          "criterion": "Clear public API and module boundaries",
+          "points": 25
+        },
+        {
+          "criterion": "Isolation, ownership, and failure behavior",
+          "points": 20
+        },
+        {
+          "criterion": "Consumer demo, tests, and documentation",
+          "points": 20
+        }
+      ],
+      "stretch": [
+        "Add an adapter that persists serialized data without coupling storage to domain logic.",
+        "Expose task history as an iterable.",
+        "Add a versioned serialization format and a migration example."
+      ]
+    },
+    {
+      "id": "research-queue",
+      "title": "Research Queue / resilient async work",
+      "stage": 4,
+      "subtitle": "Collect useful results even when the network behaves badly.",
+      "level": "Intermediate",
+      "estimatedHours": 14,
+      "brief": "Build a research collector that accepts a list of topic identifiers and loads metadata through an injectable asynchronous adapter. Begin with a local fake service that can delay, fail, and return malformed data. Support cancellation, a configurable concurrency limit, visible progress data, and a final report. The engine must remain usable after partial failures.",
+      "deliverables": [
+        "Async collector with an injectable adapter",
+        "Deterministic fake service and failure scenarios",
+        "Per-item results with success, failure, or cancellation state",
+        "Tests for ordering, concurrency, and stale results"
+      ],
+      "milestones": [
+        {
+          "title": "1 · Model the states",
+          "tasks": [
+            "Define queued, running, succeeded, failed, and cancelled items.",
+            "Specify whether output preserves input order or completion order.",
+            "Write the policy for malformed metadata and duplicate topic identifiers."
+          ]
+        },
+        {
+          "title": "2 · Control concurrency",
+          "tasks": [
+            "Ensure active requests never exceed the configured positive integer limit.",
+            "Preserve successful results when another item fails.",
+            "Stop starting new work after cancellation and document how in-flight work behaves."
+          ]
+        },
+        {
+          "title": "3 · Exercise hostile timing",
+          "tasks": [
+            "Resolve requests in a different order from creation and verify the report.",
+            "Reject one request, return malformed data for another, and show both failures distinctly.",
+            "Run a second batch after a failure and prove state from the first cannot contaminate it."
+          ]
+        }
+      ],
+      "rubric": [
+        {
+          "criterion": "Correct result and failure semantics",
+          "points": 30
+        },
+        {
+          "criterion": "Concurrency and cancellation guarantees",
+          "points": 30
+        },
+        {
+          "criterion": "Deterministic tests and realistic scenarios",
+          "points": 25
+        },
+        {
+          "criterion": "Progress contract and documentation",
+          "points": 15
+        }
+      ],
+      "stretch": [
+        "Add capped retry with an explicit retryable-error policy.",
+        "Expose progress through an async iterator.",
+        "Connect one public API adapter while retaining deterministic offline tests."
+      ]
+    },
+    {
+      "id": "field-notes",
+      "title": "Field Notes / a personal research workspace",
+      "stage": 5,
+      "subtitle": "A complete browser tool with thoughtful details.",
+      "level": "Intermediate → advanced",
+      "estimatedHours": 16,
+      "brief": "Build a responsive browser application for collecting notes, tags, and web references. A user can create, edit, search, filter, delete, export, and import records. Data persists locally. Design the empty, loading, validation, and storage-failure states alongside the happy path. Use semantic HTML and plain JavaScript modules so the platform remains visible.",
+      "deliverables": [
+        "Responsive application with a complete CRUD flow",
+        "Local persistence plus versioned JSON export/import",
+        "Keyboard walkthrough and malformed-import checks",
+        "Demo data, screenshots, and a recovery guide"
+      ],
+      "milestones": [
+        {
+          "title": "1 · Build a usable core",
+          "tasks": [
+            "Create and edit a note using labelled controls and visible validation.",
+            "Search titles and body text and combine search with a tag filter.",
+            "Provide an understandable empty result and a way to clear filters."
+          ]
+        },
+        {
+          "title": "2 · Preserve the workspace",
+          "tasks": [
+            "Reload the browser and retain saved records.",
+            "Export, clear a disposable test workspace, and restore from the export.",
+            "Reject an invalid import without overwriting existing records; define replace or merge behavior."
+          ]
+        },
+        {
+          "title": "3 · Review the browser boundaries",
+          "tasks": [
+            "Render imported markup-like titles as text rather than HTML.",
+            "Reject unsupported link protocols and handle storage failures visibly.",
+            "Complete creation, search, edit, and deletion with a keyboard on a narrow layout."
+          ]
+        }
+      ],
+      "rubric": [
+        {
+          "criterion": "Complete and reliable primary workflows",
+          "points": 30
+        },
+        {
+          "criterion": "Persistence, import/export, and recovery",
+          "points": 25
+        },
+        {
+          "criterion": "Keyboard use, responsive layout, and feedback",
+          "points": 25
+        },
+        {
+          "criterion": "Safe rendering and input boundaries",
+          "points": 15
+        },
+        {
+          "criterion": "Clear demo and documentation",
+          "points": 5
+        }
+      ],
+      "stretch": [
+        "Add an undo action for deletion.",
+        "Implement accessible keyboard shortcuts with visible help.",
+        "Add offline support only after defining a cache update strategy."
+      ]
+    },
+    {
+      "id": "signal-desk",
+      "title": "Signal Desk / the release capstone",
+      "stage": 6,
+      "subtitle": "Ship a full application with evidence behind every claim.",
+      "level": "Advanced",
+      "estimatedHours": 24,
+      "brief": "Create a small incident-tracking application with a Node.js API and a browser client. Use synthetic incidents, explicit status transitions, filtering, and a summary dashboard. Persist data using a documented local format or database adapter. Deliver the project so another developer can start it from a clean checkout, run its tests, and inspect one complete workflow. The default scope is a local single-user learning application; authentication and internet deployment are optional extensions.",
+      "deliverables": [
+        "Node API, browser client, and documented persistence model",
+        "Unit and integration tests plus one meaningful browser journey",
+        "Setup guide, architecture note, and release checklist",
+        "Demo script, known limitations, and rubric self-assessment"
+      ],
+      "milestones": [
+        {
+          "title": "1 · Contract before implementation",
+          "tasks": [
+            "Define endpoints, request schemas, response shapes, and error categories.",
+            "Choose an incident lifecycle and reject forbidden state transitions.",
+            "Keep secrets and machine-specific paths out of source and fixtures."
+          ]
+        },
+        {
+          "title": "2 · Integrate a complete journey",
+          "tasks": [
+            "Create an incident, update its state, filter the list, and verify the summary.",
+            "Restart the server and prove documented persistence behavior.",
+            "Handle invalid requests, unknown identifiers, and storage failure without misleading success messages."
+          ]
+        },
+        {
+          "title": "3 · Produce release evidence",
+          "tasks": [
+            "Run the documented setup from a clean directory.",
+            "Cover important domain rules, API validation, and one browser workflow with appropriate tests.",
+            "Demonstrate keyboard access and inspect the distribution for private data."
+          ]
+        },
+        {
+          "title": "4 · Present the work",
+          "tasks": [
+            "Record a five-minute demo script focused on user value and one difficult technical decision.",
+            "Document one real bug and the regression test that protects against it.",
+            "Score the rubric honestly and identify the next improvement with the highest value."
+          ]
+        }
+      ],
+      "rubric": [
+        {
+          "criterion": "Reliable end-to-end behavior and domain rules",
+          "points": 30
+        },
+        {
+          "criterion": "API validation, persistence, and failure handling",
+          "points": 25
+        },
+        {
+          "criterion": "Meaningful automated and manual verification",
+          "points": 20
+        },
+        {
+          "criterion": "Usable interface and accessible interactions",
+          "points": 10
+        },
+        {
+          "criterion": "Reproducible setup, architecture, and release evidence",
+          "points": 15
+        }
+      ],
+      "stretch": [
+        "Add authentication only with an explicit threat model and secure server-side session handling.",
+        "Add a CI workflow that runs the documented checks.",
+        "Deploy a demo with synthetic data and verify the deployed primary flow."
+      ]
+    }
+  ]
+}

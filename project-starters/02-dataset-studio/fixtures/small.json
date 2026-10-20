@@ -1,0 +1,44 @@
+[
+  {
+    "id": "a",
+    "displayName": " Ada ",
+    "email": "ada@example.test",
+    "tags": [
+      "js"
+    ],
+    "joinedAt": "2026-10-01T09:00:00Z"
+  },
+  {
+    "id": "b",
+    "displayName": "Bea",
+    "email": "bea@example.test",
+    "tags": [
+      "js",
+      "web"
+    ],
+    "joinedAt": "2026-10-02T09:00:00Z"
+  },
+  {
+    "id": "a",
+    "displayName": "Ada revised",
+    "email": "ada@example.test",
+    "tags": [
+      "web"
+    ],
+    "joinedAt": "2026-10-03T09:00:00Z"
+  },
+  {
+    "id": "c",
+    "displayName": "   ",
+    "email": "c@example.test",
+    "tags": [],
+    "joinedAt": "2026-10-03T09:00:00Z"
+  },
+  {
+    "id": "d",
+    "displayName": "Dee",
+    "email": "dee@example.test",
+    "tags": [],
+    "joinedAt": "2026-10-04T09:00:00Z"
+  }
+]

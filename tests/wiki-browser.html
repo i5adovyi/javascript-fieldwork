@@ -1,0 +1,22 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Wiki browser verification</title><style>body{font:16px system-ui;background:#f5f3ed;margin:24px}button{padding:12px;font:inherit}pre{white-space:pre-wrap}iframe{width:390px;height:780px;border:1px solid #aaa;background:white;display:block;margin-top:24px}</style><h1>Wiki browser verification</h1><p>Runs the wiki’s self-contained browser and language examples locally. Node and multi-file module examples are checked by validate-wiki.mjs.</p><button id="run">Run browser examples</button><pre id="results" role="status">Ready</pre><label for="preview">Mobile preview route</label><select id="preview"><option value="wiki">Wiki index</option><option value="wiki/promise-concurrency">Promise concurrency</option><option value="lesson/lesson-23">Lesson 23</option></select><iframe id="mobile" title="390 pixel mobile preview" src="/#/wiki"></iframe><script type="module">
+const button=document.querySelector('#run'),results=document.querySelector('#results');
+document.querySelector('#preview').onchange=e=>document.querySelector('#mobile').src='/#/'+e.target.value;
+button.onclick=async()=>{
+ button.disabled=true;results.textContent='Running…';const lines=[];
+ const {wiki}=await(await fetch('/data/wiki.json')).json();
+ for(const article of wiki.filter(a=>['browser','universal'].includes(a.example.runtime))){
+  const actual=[];let failure;
+  const log=(...args)=>actual.push(args.map(String).join(' '));
+  try{
+   const fn=new (Object.getPrototypeOf(async function(){}).constructor)('console',article.example.code);
+   await fn({log,error:(...args)=>{failure=args.join(' ');}});
+   const until=performance.now()+3000;
+   while(actual.join('\n')!==article.example.output&&!failure&&performance.now()<until)await new Promise(resolve=>setTimeout(resolve,20));
+   if(failure||actual.join('\n')!==article.example.output)throw Error(failure||JSON.stringify(actual));
+   lines.push('PASS '+article.id);
+  }catch(e){lines.push('FAIL '+article.id+': '+e.message);}
+  results.textContent=lines.join('\n');
+ }
+ results.textContent+='\n'+lines.filter(x=>x.startsWith('PASS')).length+'/'+lines.length+' passed';button.disabled=false;
+};
+</script></html>

@@ -1,0 +1,2119 @@
+{
+  "wiki": [
+    {
+      "id": "runtime",
+      "title": "Language vs. runtime",
+      "category": "Foundations",
+      "stage": 1,
+      "chapter": 1,
+      "sections": [
+        {
+          "ref": "1.1",
+          "pdfPage": 41
+        },
+        {
+          "ref": "1.3",
+          "pdfPage": 44
+        }
+      ],
+      "summary": "Know which capabilities come from JavaScript and which come from its host.",
+      "rule": "JavaScript defines the language; the browser or Node supplies the surrounding APIs.",
+      "details": [
+        "Arrays, functions, objects, and promises are language features. The document object belongs to a browser page; filesystem access belongs to Node. A worker can run JavaScript without having access to the page DOM.",
+        "Keep calculations and data transformations in functions that receive inputs and return outputs. Put DOM access, files, and network operations at the boundary. This makes the same core behavior easier to reuse and test."
+      ],
+      "useWhen": [
+        "Diagnosing “document is not defined” in a Node program.",
+        "Sharing validation or transformations between a UI and a script."
+      ],
+      "pitfalls": [
+        "A shared language does not mean every global API exists in every runtime.",
+        "Running a file and typing an expression into a console can display results differently; use console.log for explicit output.",
+        "Code that performs I/O as soon as it is imported is harder to test in isolation."
+      ],
+      "example": {
+        "runtime": "universal",
+        "code": "function passedCount(results) {\n  return results.filter(result => result.passed).length;\n}\nconsole.log(passedCount([{passed: true}, {passed: false}]));",
+        "output": "1",
+        "explanation": "This calculation has no dependency on a page or filesystem. A browser or Node can provide its inputs."
+      },
+      "related": [
+        "modules",
+        "functions",
+        "testing-tools"
+      ],
+      "lessonNumbers": [
+        1,
+        25,
+        31
+      ],
+      "keywords": [
+        "environment",
+        "browser",
+        "node",
+        "console",
+        "globals"
+      ]
+    },
+    {
+      "id": "syntax",
+      "title": "Syntax, return & line breaks",
+      "category": "Foundations",
+      "stage": 1,
+      "chapter": 2,
+      "sections": [
+        {
+          "ref": "2.6",
+          "pdfPage": 66
+        }
+      ],
+      "summary": "Avoid invisible behavior changes caused by automatic semicolon insertion.",
+      "rule": "Keep the expression returned by a function on the same line as return, or start parentheses there.",
+      "details": [
+        "Line breaks do not always end JavaScript statements. A following parenthesis or bracket can continue the previous expression. Use a consistent formatting style and explicit statement boundaries.",
+        "A newline immediately after return ends that return statement. An object on the next line will not be returned. Arrow functions that return an object expression need parentheses around the object to distinguish it from a function body."
+      ],
+      "useWhen": [
+        "A function unexpectedly returns undefined.",
+        "Refactoring long expressions across lines."
+      ],
+      "pitfalls": [
+        "A newline after throw is a syntax error; do not split throw from its expression.",
+        "An arrow body with braces needs an explicit return unless those braces are wrapped as an object expression.",
+        "A formatter helps keep code consistent, but tests verify what it does."
+      ],
+      "example": {
+        "runtime": "universal",
+        "code": "function broken() {\n  return\n  { ready: true };\n}\nconst working = () => ({ ready: true });\nconsole.log(broken());\nconsole.log(working().ready);",
+        "output": "undefined\ntrue",
+        "explanation": "The first function returns before the next line. The arrow explicitly returns an object."
+      },
+      "related": [
+        "functions",
+        "control-flow"
+      ],
+      "lessonNumbers": [
+        1,
+        2,
+        9
+      ],
+      "keywords": [
+        "semicolon",
+        "ASI",
+        "return",
+        "arrow"
+      ]
+    },
+    {
+      "id": "values-types",
+      "title": "Values, identity & mutation",
+      "category": "Foundations",
+      "stage": 1,
+      "chapter": 3,
+      "sections": [
+        {
+          "ref": "3.1",
+          "pdfPage": 71
+        },
+        {
+          "ref": "3.8",
+          "pdfPage": 105
+        }
+      ],
+      "summary": "Understand why changing one variable can appear to change another.",
+      "rule": "Assignment copies a value. For an object, that value is a reference to the same object.",
+      "details": [
+        "Primitives—undefined, null, booleans, numbers, bigints, strings, and symbols—are immutable. Reassigning a variable changes its binding; it does not mutate the primitive it previously held.",
+        "Objects, arrays, and functions have identity. Two separately created objects are not strictly equal even if their properties match. Copying an object with spread creates a new outer object, but nested object references are still shared."
+      ],
+      "useWhen": [
+        "Updating application state without changing the previous state.",
+        "Explaining why two identical-looking API responses fail an identity comparison."
+      ],
+      "pitfalls": [
+        "const prevents reassignment, not changes to object properties.",
+        "typeof null is \"object\"; test null directly. Arrays also report \"object\"; use Array.isArray.",
+        "A shallow copy is not a recursively independent copy."
+      ],
+      "example": {
+        "runtime": "universal",
+        "code": "const original = { settings: { retries: 1 } };\nconst copy = { ...original };\ncopy.settings.retries = 3;\nconsole.log(original === copy);\nconsole.log(original.settings.retries);",
+        "output": "false\n3",
+        "explanation": "The outer objects differ, but both settings properties refer to one nested object."
+      },
+      "related": [
+        "objects",
+        "equality-coercion",
+        "arrays"
+      ],
+      "lessonNumbers": [
+        2,
+        7,
+        12
+      ],
+      "keywords": [
+        "primitive",
+        "reference",
+        "copy",
+        "shallow",
+        "const",
+        "typeof"
+      ]
+    },
+    {
+      "id": "numbers",
+      "title": "Numbers, NaN & precision",
+      "category": "Foundations",
+      "stage": 1,
+      "chapter": 3,
+      "sections": [
+        {
+          "ref": "3.2.3",
+          "pdfPage": 78
+        },
+        {
+          "ref": "3.2.4",
+          "pdfPage": 82
+        }
+      ],
+      "summary": "Validate numeric inputs and account for floating-point approximation.",
+      "rule": "Number uses binary floating point. Check numeric boundaries explicitly instead of assuming conversion means validity.",
+      "details": [
+        "Number(text) converts the entire string; invalid numeric text produces NaN. Number.isFinite(value) accepts finite numbers without coercing strings. Number.isNaN(value) identifies NaN itself.",
+        "Many decimal fractions cannot be represented exactly. Choose an error tolerance appropriate to the scale of a calculation. Integer quantities are exact only within the safe integer range. BigInt supports larger integers, but it is a separate type with integer division."
+      ],
+      "useWhen": [
+        "Validating a retry count or duration entered as text.",
+        "Comparing calculated measurements or working with large integer identifiers."
+      ],
+      "pitfalls": [
+        "Number(\"\") and Number(\"   \") return 0; reject blank input before conversion when blank means missing.",
+        "NaN is not equal to itself, and division of Number values by zero can produce Infinity.",
+        "Do not mix Number and BigInt in arithmetic without an intentional conversion; converting a large BigInt to Number may lose information."
+      ],
+      "example": {
+        "runtime": "universal",
+        "code": "function parseRetries(text) {\n  if (text.trim() === \"\") throw new TypeError(\"Retries required\");\n  const value = Number(text);\n  if (!Number.isSafeInteger(value) || value < 0) {\n    throw new RangeError(\"Expected a nonnegative safe integer\");\n  }\n  return value;\n}\nconsole.log(parseRetries(\"3\"));\nconsole.log(0.1 + 0.2 === 0.3);\nconsole.log(Number.isNaN(Number(\"invalid\")));",
+        "output": "3\nfalse\ntrue",
+        "explanation": "Conversion and domain validation are separate steps. The second line exposes floating-point rounding."
+      },
+      "related": [
+        "equality-coercion",
+        "errors"
+      ],
+      "lessonNumbers": [
+        2,
+        3,
+        6,
+        19
+      ],
+      "keywords": [
+        "NaN",
+        "Infinity",
+        "BigInt",
+        "precision",
+        "Number",
+        "parseInt"
+      ]
+    },
+    {
+      "id": "strings",
+      "title": "Strings & Unicode",
+      "category": "Foundations",
+      "stage": 1,
+      "chapter": 3,
+      "sections": [
+        {
+          "ref": "3.3",
+          "pdfPage": 86
+        },
+        {
+          "ref": "3.3.3",
+          "pdfPage": 91
+        }
+      ],
+      "summary": "Transform text without confusing code units with visible characters.",
+      "rule": "String methods return new strings; length and indexes count UTF-16 code units.",
+      "details": [
+        "Use trim, includes, startsWith, slice, and template literals for straightforward text work. Keep the returned value: calling trim() alone does not change the original string.",
+        "A Unicode character can occupy two UTF-16 code units. Iterating a string with for...of or spread handles code points, but even code points are not always complete visual characters: accents and emoji sequences can combine multiple code points."
+      ],
+      "useWhen": [
+        "Cleaning user input before validation.",
+        "Comparing imported names or debugging unexpected string lengths."
+      ],
+      "pitfalls": [
+        "Indexing or slicing can split a surrogate pair.",
+        "Visually identical text may have different Unicode representations; normalize when your comparison contract requires it.",
+        "Lowercasing is not a universal substitute for locale-aware text comparison."
+      ],
+      "example": {
+        "runtime": "universal",
+        "code": "const raw = \"  Ready  \";\nconst cleaned = raw.trim().toLowerCase();\nconsole.log(cleaned);\nconsole.log(raw.length);\nconsole.log(\"😀\".length);\nconsole.log([...\"😀\"].length);",
+        "output": "ready\n9\n2\n1",
+        "explanation": "The input stays intact. The emoji occupies two code units but one code point."
+      },
+      "related": [
+        "regex",
+        "equality-coercion"
+      ],
+      "lessonNumbers": [
+        2,
+        20
+      ],
+      "keywords": [
+        "Unicode",
+        "UTF-16",
+        "text",
+        "trim",
+        "template literals"
+      ]
+    },
+    {
+      "id": "equality-coercion",
+      "title": "Equality & explicit conversion",
+      "category": "Foundations",
+      "stage": 1,
+      "chapter": 4,
+      "sections": [
+        {
+          "ref": "3.9.1",
+          "pdfPage": 110
+        },
+        {
+          "ref": "4.9.1",
+          "pdfPage": 166
+        }
+      ],
+      "summary": "Compare values without hiding type mismatches.",
+      "rule": "Use === for routine comparisons, and convert external inputs deliberately at the boundary.",
+      "details": [
+        "Strict equality compares without type coercion. Loose equality can convert operands, so values such as a numeric string and a number may compare equal even when a type mismatch would be useful to detect.",
+        "Equality is a choice of contract: object identity, selected property values, and deep structural equality are different questions. For an ID read from a form, decide whether its representation is a string or a number before comparing it to stored IDs."
+      ],
+      "useWhen": [
+        "Comparing form input with a numeric value.",
+        "Writing assertions that should detect incorrect result types."
+      ],
+      "pitfalls": [
+        "Two distinct objects are never === merely because their contents match.",
+        "NaN === NaN is false; use Number.isNaN. Object.is distinguishes signed zero and considers NaN equal to itself.",
+        "Truthy does not mean equal to true; empty arrays and empty objects are truthy."
+      ],
+      "example": {
+        "runtime": "universal",
+        "code": "const input = \"12\";\nconsole.log(input === 12);\nconsole.log(Number(input) === 12);\nconsole.log(Boolean([]));\nconsole.log({ id: 12 } === { id: 12 });",
+        "output": "false\ntrue\ntrue\nfalse",
+        "explanation": "The comparisons make type conversion and object identity visible."
+      },
+      "related": [
+        "values-types",
+        "operators",
+        "numbers"
+      ],
+      "lessonNumbers": [
+        2,
+        3
+      ],
+      "keywords": [
+        "===",
+        "==",
+        "coercion",
+        "truthy",
+        "falsy",
+        "Object.is"
+      ]
+    },
+    {
+      "id": "scope",
+      "title": "Scope, const, let & closures",
+      "category": "Foundations",
+      "stage": 1,
+      "chapter": 3,
+      "sections": [
+        {
+          "ref": "3.10",
+          "pdfPage": 122
+        }
+      ],
+      "summary": "Identify which binding a name refers to and when it becomes usable.",
+      "rule": "let and const are block scoped; var is scoped to its function or script rather than a loop block.",
+      "details": [
+        "A binding declared with let or const cannot be accessed before its declaration is initialized. This interval is called the temporal dead zone. Declaring the same name in a nested block creates a separate binding and shadows the outer one.",
+        "A for loop using let gives callbacks a distinct loop binding for each iteration. With var, callbacks share the same function-scoped binding and usually see its final value when called later."
+      ],
+      "useWhen": [
+        "Creating callbacks inside a loop.",
+        "Reducing accidental changes and debugging shadowed names."
+      ],
+      "pitfalls": [
+        "const objects can still be mutated.",
+        "Moving a declaration lower in a block can make earlier reads throw even if an outer variable has the same name.",
+        "A closure retains access to bindings, not a frozen snapshot of all values."
+      ],
+      "example": {
+        "runtime": "universal",
+        "code": "const callbacks = [];\nfor (let index = 0; index < 3; index++) {\n  callbacks.push(() => index);\n}\nconsole.log(JSON.stringify(callbacks.map(read => read())));",
+        "output": "[0,1,2]",
+        "explanation": "Each callback closes over its own iteration binding."
+      },
+      "related": [
+        "closures",
+        "values-types",
+        "modules"
+      ],
+      "lessonNumbers": [
+        2,
+        5,
+        6,
+        10,
+        16
+      ],
+      "keywords": [
+        "let",
+        "const",
+        "var",
+        "hoisting",
+        "TDZ",
+        "shadowing"
+      ]
+    },
+    {
+      "id": "operators",
+      "title": "Defaults & optional chaining",
+      "category": "Foundations",
+      "stage": 1,
+      "chapter": 4,
+      "sections": [
+        {
+          "ref": "4.4.1",
+          "pdfPage": 141
+        },
+        {
+          "ref": "4.10",
+          "pdfPage": 174
+        },
+        {
+          "ref": "4.13.2",
+          "pdfPage": 188
+        }
+      ],
+      "summary": "Read optional data and apply defaults while preserving valid falsy values.",
+      "rule": "Use ?? for null or undefined defaults; use ?. only where a missing value is an expected case.",
+      "details": [
+        "The operators && and || short-circuit and return an operand, which is not necessarily a boolean. || chooses a fallback for all falsy values, including 0, false, and the empty string. ?? chooses its fallback only for null and undefined.",
+        "Optional chaining stops a continuous property-access chain when its guarded receiver is nullish. It does not validate the type of the data, and it does not turn an undeclared identifier into a defined one."
+      ],
+      "useWhen": [
+        "Applying defaults to an API response or optional settings.",
+        "Reading a nested property that may legitimately be absent."
+      ],
+      "pitfalls": [
+        "A zero timeout may be deliberate; replacing it with || changes its meaning.",
+        "Place guards at the levels that may be missing: value?.profile?.name.",
+        "Mixing ?? directly with && or || requires parentheses."
+      ],
+      "example": {
+        "runtime": "universal",
+        "code": "const options = { retries: 0, user: null };\nconsole.log(options.retries ?? 2);\nconsole.log(options.retries || 2);\nconsole.log(options.user?.name ?? \"Guest\");",
+        "output": "0\n2\nGuest",
+        "explanation": "Nullish defaults preserve zero; optional chaining makes the missing user explicit."
+      },
+      "related": [
+        "equality-coercion",
+        "objects",
+        "functions"
+      ],
+      "lessonNumbers": [
+        3,
+        4,
+        7,
+        11
+      ],
+      "keywords": [
+        "??",
+        "?.",
+        "nullish",
+        "optional chaining",
+        "default",
+        "short circuit"
+      ]
+    },
+    {
+      "id": "control-flow",
+      "title": "Conditions & choosing a loop",
+      "category": "Foundations",
+      "stage": 1,
+      "chapter": 5,
+      "sections": [
+        {
+          "ref": "5.3",
+          "pdfPage": 202
+        },
+        {
+          "ref": "5.4.4",
+          "pdfPage": 215
+        }
+      ],
+      "summary": "Make decisions explicit and select the right iteration behavior.",
+      "rule": "Use for...of for iterable values; use Object.entries with for...of for own enumerable string-keyed properties.",
+      "details": [
+        "Guard clauses let a function reject invalid or irrelevant input early. For branches, if/else chooses one path; switch selects a case by strict equality and continues through later cases unless control exits.",
+        "Use a regular loop when you need break, continue, or sequential await. for...in enumerates string property names, including inherited enumerable properties, so it is usually a poor choice for processing array values."
+      ],
+      "useWhen": [
+        "Finding the first failing check and stopping immediately.",
+        "Processing the entries of a configuration object."
+      ],
+      "pitfalls": [
+        "A switch case without break or return can fall through.",
+        "forEach has no ordinary break and does not wait for an async callback.",
+        "An empty array is truthy; use its length to test whether it has elements."
+      ],
+      "example": {
+        "runtime": "universal",
+        "code": "const results = [{name: \"login\", ok: true}, {name: \"checkout\", ok: false}];\nlet failed = \"none\";\nfor (const result of results) {\n  if (result.ok) continue;\n  failed = result.name;\n  break;\n}\nconsole.log(failed);",
+        "output": "checkout",
+        "explanation": "The loop skips passing checks and exits at the first failure."
+      },
+      "related": [
+        "array-methods",
+        "iterators",
+        "async-await"
+      ],
+      "lessonNumbers": [
+        4,
+        5,
+        6,
+        21
+      ],
+      "keywords": [
+        "for",
+        "while",
+        "switch",
+        "break",
+        "continue",
+        "for...in",
+        "for...of"
+      ]
+    },
+    {
+      "id": "errors",
+      "title": "Errors & cleanup",
+      "category": "Foundations",
+      "stage": 1,
+      "chapter": 5,
+      "sections": [
+        {
+          "ref": "5.5.6",
+          "pdfPage": 231
+        },
+        {
+          "ref": "5.5.7",
+          "pdfPage": 232
+        }
+      ],
+      "summary": "Expose failures clearly and put cleanup on every exit path.",
+      "rule": "Throw Error objects for exceptional failures; catch where you can recover or add a useful boundary response.",
+      "details": [
+        "An exception stops normal execution until a matching catch handles it. Use specific error types such as TypeError or RangeError to describe a violated contract. A catch that silently ignores everything can turn an obvious failure into incorrect data.",
+        "finally runs when control leaves try/catch, including on return or throw. It is the right place for synchronous resource cleanup. For rejected promises, await inside try or return a chain with catch so the error reaches the intended handler."
+      ],
+      "useWhen": [
+        "Rejecting an unsupported input before changing state.",
+        "Restoring a loading flag or releasing a resource after success or failure."
+      ],
+      "pitfalls": [
+        "A return or throw in finally can replace the original result or error.",
+        "A surrounding synchronous try does not catch a timer callback that throws later.",
+        "Do not convert every failure into an empty success value; callers may need to react."
+      ],
+      "example": {
+        "runtime": "universal",
+        "code": "let busy = true;\ntry {\n  throw new TypeError(\"Expected an array\");\n} catch (error) {\n  console.log(error.name);\n} finally {\n  busy = false;\n}\nconsole.log(busy);",
+        "output": "TypeError\nfalse",
+        "explanation": "Cleanup executes even when the main operation fails."
+      },
+      "related": [
+        "promises",
+        "async-await",
+        "functions"
+      ],
+      "lessonNumbers": [
+        4,
+        6,
+        9,
+        14,
+        22,
+        33
+      ],
+      "keywords": [
+        "try",
+        "catch",
+        "finally",
+        "throw",
+        "TypeError",
+        "cleanup"
+      ]
+    },
+    {
+      "id": "objects",
+      "title": "Object properties & safe updates",
+      "category": "Data & functions",
+      "stage": 2,
+      "chapter": 6,
+      "sections": [
+        {
+          "ref": "6.5",
+          "pdfPage": 268
+        },
+        {
+          "ref": "6.10.4",
+          "pdfPage": 284
+        }
+      ],
+      "summary": "Distinguish missing properties, inherited properties, and shared nested state.",
+      "rule": "Check ownership when it matters, and copy every level you intend to change independently.",
+      "details": [
+        "Reading a property can find an inherited value through the prototype chain. The in operator includes inherited properties. To test ownership using the book’s APIs, call Object.prototype.hasOwnProperty.call(object, key); this also works when the object has no prototype or shadows that method.",
+        "Object spread copies own enumerable properties into a new object. Later properties win. It does not clone the prototype, property descriptors, or nested objects. Use explicit nested copies for a small immutable state update."
+      ],
+      "useWhen": [
+        "Merging defaults with explicit user settings.",
+        "Updating one nested field while preserving earlier state for comparison."
+      ],
+      "pitfalls": [
+        "A property whose value is undefined can still exist.",
+        "Object.keys and Object.entries omit inherited, non-enumerable, and symbol-keyed properties.",
+        "Copying only the outer object leaves nested references shared."
+      ],
+      "example": {
+        "runtime": "universal",
+        "code": "const before = { profile: { name: \"Ada\", active: false } };\nconst after = { ...before, profile: { ...before.profile, active: true } };\nconsole.log(before.profile.active);\nconsole.log(after.profile.active);\nconsole.log(Object.prototype.hasOwnProperty.call(after, \"profile\"));",
+        "output": "false\ntrue\ntrue",
+        "explanation": "Both the outer record and the changed nested record receive new identities."
+      },
+      "related": [
+        "values-types",
+        "classes",
+        "metaprogramming"
+      ],
+      "lessonNumbers": [
+        7,
+        12,
+        13,
+        26,
+        34
+      ],
+      "keywords": [
+        "property",
+        "spread",
+        "clone",
+        "prototype",
+        "hasOwnProperty",
+        "Object.keys"
+      ]
+    },
+    {
+      "id": "arrays",
+      "title": "Arrays, holes & mutation",
+      "category": "Data & functions",
+      "stage": 2,
+      "chapter": 7,
+      "sections": [
+        {
+          "ref": "7.3",
+          "pdfPage": 302
+        },
+        {
+          "ref": "7.4",
+          "pdfPage": 303
+        },
+        {
+          "ref": "7.8.6",
+          "pdfPage": 326
+        }
+      ],
+      "summary": "Handle collection length, copies, removals, and sorting deliberately.",
+      "rule": "Array length is an index boundary, not a guarantee that every position contains an element.",
+      "details": [
+        "A hole is an absent property at an array index. Assigning a distant index, constructing new Array(n), or deleting an indexed property can create holes. Several iteration methods skip them, making sparse data easy to misunderstand.",
+        "slice and spread create shallow copies. splice changes the input array, as do sort, reverse, push, and pop. To sort while preserving the input with the book’s APIs, first copy it and then pass a numeric comparator when sorting numbers."
+      ],
+      "useWhen": [
+        "Sorting result durations without rearranging the original results.",
+        "Removing one item while maintaining a dense array."
+      ],
+      "pitfalls": [
+        "delete items[index] leaves a hole and does not reduce length; splice removes and shifts.",
+        "sort() without a comparator compares string representations.",
+        "Array copies still refer to the same contained objects."
+      ],
+      "example": {
+        "runtime": "universal",
+        "code": "const durations = [30, 4, 12];\nconst sorted = [...durations].sort((a, b) => a - b);\nconsole.log(JSON.stringify(sorted));\nconsole.log(JSON.stringify(durations));\nconst holes = new Array(3);\nconsole.log(holes.length, Object.keys(holes).length);",
+        "output": "[4,12,30]\n[30,4,12]\n3 0",
+        "explanation": "A copied array protects the original order. The sparse array has a length but no indexed elements."
+      },
+      "related": [
+        "array-methods",
+        "values-types",
+        "iterators"
+      ],
+      "lessonNumbers": [
+        8,
+        12,
+        26
+      ],
+      "keywords": [
+        "sparse",
+        "hole",
+        "sort",
+        "slice",
+        "splice",
+        "length",
+        "mutation"
+      ]
+    },
+    {
+      "id": "array-methods",
+      "title": "Choose map, filter, find or reduce",
+      "category": "Data & functions",
+      "stage": 2,
+      "chapter": 7,
+      "sections": [
+        {
+          "ref": "7.8.1",
+          "pdfPage": 311
+        }
+      ],
+      "summary": "Choose a collection operation by the result you need.",
+      "rule": "map transforms, filter selects, find retrieves one match, some/every answer a question, and reduce combines.",
+      "details": [
+        "A map callback must return the new element. filter keeps elements whose predicate returns a truthy value. find stops at the first match and returns undefined if none exists. some stops on the first passing element; every stops on the first failure.",
+        "Give reduce an initial accumulator so empty input has a defined result. These methods do not automatically protect nested data: a callback that mutates an input object still changes that object. Use for...of when early exit or sequential async work is central."
+      ],
+      "useWhen": [
+        "Extracting names from failed test results.",
+        "Calculating a total with an explicit empty-input result."
+      ],
+      "pitfalls": [
+        "every on an empty array returns true; check length separately if at least one item is required.",
+        "map(parseInt) accidentally passes the array index as the radix; wrap the call.",
+        "map with an async callback returns promises; collect them with Promise.all when appropriate."
+      ],
+      "example": {
+        "runtime": "universal",
+        "code": "const runs = [{name: \"login\", ms: 8, passed: true}, {name: \"pay\", ms: 12, passed: false}];\nconst failed = runs.filter(run => !run.passed).map(run => run.name);\nconst total = runs.reduce((sum, run) => sum + run.ms, 0);\nconsole.log(JSON.stringify(failed));\nconsole.log(total);\nconsole.log([].every(Boolean));",
+        "output": "[\"pay\"]\n20\ntrue",
+        "explanation": "Each operation expresses a separate question: which failed, how long they took, and whether all empty inputs pass."
+      },
+      "related": [
+        "arrays",
+        "functions",
+        "promise-concurrency"
+      ],
+      "lessonNumbers": [
+        5,
+        8,
+        10,
+        12
+      ],
+      "keywords": [
+        "map",
+        "filter",
+        "find",
+        "reduce",
+        "some",
+        "every",
+        "forEach"
+      ]
+    },
+    {
+      "id": "functions",
+      "title": "Functions & parameter contracts",
+      "category": "Data & functions",
+      "stage": 2,
+      "chapter": 8,
+      "sections": [
+        {
+          "ref": "8.1.3",
+          "pdfPage": 344
+        },
+        {
+          "ref": "8.3.1",
+          "pdfPage": 357
+        }
+      ],
+      "summary": "Make accepted inputs, defaults, outputs, and side effects easy to see.",
+      "rule": "Defaults apply to omitted or undefined arguments; they do not replace null or other falsy values.",
+      "details": [
+        "Destructured parameter objects make named options readable. A default object allows a call with no argument, but explicitly passing null still needs handling if your contract accepts it. Rest parameters gather remaining arguments into an array.",
+        "Choose a return value and keep it consistent across branches. A function declaration can be called before its declaration is evaluated; a function expression assigned to const cannot be used before initialization. Arrow functions are convenient callbacks and inherit this from the surrounding scope."
+      ],
+      "useWhen": [
+        "Designing a helper with optional settings.",
+        "Separating pure calculations from logging, storage, or other effects."
+      ],
+      "pitfalls": [
+        "Missing return produces undefined.",
+        "Parameter defaults do not validate types or ranges.",
+        "Mutating an object parameter also affects the caller’s object."
+      ],
+      "example": {
+        "runtime": "universal",
+        "code": "function describeRun({ name = \"untitled\", retries = 2 } = {}) {\n  return `${name}: ${retries} retries`;\n}\nconsole.log(describeRun());\nconsole.log(describeRun({ name: \"login\", retries: 0 }));",
+        "output": "untitled: 2 retries\nlogin: 0 retries",
+        "explanation": "Defaults cover missing inputs while retaining an explicitly supplied zero."
+      },
+      "related": [
+        "operators",
+        "this",
+        "closures"
+      ],
+      "lessonNumbers": [
+        9,
+        11,
+        12,
+        15,
+        17
+      ],
+      "keywords": [
+        "parameter",
+        "destructuring",
+        "rest",
+        "default",
+        "arrow",
+        "return"
+      ]
+    },
+    {
+      "id": "closures",
+      "title": "Closures & private state",
+      "category": "Data & functions",
+      "stage": 2,
+      "chapter": 8,
+      "sections": [
+        {
+          "ref": "8.6",
+          "pdfPage": 376
+        }
+      ],
+      "summary": "Keep state alive without making it global.",
+      "rule": "A function retains access to the lexical bindings where it was created, even after that outer call returns.",
+      "details": [
+        "Each invocation of a factory can create separate private state. Functions returned from the same invocation share those bindings. This supports counters, configurable predicates, and small services with a controlled interface.",
+        "The retained binding is live: later changes are visible to closures that use it. This is why callbacks created in a loop need the right scope, and why an event listener can keep data reachable until it is removed."
+      ],
+      "useWhen": [
+        "Creating independent counters or configuration-specific validators.",
+        "Injecting dependencies into a function without global variables."
+      ],
+      "pitfalls": [
+        "Capturing a variable does not freeze its value.",
+        "Multiple returned functions can share state and affect each other.",
+        "A long-lived callback can retain objects you no longer intended to keep."
+      ],
+      "example": {
+        "runtime": "universal",
+        "code": "function makeCounter() {\n  let count = 0;\n  return () => ++count;\n}\nconst first = makeCounter();\nconst second = makeCounter();\nconsole.log(first(), first(), second());",
+        "output": "1 2 1",
+        "explanation": "The first two calls share one binding; the second factory call creates another."
+      },
+      "related": [
+        "scope",
+        "functions",
+        "this"
+      ],
+      "lessonNumbers": [
+        6,
+        10,
+        11,
+        18
+      ],
+      "keywords": [
+        "closure",
+        "lexical",
+        "factory",
+        "private",
+        "higher-order"
+      ]
+    },
+    {
+      "id": "this",
+      "title": "this, methods & bind",
+      "category": "Data & functions",
+      "stage": 2,
+      "chapter": 8,
+      "sections": [
+        {
+          "ref": "8.2.2",
+          "pdfPage": 350
+        },
+        {
+          "ref": "8.7.5",
+          "pdfPage": 389
+        }
+      ],
+      "summary": "Keep the intended receiver when passing a method as a callback.",
+      "rule": "For an ordinary function, the call form determines this. Arrow functions inherit this from their enclosing context.",
+      "details": [
+        "Calling object.method() uses object as the receiver. Saving object.method in a variable and calling it as a plain function loses that receiver. In strict mode, a plain call has undefined as this.",
+        "bind creates a new function with a fixed receiver and optional leading arguments. call and apply invoke immediately with a chosen receiver. A small arrow wrapper can also preserve access to an object by explicitly making a method call."
+      ],
+      "useWhen": [
+        "Passing an instance method to a callback API.",
+        "Explaining why a method works directly but fails in an event handler."
+      ],
+      "pitfalls": [
+        "An arrow used as an object-literal method does not acquire that object as this.",
+        "bind cannot replace an arrow function’s lexical this.",
+        "Repeated bind calls create different function objects; retain the bound function if you must remove it as a listener."
+      ],
+      "example": {
+        "runtime": "universal",
+        "code": "const reporter = {\n  prefix: \"PASS\",\n  format(name) { return `${this.prefix}: ${name}`; }\n};\nconst report = reporter.format.bind(reporter);\nconsole.log([\"login\", \"cart\"].map(report).join(\" | \"));",
+        "output": "PASS: login | PASS: cart",
+        "explanation": "The bound method keeps its receiver when Array.map invokes it."
+      },
+      "related": [
+        "closures",
+        "classes",
+        "events"
+      ],
+      "lessonNumbers": [
+        9,
+        11,
+        14,
+        27
+      ],
+      "keywords": [
+        "this",
+        "bind",
+        "call",
+        "apply",
+        "receiver",
+        "context"
+      ]
+    },
+    {
+      "id": "classes",
+      "title": "Classes, prototypes & composition",
+      "category": "Program structure",
+      "stage": 3,
+      "chapter": 9,
+      "sections": [
+        {
+          "ref": "9.3",
+          "pdfPage": 416
+        },
+        {
+          "ref": "9.5.3",
+          "pdfPage": 437
+        }
+      ],
+      "summary": "Group state and behavior without losing sight of prototype lookup.",
+      "rule": "Class methods are shared through the prototype; constructor assignments create instance state.",
+      "details": [
+        "Property lookup checks the instance and then its prototype chain. A class gives this pattern a clear syntax. Static methods belong to the constructor, so call them on the class rather than on an instance.",
+        "Use inheritance when a subtype can honor the parent’s contract. If you only need another object’s capability, composition lets your object hold that collaborator and delegate work to it. This avoids tying unrelated features into a rigid hierarchy."
+      ],
+      "useWhen": [
+        "Creating several independent instances with shared behavior.",
+        "Choosing between extending a class and injecting a collaborator."
+      ],
+      "pitfalls": [
+        "Methods are not automatically bound to instances.",
+        "A derived constructor must call super before accessing this.",
+        "Freezing an instance is shallow and does not automatically freeze nested state."
+      ],
+      "example": {
+        "runtime": "universal",
+        "code": "class RunSummary {\n  constructor(name) { this.name = name; }\n  label() { return `Run: ${this.name}`; }\n}\nconst first = new RunSummary(\"smoke\");\nconst second = new RunSummary(\"full\");\nconsole.log(first.label());\nconsole.log(first.label === second.label);",
+        "output": "Run: smoke\ntrue",
+        "explanation": "The two instances store different names but resolve label to the same prototype method."
+      },
+      "related": [
+        "objects",
+        "this",
+        "modules"
+      ],
+      "lessonNumbers": [
+        13,
+        14,
+        15,
+        18
+      ],
+      "keywords": [
+        "class",
+        "prototype",
+        "extends",
+        "super",
+        "composition",
+        "inheritance"
+      ]
+    },
+    {
+      "id": "modules",
+      "title": "Modules & explicit dependencies",
+      "category": "Program structure",
+      "stage": 3,
+      "chapter": 10,
+      "sections": [
+        {
+          "ref": "10.3",
+          "pdfPage": 458
+        },
+        {
+          "ref": "10.3.1",
+          "pdfPage": 460
+        },
+        {
+          "ref": "10.3.2",
+          "pdfPage": 462
+        }
+      ],
+      "summary": "Split code into files with small, intentional public interfaces.",
+      "rule": "Export the capabilities callers need; import dependencies explicitly in the files that use them.",
+      "details": [
+        "An ES module has its own top-level scope and runs in strict mode. Named imports match exported names; a default import uses the name chosen by the importing file. Imports refer to live exported bindings and cannot be reassigned by the importer.",
+        "Use static imports for regular dependencies and dynamic import() when code should load conditionally; dynamic import returns a promise. In browser HTML, load the entry point with type=\"module\" and serve the files over HTTP. The project already uses ES modules."
+      ],
+      "useWhen": [
+        "Extracting a pure helper so both UI and tests can use it.",
+        "Loading an optional feature only when it is needed."
+      ],
+      "pitfalls": [
+        "Named and default imports use different syntax.",
+        "Circular dependencies can access bindings before initialization; simplify the dependency direction.",
+        "Browser module paths need resolvable URLs; a bare package name requires additional resolution support."
+      ],
+      "example": {
+        "runtime": "module",
+        "code": "// summary.mjs\nexport const total = values => values.reduce((sum, value) => sum + value, 0);\n\n// app.mjs (a separate file)\nimport { total } from \"./summary.mjs\";\nconsole.log(total([3, 5, 8]));",
+        "output": "16",
+        "explanation": "Save the two files side by side and run node app.mjs, or load app.mjs as a browser module.",
+        "files": {
+          "summary.mjs": "export const total = values => values.reduce((sum, value) => sum + value, 0);",
+          "app.mjs": "import { total } from \"./summary.mjs\";\nconsole.log(total([3, 5, 8]));"
+        }
+      },
+      "related": [
+        "functions",
+        "runtime",
+        "classes"
+      ],
+      "lessonNumbers": [
+        16,
+        17,
+        18,
+        31,
+        35,
+        36
+      ],
+      "keywords": [
+        "import",
+        "export",
+        "ESM",
+        "dependency",
+        "dynamic import"
+      ]
+    },
+    {
+      "id": "maps-sets",
+      "title": "Maps and sets",
+      "category": "Standard library",
+      "stage": 4,
+      "chapter": 11,
+      "sections": [
+        {
+          "ref": "11.1.1",
+          "pdfPage": 481
+        },
+        {
+          "ref": "11.1.2",
+          "pdfPage": 485
+        }
+      ],
+      "summary": "Deduplicate values with Set and associate arbitrary keys with values using Map.",
+      "rule": "Use Set for unique membership and Map for keyed lookup. Both iterate in insertion order.",
+      "details": [
+        "Set stores each value once. Use add, has, and delete to change or query membership; size reports the count. Map stores one value per key. Calling set again with the same key updates its value. Iterating a Map produces [key, value] pairs, ready for destructuring.",
+        "Objects used as keys or members are compared by reference, so two separately created objects remain distinct even if their fields match. Primitive comparison follows SameValueZero: NaN matches itself and positive and negative zero are equivalent. Use has when a Map may legitimately store undefined, because get alone cannot distinguish that value from a missing key."
+      ],
+      "useWhen": [
+        "Remove duplicate tags or track which record IDs have already been processed.",
+        "Count outcomes, cache results, or associate metadata with object identities."
+      ],
+      "pitfalls": [
+        "map[key] creates an ordinary object property; use map.set(key, value).",
+        "A fresh object literal cannot retrieve an entry keyed by another object.",
+        "Spreading a Map produces pairs, not just values; use map.values() when needed."
+      ],
+      "example": {
+        "runtime": "universal",
+        "code": "const outcomes = [\"pass\", \"fail\", \"pass\"];\nconst unique = new Set(outcomes);\nconst counts = new Map();\nfor (const outcome of outcomes) {\n  counts.set(outcome, (counts.get(outcome) ?? 0) + 1);\n}\nconsole.log(JSON.stringify([...unique]));\nconsole.log(JSON.stringify([...counts]));\nconsole.log(counts.has(\"skipped\"));",
+        "output": "[\"pass\",\"fail\"]\n[[\"pass\",2],[\"fail\",1]]\nfalse",
+        "explanation": "The Set removes repeated outcomes while the Map counts them. Both retain the order in which each distinct key first appeared."
+      },
+      "related": [
+        "objects",
+        "arrays",
+        "iterators",
+        "equality-coercion"
+      ],
+      "keywords": [
+        "Map",
+        "Set",
+        "deduplicate",
+        "membership",
+        "lookup",
+        "SameValueZero"
+      ],
+      "lessonNumbers": [
+        19
+      ],
+      "references": [
+        {
+          "title": "ECMAScript: Set objects",
+          "url": "https://tc39.es/ecma262/multipage/keyed-collections.html#sec-set-objects"
+        }
+      ]
+    },
+    {
+      "id": "regex",
+      "title": "Regular expressions",
+      "category": "Standard library",
+      "stage": 4,
+      "chapter": 11,
+      "sections": [
+        {
+          "ref": "11.3.1",
+          "pdfPage": 504
+        },
+        {
+          "ref": "11.3.2",
+          "pdfPage": 523
+        },
+        {
+          "ref": "11.3.3",
+          "pdfPage": 530
+        }
+      ],
+      "summary": "Validate simple text shapes, extract fields, and replace repeated patterns.",
+      "rule": "Choose test for a boolean, matchAll for repeated captures, and replace for a transformation.",
+      "details": [
+        "A literal such as /QA-\\d+/ describes a pattern rather than a fixed string. Character classes select possible characters; quantifiers control repetition; parentheses capture fields. Anchors constrain match positions. Flags modify behavior: i ignores case, g finds repeated matches, and u enables Unicode-aware pattern processing.",
+        "matchAll returns an iterator of match arrays. Index 0 contains the full match and subsequent indexes contain captured groups; named groups are available through groups. A regex argument to matchAll must have the g flag. For a replacement, pass a callback when the replacement needs a calculation or conditional logic."
+      ],
+      "useWhen": [
+        "Extract consistently formatted IDs from logs or issue descriptions.",
+        "Normalize whitespace or validate a small, clearly defined text format."
+      ],
+      "pitfalls": [
+        "test and exec mutate lastIndex on g or y patterns; reuse can change later results.",
+        "RegExp constructor strings require escaped backslashes, such as \"\\\\d+\".",
+        "Patterns can match substrings; choose anchors deliberately when validating complete input."
+      ],
+      "example": {
+        "runtime": "universal",
+        "code": "const log = \"QA-42 passed; QA-73 failed\";\nconst ids = [...log.matchAll(/QA-(\\d+)/g)]\n  .map(match => Number(match[1]));\nconsole.log(JSON.stringify(ids));\nconst normalized = \"  run   tests  \".trim().replace(/\\s+/g, \" \");\nconsole.log(normalized);\nconsole.log(/^QA-\\d+$/.test(\"QA-42\"));",
+        "output": "[42,73]\nrun tests\ntrue",
+        "explanation": "The capture extracts only each numeric ID. A separate global pattern collapses whitespace without altering the original string."
+      },
+      "related": [
+        "values-types",
+        "iterators",
+        "arrays"
+      ],
+      "keywords": [
+        "RegExp",
+        "regex",
+        "matchAll",
+        "test",
+        "replace",
+        "capture",
+        "lastIndex"
+      ],
+      "lessonNumbers": [
+        20
+      ]
+    },
+    {
+      "id": "dates",
+      "title": "Dates, timestamps, and UTC",
+      "category": "Standard library",
+      "stage": 4,
+      "chapter": 11,
+      "sections": [
+        {
+          "ref": "11.4",
+          "pdfPage": 536
+        },
+        {
+          "ref": "11.4.1",
+          "pdfPage": 538
+        },
+        {
+          "ref": "11.4.2",
+          "pdfPage": 539
+        },
+        {
+          "ref": "11.4.3",
+          "pdfPage": 540
+        }
+      ],
+      "summary": "Represent instants consistently and separate elapsed durations from calendar calculations.",
+      "rule": "Use explicit time zones for instants, milliseconds for elapsed durations, and UTC output for reproducible examples.",
+      "details": [
+        "A Date stores an instant as milliseconds relative to the Unix epoch. getTime exposes that number; toISOString formats it in UTC with a trailing Z. The local and UTC getter families interpret the same instant differently. Dates do not retain the original input time-zone name.",
+        "Subtract timestamps to measure an elapsed duration. Calendar operations are different: a month has a variable length, and a local day can cross a daylight-saving change. Date setters mutate the object and normalize overflowing fields. Clone with new Date(existing.getTime()) before changing a date that other code still needs."
+      ],
+      "useWhen": [
+        "Record run start and finish times in logs using a portable UTC representation.",
+        "Calculate elapsed time or compare deadlines represented as explicit instants."
+      ],
+      "pitfalls": [
+        "Numeric constructors and Date.UTC use zero-based months: January is 0.",
+        "getDay returns the weekday; getDate returns the day of the month.",
+        "Ambiguous date strings can parse differently; invalid input produces an invalid Date."
+      ],
+      "example": {
+        "runtime": "universal",
+        "code": "const started = new Date(\"2026-04-08T10:00:00Z\");\nconst finished = new Date(\"2026-04-08T10:01:30Z\");\nconst seconds = (finished.getTime() - started.getTime()) / 1000;\nconst deadline = new Date(finished.getTime());\ndeadline.setUTCMinutes(deadline.getUTCMinutes() + 5);\nconsole.log(seconds);\nconsole.log(deadline.toISOString());\nconsole.log(finished.toISOString());",
+        "output": "90\n2026-04-08T10:06:30.000Z\n2026-04-08T10:01:30.000Z",
+        "explanation": "The elapsed duration is 90 seconds. Updating the cloned deadline leaves the original finish time unchanged."
+      },
+      "related": [
+        "json",
+        "operators",
+        "testing-tools"
+      ],
+      "keywords": [
+        "Date",
+        "UTC",
+        "timestamp",
+        "timezone",
+        "ISO",
+        "duration",
+        "milliseconds"
+      ],
+      "lessonNumbers": [
+        20
+      ]
+    },
+    {
+      "id": "json",
+      "title": "JSON serialization",
+      "category": "Standard library",
+      "stage": 4,
+      "chapter": 11,
+      "sections": [
+        {
+          "ref": "11.6",
+          "pdfPage": 545
+        },
+        {
+          "ref": "11.6.1",
+          "pdfPage": 548
+        }
+      ],
+      "summary": "Convert portable data to text and reconstruct it without confusing JSON with arbitrary JavaScript objects.",
+      "rule": "Use JSON.stringify to encode and JSON.parse to decode; validate the decoded data before using it.",
+      "details": [
+        "JSON represents strings, finite numbers, booleans, null, arrays, and objects with string keys. Parsing reconstructs data, not class instances or their methods. JSON syntax requires double-quoted keys and strings and excludes comments and trailing commas. A successful parse confirms valid syntax, not the shape your application expects.",
+        "A stringify replacer can select or transform values. A parse reviver can transform the resulting values, including reconstructing dates when your schema identifies a date field. Date serialization normally produces a string. Use JSON.stringify(value, null, 2) for readable output, and define explicit conversions for richer types such as Map or Set."
+      ],
+      "useWhen": [
+        "Save application settings in storage or exchange a small API payload.",
+        "Produce readable test fixtures with an explicit, predictable schema."
+      ],
+      "pitfalls": [
+        "JSON round trips are not general deep cloning: dates, methods, and prototypes change.",
+        "undefined object properties disappear; undefined array elements become null.",
+        "Circular references and unsupported BigInt values throw during serialization."
+      ],
+      "example": {
+        "runtime": "universal",
+        "code": "const run = { name: \"smoke\", passed: true, note: undefined };\nconst text = JSON.stringify(run);\nconst parsed = JSON.parse(text);\nif (typeof parsed.name !== \"string\" || typeof parsed.passed !== \"boolean\") {\n  throw new TypeError(\"Invalid run record\");\n}\nconsole.log(text);\nconsole.log(parsed.name);\nconsole.log(Object.hasOwn(parsed, \"note\"));",
+        "output": "{\"name\":\"smoke\",\"passed\":true}\nsmoke\nfalse",
+        "explanation": "Serialization omits the undefined property. After parsing, field checks enforce the expected record shape."
+      },
+      "related": [
+        "objects",
+        "dates",
+        "fetch",
+        "browser-storage",
+        "errors"
+      ],
+      "keywords": [
+        "JSON",
+        "stringify",
+        "parse",
+        "serialization",
+        "reviver",
+        "replacer"
+      ],
+      "lessonNumbers": [
+        19,
+        24,
+        28,
+        33
+      ],
+      "modernNote": "Object.hasOwn is newer than the 2020 edition; it is supported by the modern browser and Node baseline used here.",
+      "references": [
+        {
+          "title": "MDN: Object.hasOwn",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/hasOwn"
+        }
+      ]
+    },
+    {
+      "id": "iterators",
+      "title": "Iterators and generators",
+      "category": "Advanced language",
+      "stage": 4,
+      "chapter": 12,
+      "sections": [
+        {
+          "ref": "12.1",
+          "pdfPage": 580
+        },
+        {
+          "ref": "12.2",
+          "pdfPage": 582
+        },
+        {
+          "ref": "12.3",
+          "pdfPage": 588
+        },
+        {
+          "ref": "12.3.2",
+          "pdfPage": 593
+        }
+      ],
+      "summary": "Produce and consume values one at a time with the protocol behind for…of and spread.",
+      "rule": "An iterable supplies Symbol.iterator; its iterator supplies next(), returning { value, done }.",
+      "details": [
+        "Arrays, strings, Maps, and Sets implement the iterable protocol. for…of asks for an iterator and repeatedly calls next until done is true. An iterator tracks progress, so consuming it changes what remains. A collection can create a fresh iterator for every traversal.",
+        "A function* generator makes this protocol easier to implement. Calling it creates a generator without running its body. Each next resumes execution until yield provides a value or the function finishes. yield* delegates to another iterable. This lets you generate values on demand without allocating the entire sequence first."
+      ],
+      "useWhen": [
+        "Traverse a custom collection using the same syntax as an array.",
+        "Generate test inputs or process a sequence without building all intermediate arrays."
+      ],
+      "pitfalls": [
+        "An exhausted generator stays exhausted; call the generator function again to restart.",
+        "Spreading an infinite iterable never completes; stop after a bounded number of items.",
+        "for…in enumerates property names and does not use the iterator protocol."
+      ],
+      "example": {
+        "runtime": "universal",
+        "code": "function* caseNames(prefix, count) {\n  for (let number = 1; number <= count; number++) {\n    yield `${prefix}-${number}`;\n  }\n}\nconst cases = caseNames(\"login\", 3);\nconsole.log(cases.next().value);\nconsole.log(JSON.stringify([...cases]));\nconsole.log(cases.next().done);",
+        "output": "login-1\n[\"login-2\",\"login-3\"]\ntrue",
+        "explanation": "The first next consumes one name. Spread consumes only the remaining names, and the final call reports completion."
+      },
+      "related": [
+        "arrays",
+        "maps-sets",
+        "functions",
+        "control-flow"
+      ],
+      "keywords": [
+        "iterator",
+        "iterable",
+        "generator",
+        "yield",
+        "Symbol.iterator",
+        "for of",
+        "lazy"
+      ],
+      "lessonNumbers": [
+        21,
+        23,
+        32
+      ]
+    },
+    {
+      "id": "promises",
+      "title": "Promises and error propagation",
+      "category": "Async JavaScript",
+      "stage": 4,
+      "chapter": 13,
+      "sections": [
+        {
+          "ref": "13.2.1",
+          "pdfPage": 613
+        },
+        {
+          "ref": "13.2.2",
+          "pdfPage": 617
+        },
+        {
+          "ref": "13.2.3",
+          "pdfPage": 622
+        },
+        {
+          "ref": "13.2.4",
+          "pdfPage": 626
+        },
+        {
+          "ref": "13.2.6",
+          "pdfPage": 636
+        }
+      ],
+      "summary": "Compose one eventual result through transformations, failures, and cleanup.",
+      "rule": "Return each asynchronous step from then so its result and failure remain part of the chain.",
+      "details": [
+        "A Promise is pending until it fulfills with a value or rejects with a reason. Once settled, that outcome cannot change. then returns a new Promise: a returned value fulfills it, a thrown error rejects it, and a returned Promise makes it adopt that Promise's outcome.",
+        "Promise handlers run asynchronously even if the Promise is already settled. The executor passed to new Promise runs synchronously, so a Promise does not postpone work automatically. catch handles a rejection and can recover by returning a value. finally performs cleanup for either outcome; throwing there or returning a rejected Promise replaces the previous outcome."
+      ],
+      "useWhen": [
+        "Connect dependent asynchronous steps while keeping one error-handling path.",
+        "Adapt a callback API into a single completion result."
+      ],
+      "pitfalls": [
+        "A block-bodied then callback needs return to pass its Promise onward.",
+        "A catch that only logs usually turns the chain into a fulfilled undefined result.",
+        "One Promise represents one outcome, so it cannot model a continuing stream of events."
+      ],
+      "example": {
+        "runtime": "universal",
+        "code": "const score = await Promise.resolve(3)\n  .then(count => count * 2)\n  .then(value => {\n    if (value < 10) throw new Error(\"Below target\");\n    return value;\n  })\n  .catch(error => {\n    console.log(error.message);\n    return 0;\n  })\n  .finally(() => console.log(\"Finished\"));\nconsole.log(score);",
+        "output": "Below target\nFinished\n0",
+        "explanation": "The thrown error skips normal fulfillment handling. catch recovers with 0, while finally runs without changing that result."
+      },
+      "related": [
+        "async-await",
+        "promise-concurrency",
+        "errors",
+        "fetch"
+      ],
+      "keywords": [
+        "Promise",
+        "then",
+        "catch",
+        "finally",
+        "resolve",
+        "reject",
+        "chain"
+      ],
+      "lessonNumbers": [
+        22
+      ]
+    },
+    {
+      "id": "async-await",
+      "title": "Async functions and await",
+      "category": "Async JavaScript",
+      "stage": 4,
+      "chapter": 13,
+      "sections": [
+        {
+          "ref": "13.3.1",
+          "pdfPage": 647
+        },
+        {
+          "ref": "13.3.2",
+          "pdfPage": 648
+        },
+        {
+          "ref": "13.3.3",
+          "pdfPage": 649
+        }
+      ],
+      "summary": "Write asynchronous control flow with familiar returns, loops, and try/catch.",
+      "rule": "An async function always returns a Promise. await suspends that function until a value is available.",
+      "details": [
+        "An async function begins running immediately and continues until its first await or completion. Awaiting a fulfilled Promise yields its value; awaiting a rejected Promise throws its reason at that expression. Other work can continue while the function is suspended. await also accepts plain values and resumes asynchronously.",
+        "Use try/catch around awaited operations to handle their failures and finally for cleanup. Await belongs inside an async function or at the top level of an ES module. Sequential awaits are appropriate when later work depends on earlier results. For independent operations, call them before waiting and combine their Promises with Promise.all."
+      ],
+      "useWhen": [
+        "Express a sequence such as load, validate, transform, then save.",
+        "Use ordinary loops and exception handling around asynchronous operations."
+      ],
+      "pitfalls": [
+        "Calling an async function gives you a Promise, even when it returns a plain number.",
+        "Array.forEach does not await async callbacks; choose a loop or Promise.all with map.",
+        "try/catch cannot catch a later rejection from an unawaited, unreturned Promise."
+      ],
+      "example": {
+        "runtime": "universal",
+        "code": "async function runCheck() {\n  console.log(\"started\");\n  const result = await Promise.resolve(\"passed\");\n  console.log(result);\n  return result.toUpperCase();\n}\nconst pending = runCheck();\nconsole.log(\"caller continues\");\nconsole.log(await pending);",
+        "output": "started\ncaller continues\npassed\nPASSED",
+        "explanation": "Execution starts at the call. await yields control to the caller, and the final returned string fulfills the function's Promise."
+      },
+      "related": [
+        "promises",
+        "promise-concurrency",
+        "errors",
+        "modules"
+      ],
+      "keywords": [
+        "async",
+        "await",
+        "try catch",
+        "sequential",
+        "Promise",
+        "forEach"
+      ],
+      "lessonNumbers": [
+        23,
+        24,
+        25
+      ]
+    },
+    {
+      "id": "promise-concurrency",
+      "title": "Running asynchronous tasks concurrently",
+      "category": "Async JavaScript",
+      "stage": 4,
+      "chapter": 13,
+      "sections": [
+        {
+          "ref": "13.2.5",
+          "pdfPage": 634
+        },
+        {
+          "ref": "13.3.3",
+          "pdfPage": 649
+        }
+      ],
+      "summary": "Choose whether a group of independent operations needs every value, every outcome, or the first outcome.",
+      "rule": "Calling the task starts its work; Promise combinators observe the resulting Promises and combine their outcomes.",
+      "details": [
+        "Promise.all fulfills with values in input order when every input fulfills, or rejects when an input rejects. Promise.allSettled waits for every input and returns ordered status records with value or reason. Use it when successful and failed outcomes both belong in the report.",
+        "Promise.race adopts the first settlement, whether fulfillment or rejection. It does not mean first success. Neither race nor all cancels other operations after settling. Cancellation must be supported by the underlying operation, such as an abortable fetch. To limit concurrency, control when tasks are called; combining already-started Promises does not impose a limit."
+      ],
+      "useWhen": [
+        "Load independent resources together and require all results before proceeding.",
+        "Run several checks and produce a report even when some checks fail."
+      ],
+      "pitfalls": [
+        "A timeout implemented with race does not itself stop the operation that loses.",
+        "Sequential await calls delay starting later tasks when calls appear after each await.",
+        "race([]) remains pending; all([]) and allSettled([]) fulfill with empty arrays."
+      ],
+      "example": {
+        "runtime": "universal",
+        "code": "async function check(name) {\n  if (name === \"search\") throw new Error(\"No results\");\n  return `${name}: passed`;\n}\nconst pending = [\"login\", \"search\"].map(check);\nconst results = await Promise.allSettled(pending);\nconsole.log(JSON.stringify(results.map(result => result.status)));\nconsole.log(results[0].value);\nconsole.log(results[1].reason.message);",
+        "output": "[\"fulfilled\",\"rejected\"]\nlogin: passed\nNo results",
+        "explanation": "map calls both checks before the await. allSettled preserves both outcomes in the same order as the input checks."
+      },
+      "related": [
+        "promises",
+        "async-await",
+        "fetch",
+        "array-methods"
+      ],
+      "keywords": [
+        "Promise.all",
+        "allSettled",
+        "race",
+        "concurrency",
+        "parallel",
+        "cancellation",
+        "timeout"
+      ],
+      "lessonNumbers": [
+        22,
+        23,
+        24,
+        29
+      ],
+      "references": [
+        {
+          "title": "MDN: Promise.all, ordering and rejection behavior",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/all"
+        }
+      ]
+    },
+    {
+      "id": "metaprogramming",
+      "title": "Property descriptors and object behavior",
+      "category": "Advanced language",
+      "stage": 3,
+      "chapter": 14,
+      "sections": [
+        {
+          "ref": "14.1",
+          "pdfPage": 665
+        },
+        {
+          "ref": "14.2",
+          "pdfPage": 673
+        },
+        {
+          "ref": "14.6",
+          "pdfPage": 695
+        },
+        {
+          "ref": "14.7",
+          "pdfPage": 699
+        }
+      ],
+      "summary": "Inspect property rules, constrain object mutation, and understand where Proxy and Reflect fit.",
+      "rule": "A property descriptor controls whether a property can change, appear in enumeration, or be reconfigured.",
+      "details": [
+        "Data descriptors combine value with writable, enumerable, and configurable flags. Accessor descriptors use get and set instead of value and writable. Object.getOwnPropertyDescriptor inspects an own property; Object.defineProperty creates or changes one. When defining a new property, omitted flags default to false.",
+        "Object.preventExtensions blocks new own properties; seal additionally prevents deletion and reconfiguration; freeze also makes own data properties non-writable. These operations are shallow. Proxy intercepts operations such as reads and writes through handler methods. Reflect provides corresponding operations and is useful for forwarding behavior from a Proxy handler to its target."
+      ],
+      "useWhen": [
+        "Expose a stable read-only field while keeping other record properties editable.",
+        "Inspect an unfamiliar object's behavior or implement focused library instrumentation."
+      ],
+      "pitfalls": [
+        "A non-enumerable field is still readable; hiding it from Object.keys is not privacy.",
+        "Freezing an object does not recursively freeze nested objects.",
+        "Proxy traps must respect object invariants; interception is not unrestricted rewriting."
+      ],
+      "example": {
+        "runtime": "universal",
+        "code": "const run = { status: \"pending\" };\nObject.defineProperty(run, \"id\", {\n  value: \"run-17\",\n  enumerable: true,\n  writable: false,\n  configurable: false\n});\nconsole.log(Reflect.set(run, \"id\", \"run-18\"));\nconsole.log(run.id);\nconsole.log(Reflect.set(run, \"status\", \"passed\"));\nconsole.log(run.status);",
+        "output": "false\nrun-17\ntrue\npassed",
+        "explanation": "Reflect.set reports that the read-only ID cannot change. The ordinary status property remains writable."
+      },
+      "related": [
+        "objects",
+        "classes",
+        "iterators"
+      ],
+      "keywords": [
+        "descriptor",
+        "defineProperty",
+        "freeze",
+        "seal",
+        "Proxy",
+        "Reflect",
+        "enumerable"
+      ],
+      "lessonNumbers": [
+        13,
+        34
+      ]
+    },
+    {
+      "id": "dom",
+      "title": "DOM: find, create, and update elements",
+      "category": "Browser",
+      "stage": 5,
+      "chapter": 15,
+      "sections": [
+        {
+          "ref": "15.3.1",
+          "pdfPage": 761
+        },
+        {
+          "ref": "15.3.4",
+          "pdfPage": 776
+        },
+        {
+          "ref": "15.3.5",
+          "pdfPage": 779
+        }
+      ],
+      "summary": "Turn data into document elements with selectors, text content, and explicit node operations.",
+      "rule": "Select the element you need, check that it exists, and use textContent when inserting plain text.",
+      "details": [
+        "querySelector returns the first match or null. querySelectorAll returns a static NodeList: it is iterable, but it is not an Array and does not gain newly added matches. Use Array.from when you need array methods. Scope queries to a component root to avoid selecting unrelated page elements.",
+        "createElement makes a detached node. Set its content and attributes, then insert it with append, prepend, before, or after. Inserting an existing node moves it instead of copying it. textContent preserves text literally; innerHTML parses markup and replaces the existing child tree."
+      ],
+      "useWhen": [
+        "Render lists, messages, or validation results from application data.",
+        "Update one component without rebuilding the entire document."
+      ],
+      "pitfalls": [
+        "Dereferencing a missing selector result throws; handle null.",
+        "Untrusted strings in innerHTML can inject executable markup.",
+        "Replacing children destroys their identity and their directly attached listeners."
+      ],
+      "example": {
+        "runtime": "browser",
+        "code": "const list = document.createElement(\"ul\");\nfor (const title of [\"Review <script>\", \"Ship fix\"]) {\n  const item = document.createElement(\"li\");\n  item.textContent = title;\n  list.append(item);\n}\nconsole.log(list.querySelectorAll(\"li\").length);\nconsole.log(list.firstElementChild.textContent);\nconsole.log(list.querySelector(\"script\") === null);",
+        "output": "2\nReview <script>\ntrue",
+        "explanation": "The list stays detached, so this changes no visible page. The angle brackets remain text; no script element is created. Append the list to a chosen container when rendering a real interface."
+      },
+      "related": [
+        "events",
+        "arrays",
+        "array-methods"
+      ],
+      "keywords": [
+        "querySelector",
+        "querySelectorAll",
+        "textContent",
+        "innerHTML",
+        "createElement",
+        "NodeList",
+        "append",
+        "DOM"
+      ],
+      "lessonNumbers": [
+        26,
+        27,
+        30
+      ]
+    },
+    {
+      "id": "events",
+      "title": "Events: listeners, bubbling, and delegation",
+      "category": "Browser",
+      "stage": 5,
+      "chapter": 15,
+      "sections": [
+        {
+          "ref": "15.2.2",
+          "pdfPage": 747
+        },
+        {
+          "ref": "15.2.3",
+          "pdfPage": 753
+        },
+        {
+          "ref": "15.2.4",
+          "pdfPage": 756
+        },
+        {
+          "ref": "15.2.5",
+          "pdfPage": 758
+        }
+      ],
+      "summary": "Connect user actions to behavior and handle a whole group of controls through a shared parent.",
+      "rule": "Use addEventListener; distinguish the original event target from the element whose listener is running.",
+      "details": [
+        "An event travels through a capture phase toward its target and, for bubbling events, back through its ancestors. event.target identifies the original target; event.currentTarget identifies the element handling this invocation. A parent listener can use closest to find the relevant control, including when a nested icon was clicked.",
+        "preventDefault cancels a cancelable default action, such as form submission. stopPropagation stops further travel through the tree; it does not cancel that default action. Keep a reference to a handler if you will remove it later, or use once for a single invocation."
+      ],
+      "useWhen": [
+        "Handle rows or buttons that are added after initial rendering.",
+        "Keep form submission and navigation behavior under explicit control."
+      ],
+      "pitfalls": [
+        "Returning false from an addEventListener callback does not cancel anything.",
+        "Passive listeners cannot use preventDefault to cancel the event.",
+        "A fresh anonymous function is not the same callback when removing a listener."
+      ],
+      "example": {
+        "runtime": "browser",
+        "code": "const panel = document.createElement(\"div\");\nconst button = document.createElement(\"button\");\nbutton.type = \"button\";\nbutton.dataset.action = \"save\";\npanel.append(button);\npanel.addEventListener(\"click\", (event) => {\n  const control = event.target.closest(\"button[data-action]\");\n  if (!control || !panel.contains(control)) return;\n  console.log(control.dataset.action);\n  console.log(event.currentTarget === panel);\n});\nbutton.click();",
+        "output": "save\ntrue",
+        "explanation": "The detached button dispatches a click that bubbles to its detached parent. One parent listener handles the action without attaching a handler to each button."
+      },
+      "related": [
+        "dom",
+        "functions",
+        "this"
+      ],
+      "keywords": [
+        "addEventListener",
+        "bubbling",
+        "capture",
+        "delegation",
+        "target",
+        "currentTarget",
+        "preventDefault",
+        "stopPropagation"
+      ],
+      "lessonNumbers": [
+        25,
+        27,
+        29,
+        30
+      ]
+    },
+    {
+      "id": "fetch",
+      "title": "Fetch: check the response, then read the body",
+      "category": "Browser",
+      "stage": 5,
+      "chapter": 15,
+      "sections": [
+        {
+          "ref": "15.11.1",
+          "pdfPage": 897
+        }
+      ],
+      "summary": "Treat an HTTP request, its status, and its parsed response body as separate steps.",
+      "rule": "Await fetch, check response.ok, then await the body reader. Handle failures from all three steps.",
+      "details": [
+        "fetch resolves once status and headers are available. A 404 or 500 response still fulfills the promise, so your code must turn an unsuccessful status into an application error. Reading JSON is another asynchronous operation and can fail independently, for example when a server returns HTML.",
+        "Request options configure method, headers, body, and an AbortSignal. For JSON writes, stringify the payload and set Content-Type to application/json. Use URLSearchParams for query values. Aborting a request can reject the fetch or its unfinished body read; clean up any timeout you created."
+      ],
+      "useWhen": [
+        "Load remote data into a screen or submit an API request.",
+        "Separate networking from parsing so tests can supply controlled responses."
+      ],
+      "pitfalls": [
+        "HTTP errors do not automatically enter catch.",
+        "A response body is normally consumed once; clone it before reading twice.",
+        "Cross-origin access needs server CORS permission; mode: no-cors does not unlock readable responses."
+      ],
+      "example": {
+        "runtime": "browser",
+        "code": "async function readJSON(url, request = fetch) {\n  const response = await request(url);\n  if (!response.ok) throw new Error(`HTTP ${response.status}`);\n  return response.json();\n}\n// Offline mock: no network request is made.\nconst mockFetch = async () => new Response(\n  JSON.stringify({ pending: 3 }),\n  { status: 200, headers: { \"Content-Type\": \"application/json\" } }\n);\nawait readJSON(\"/api/tasks\", mockFetch)\n  .then((data) => console.log(data.pending))\n  .catch(console.error);",
+        "output": "3",
+        "explanation": "The injected request function returns a real Response with a fixed body. Omitting mockFetch uses the browser fetch function against your own API."
+      },
+      "related": [
+        "async-await",
+        "promises",
+        "errors",
+        "testing-tools"
+      ],
+      "keywords": [
+        "fetch",
+        "HTTP",
+        "Response",
+        "JSON",
+        "CORS",
+        "AbortController",
+        "request",
+        "network"
+      ],
+      "lessonNumbers": [
+        28,
+        30,
+        33,
+        36
+      ]
+    },
+    {
+      "id": "browser-storage",
+      "title": "Browser storage: persist small preferences",
+      "category": "Browser",
+      "stage": 5,
+      "chapter": 15,
+      "sections": [
+        {
+          "ref": "15.12.1",
+          "pdfPage": 927
+        },
+        {
+          "ref": "15.12.3",
+          "pdfPage": 938
+        }
+      ],
+      "summary": "Choose storage by lifetime and data size, and treat persisted data as fallible input.",
+      "rule": "Use Web Storage for small string values; serialize objects explicitly and recover from unavailable or invalid data.",
+      "details": [
+        "localStorage belongs to an origin and normally survives page reloads and browser restarts. sessionStorage also belongs to a particular top-level tab session. Neither is a guaranteed backup. getItem returns a string or null; setItem and removeItem change one key. Namespace application keys to prevent collisions.",
+        "Use JSON.stringify and JSON.parse for simple data, then validate the parsed shape before using it. Web Storage operations are synchronous. IndexedDB is the more suitable asynchronous object-store API for larger collections and indexed lookups. A storage event reports changes to other eligible documents, not the document that made the change."
+      ],
+      "useWhen": [
+        "Remember a theme, dismissed hint, or small draft.",
+        "Restore lightweight interface state after a page reload."
+      ],
+      "pitfalls": [
+        "Blocked storage, quotas, and invalid JSON can throw; provide defaults.",
+        "Do not put passwords or other secrets in script-accessible storage.",
+        "clear removes every key for that storage area; remove your own key instead."
+      ],
+      "example": {
+        "runtime": "browser",
+        "code": "const key = \"fieldwork:wiki-storage-demo\";\nconst previous = localStorage.getItem(key);\ntry {\n  localStorage.setItem(key, JSON.stringify({ theme: \"dark\" }));\n  const preferences = JSON.parse(localStorage.getItem(key));\n  console.log(preferences.theme);\n} finally {\n  if (previous === null) localStorage.removeItem(key);\n  else localStorage.setItem(key, previous);\n}",
+        "output": "dark",
+        "explanation": "Run on a project page where storage is available. The demo restores the original value afterward; production preferences would remain stored and need parsing and validation safeguards."
+      },
+      "related": [
+        "json",
+        "objects",
+        "events",
+        "errors"
+      ],
+      "keywords": [
+        "localStorage",
+        "sessionStorage",
+        "IndexedDB",
+        "JSON",
+        "persistence",
+        "preferences",
+        "storage event"
+      ],
+      "lessonNumbers": [
+        28,
+        30
+      ],
+      "references": [
+        {
+          "title": "MDN: Storage.removeItem",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/API/Storage/removeItem"
+        }
+      ]
+    },
+    {
+      "id": "workers",
+      "title": "Workers: move CPU work off the interface thread",
+      "category": "Browser",
+      "stage": 5,
+      "chapter": 15,
+      "sections": [
+        {
+          "ref": "15.13",
+          "pdfPage": 946
+        },
+        {
+          "ref": "15.13.1",
+          "pdfPage": 948
+        },
+        {
+          "ref": "15.13.2",
+          "pdfPage": 949
+        },
+        {
+          "ref": "15.13.5",
+          "pdfPage": 954
+        }
+      ],
+      "summary": "Keep the interface responsive while a separate worker performs an expensive calculation.",
+      "rule": "Send data to a worker, compute there, and send results back; update the DOM on the main thread.",
+      "details": [
+        "A dedicated worker has its own global scope and event loop. It can run CPU work while the main thread processes input, but it cannot access document or window. postMessage sends data asynchronously, and a message listener receives it through event.data. Use request IDs when multiple jobs may be in flight.",
+        "Messages use structured cloning rather than shared ordinary objects. Functions and DOM nodes cannot be cloned. A transferable ArrayBuffer can move ownership instead of copying bytes; the sender loses access to that buffer. Reuse workers for repeated jobs and terminate them when their work is finished."
+      ],
+      "useWhen": [
+        "Parse large datasets, process pixels, or run expensive calculations.",
+        "Keep typing and interaction responsive during repeated computation."
+      ],
+      "pitfalls": [
+        "Wrapping CPU work in a promise does not move it off the main thread.",
+        "Copying a huge message has a cost; worker overhead can outweigh small jobs.",
+        "Worker script loading follows origin and Content Security Policy restrictions."
+      ],
+      "example": {
+        "runtime": "browser",
+        "code": "const source = `\n  self.onmessage = ({ data }) => {\n    self.postMessage(data.reduce((sum, n) => sum + n, 0));\n  };\n`;\nconst url = URL.createObjectURL(\n  new Blob([source], { type: \"text/javascript\" })\n);\nconst worker = new Worker(url);\nconst cleanup = () => {\n  worker.terminate();\n  URL.revokeObjectURL(url);\n};\nworker.onmessage = ({ data }) => {\n  console.log(data);\n  cleanup();\n};\nworker.onerror = () => { cleanup(); console.error(\"Worker failed\"); };\nworker.postMessage([2, 4, 6]);",
+        "output": "12",
+        "explanation": "The tiny calculation illustrates messaging, not a speed improvement. This self-contained demo needs a page that permits blob workers; a real project can use a separate worker script."
+      },
+      "related": [
+        "events",
+        "array-methods",
+        "promises",
+        "promise-concurrency"
+      ],
+      "keywords": [
+        "Worker",
+        "postMessage",
+        "structured clone",
+        "ArrayBuffer",
+        "CPU",
+        "parallel",
+        "main thread"
+      ],
+      "lessonNumbers": [
+        29
+      ]
+    },
+    {
+      "id": "node-files",
+      "title": "Node files: await I/O and resolve paths deliberately",
+      "category": "Node & tooling",
+      "stage": 6,
+      "chapter": 16,
+      "sections": [
+        {
+          "ref": "16.7",
+          "pdfPage": 1038
+        },
+        {
+          "ref": "16.7.1",
+          "pdfPage": 1039
+        },
+        {
+          "ref": "16.7.2",
+          "pdfPage": 1042
+        }
+      ],
+      "summary": "Read small files with promise APIs, choose the right path base, and close resources you open.",
+      "rule": "Use node:fs/promises for asynchronous file operations; specify an encoding when you want text.",
+      "details": [
+        "readFile without an encoding returns a Buffer of bytes. With utf8 it returns a decoded string. The operation may reject for missing files, permissions, or other I/O errors; handle the actual operation rather than checking existence first and assuming nothing can change.",
+        "Relative string paths resolve from process.cwd(), which can differ from the script directory. In an ES module, new URL(\"./file.json\", import.meta.url) locates a sibling file. readFile manages its own handle. If you open a FileHandle yourself, close it in finally after all awaited work finishes."
+      ],
+      "useWhen": [
+        "Load a small JSON configuration or text fixture in a Node script.",
+        "Build scripts that must find their assets regardless of the launch directory."
+      ],
+      "pitfalls": [
+        "Sync filesystem calls block the event loop while they run.",
+        "readFile loads the whole file into memory; stream large inputs.",
+        "path.normalize cleans up path syntax; it does not resolve filesystem symlinks."
+      ],
+      "example": {
+        "runtime": "node",
+        "code": "// Save as inspect-file.mjs and run: node inspect-file.mjs\nimport { readFile } from \"node:fs/promises\";\n\nconst sourceFile = new URL(import.meta.url);\nconst sourceText = await readFile(sourceFile, \"utf8\");\nconsole.log(typeof sourceText);\nconsole.log(sourceText.includes(\"node:fs/promises\"));",
+        "output": "string\ntrue",
+        "explanation": "This Node 20 ES module reads its own saved source without changing any files. Its location comes from import.meta.url, so the current working directory does not affect the read."
+      },
+      "related": [
+        "async-await",
+        "errors",
+        "modules",
+        "node-streams"
+      ],
+      "keywords": [
+        "Node",
+        "fs",
+        "readFile",
+        "Buffer",
+        "utf8",
+        "path",
+        "FileHandle",
+        "import.meta.url"
+      ],
+      "lessonNumbers": [
+        31,
+        32
+      ],
+      "references": [
+        {
+          "title": "Node 20: File system APIs",
+          "url": "https://nodejs.org/docs/latest-v20.x/api/fs.html"
+        }
+      ]
+    },
+    {
+      "id": "node-streams",
+      "title": "Node streams: process chunks with backpressure",
+      "category": "Node & tooling",
+      "stage": 6,
+      "chapter": 16,
+      "sections": [
+        {
+          "ref": "16.5",
+          "pdfPage": 1016
+        },
+        {
+          "ref": "16.5.1",
+          "pdfPage": 1020
+        },
+        {
+          "ref": "16.5.2",
+          "pdfPage": 1024
+        },
+        {
+          "ref": "16.5.3",
+          "pdfPage": 1026
+        }
+      ],
+      "summary": "Process large or ongoing inputs incrementally instead of buffering the entire dataset.",
+      "rule": "Let a pipeline coordinate flow and errors; when writing manually, respect the writable stream’s backpressure.",
+      "details": [
+        "Readable streams produce chunks; writable streams consume them. Duplex streams do both, and transform streams turn incoming data into outgoing data. Byte streams usually deliver Buffers; decoded streams deliver strings. Chunk boundaries are arbitrary and do not necessarily match lines, characters, or application records.",
+        "When write returns false, pause further writes until drain or failure. This prevents a fast producer from filling memory behind a slow consumer. For this project’s Node 20 runtime, await pipeline from node:stream/promises to coordinate backpressure and failures. Use for await for sequential consumption that needs custom per-chunk logic."
+      ],
+      "useWhen": [
+        "Copy, compress, or transform large files with bounded buffering.",
+        "Consume logs or network responses as data arrives."
+      ],
+      "pitfalls": [
+        "A stream stops being memory efficient if you collect every chunk.",
+        "Plain pipe does not provide pipeline’s complete error coordination.",
+        "Splitting each chunk on newline loses records spanning two chunks."
+      ],
+      "example": {
+        "runtime": "node",
+        "code": "import { Readable, Writable } from \"node:stream\";\nimport { pipeline } from \"node:stream/promises\";\n\nlet totalBytes = 0;\nconst sink = new Writable({\n  write(chunk, encoding, done) {\n    totalBytes += chunk.length;\n    done();\n  },\n});\nawait pipeline(\n  Readable.from([Buffer.from(\"QA\"), Buffer.from(\" ready\")]),\n  sink\n);\nconsole.log(totalBytes);",
+        "output": "8",
+        "explanation": "The in-memory source sends two chunks to a writable destination. Counting bytes avoids retaining the input, and the awaited pipeline finishes only after the destination completes."
+      },
+      "related": [
+        "node-files",
+        "iterators",
+        "async-await",
+        "errors"
+      ],
+      "keywords": [
+        "stream",
+        "pipeline",
+        "Readable",
+        "Writable",
+        "Transform",
+        "backpressure",
+        "drain",
+        "Buffer"
+      ],
+      "lessonNumbers": [
+        32,
+        36
+      ],
+      "modernNote": "The book demonstrates callback-era stream APIs. This example uses the promise-based pipeline available in the project’s Node 20+ baseline.",
+      "references": [
+        {
+          "title": "Node: stream.pipeline",
+          "url": "https://nodejs.org/api/stream.html#streampipelinesource-transforms-destination-callback"
+        }
+      ]
+    },
+    {
+      "id": "testing-tools",
+      "title": "Tests, linting, and formatting",
+      "category": "Node & tooling",
+      "stage": 6,
+      "chapter": 17,
+      "sections": [
+        {
+          "ref": "17.1",
+          "pdfPage": 1094
+        },
+        {
+          "ref": "17.2",
+          "pdfPage": 1096
+        },
+        {
+          "ref": "17.3",
+          "pdfPage": 1098
+        },
+        {
+          "ref": "17.4",
+          "pdfPage": 1102
+        }
+      ],
+      "summary": "Use behavior checks, static checks, and formatting for the different problems each can detect.",
+      "rule": "Assert observable behavior with representative inputs, boundaries, and failures; keep external dependencies controllable.",
+      "details": [
+        "A unit test supplies inputs and compares the result with an independently chosen expectation. For asynchronous code, return or await the work so failures reach the test. Inject a small fake dependency when networking, clocks, or files would make the test nondeterministic. Add integration coverage where the real boundary matters.",
+        "The book uses Jest to demonstrate assertions and mocks. The example below uses Node 20’s built-in assertion module, requiring no package install. ESLint checks configured code rules; Prettier formats source. Keep project tools and scripts in package.json so contributors run consistent checks."
+      ],
+      "useWhen": [
+        "Protect a meaningful behavior before refactoring it.",
+        "Reproduce a bug with a small deterministic case."
+      ],
+      "pitfalls": [
+        "Coverage measures execution, not whether your assertions prove the right behavior.",
+        "A mock can hide a broken real integration; test that boundary separately.",
+        "Passing lint and formatting checks says nothing about business correctness."
+      ],
+      "example": {
+        "runtime": "node",
+        "code": "import assert from \"node:assert/strict\";\n\nasync function cartTotal(loadItems) {\n  const items = await loadItems();\n  return items.reduce((sum, item) => sum + item.priceCents, 0);\n}\nassert.equal(await cartTotal(async () => [\n  { priceCents: 250 }, { priceCents: 500 },\n]), 750);\nassert.equal(await cartTotal(async () => []), 0);\nawait assert.rejects(\n  () => cartTotal(async () => { throw new Error(\"offline\"); }),\n  /offline/\n);\nconsole.log(\"3 checks passed\");",
+        "output": "3 checks passed",
+        "explanation": "Save as an .mjs file and run with Node 20. The checks cover a normal total, an empty cart, and propagation of a dependency failure, without a network request."
+      },
+      "related": [
+        "functions",
+        "async-await",
+        "errors",
+        "fetch"
+      ],
+      "keywords": [
+        "testing",
+        "unit tests",
+        "assert",
+        "Jest",
+        "ESLint",
+        "Prettier",
+        "mock",
+        "npm",
+        "coverage"
+      ],
+      "lessonNumbers": [
+        17,
+        33,
+        35,
+        36
+      ],
+      "modernNote": "The book teaches testing with Jest. This dependency-free example applies the same testing principles with Node assertions."
+    }
+  ]
+}

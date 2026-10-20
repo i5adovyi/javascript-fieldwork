@@ -1,0 +1,499 @@
+[
+  {
+    "id": "person-001",
+    "displayName": "  Participant 1  ",
+    "email": "person1@example.test",
+    "tags": [
+      "javascript",
+      "odd"
+    ],
+    "joinedAt": "2026-10-02T09:00:00Z"
+  },
+  {
+    "id": "person-002",
+    "displayName": "  Participant 2  ",
+    "email": "person2@example.test",
+    "tags": [
+      "javascript",
+      "even"
+    ],
+    "joinedAt": "2026-10-03T09:00:00Z"
+  },
+  {
+    "id": "person-003",
+    "displayName": "  Participant 3  ",
+    "email": "person3@example.test",
+    "tags": [
+      "javascript",
+      "odd"
+    ],
+    "joinedAt": "2026-10-04T09:00:00Z"
+  },
+  {
+    "id": "person-004",
+    "displayName": "  Participant 4  ",
+    "email": "person4@example.test",
+    "tags": [
+      "javascript",
+      "even"
+    ],
+    "joinedAt": "2026-10-05T09:00:00Z"
+  },
+  {
+    "id": "person-005",
+    "displayName": "  Participant 5  ",
+    "email": "person5@example.test",
+    "tags": [
+      "javascript",
+      "odd"
+    ],
+    "joinedAt": "2026-10-06T09:00:00Z"
+  },
+  {
+    "id": "person-006",
+    "displayName": "  Participant 6  ",
+    "email": "person6@example.test",
+    "tags": [
+      "javascript",
+      "even"
+    ],
+    "joinedAt": "2026-10-07T09:00:00Z"
+  },
+  {
+    "id": "person-007",
+    "displayName": "  Participant 7  ",
+    "email": "person7@example.test",
+    "tags": [
+      "javascript",
+      "odd"
+    ],
+    "joinedAt": "2026-10-08T09:00:00Z"
+  },
+  {
+    "id": "person-008",
+    "displayName": "  Participant 8  ",
+    "email": "person8@example.test",
+    "tags": [
+      "javascript",
+      "even"
+    ],
+    "joinedAt": "2026-10-09T09:00:00Z"
+  },
+  {
+    "id": "person-008",
+    "displayName": "  Participant 9  ",
+    "email": "person9@example.test",
+    "tags": [
+      "javascript",
+      "odd"
+    ],
+    "joinedAt": "2026-10-10T09:00:00Z"
+  },
+  {
+    "id": "person-010",
+    "displayName": "  Participant 10  ",
+    "email": "person10@example.test",
+    "tags": [
+      "javascript",
+      "even"
+    ],
+    "joinedAt": "2026-10-11T09:00:00Z"
+  },
+  {
+    "id": "person-011",
+    "displayName": "  Participant 11  ",
+    "email": "person11@example.test",
+    "tags": [
+      "javascript",
+      "odd"
+    ],
+    "joinedAt": "2026-10-12T09:00:00Z"
+  },
+  {
+    "id": "person-012",
+    "displayName": "  Participant 12  ",
+    "email": "person12@example.test",
+    "tags": [
+      "javascript",
+      "even"
+    ],
+    "joinedAt": "2026-10-13T09:00:00Z"
+  },
+  {
+    "id": "person-013",
+    "displayName": "  Participant 13  ",
+    "email": "invalid-address",
+    "tags": [
+      "javascript",
+      "odd"
+    ],
+    "joinedAt": "2026-10-14T09:00:00Z"
+  },
+  {
+    "id": "person-014",
+    "displayName": "  Participant 14  ",
+    "email": "person14@example.test",
+    "tags": [
+      "javascript",
+      "even"
+    ],
+    "joinedAt": "2026-10-15T09:00:00Z"
+  },
+  {
+    "id": "person-015",
+    "displayName": "  Participant 15  ",
+    "email": "person15@example.test",
+    "tags": [
+      "javascript",
+      "odd"
+    ],
+    "joinedAt": "2026-10-16T09:00:00Z"
+  },
+  {
+    "id": "person-016",
+    "displayName": "  Participant 16  ",
+    "email": "person16@example.test",
+    "tags": [
+      "javascript",
+      "even"
+    ],
+    "joinedAt": "2026-10-17T09:00:00Z"
+  },
+  {
+    "id": "person-017",
+    "displayName": "  Participant 17  ",
+    "email": "person17@example.test",
+    "tags": [
+      "javascript",
+      "odd"
+    ],
+    "joinedAt": "2026-10-18T09:00:00Z"
+  },
+  {
+    "id": "person-018",
+    "displayName": "  Participant 18  ",
+    "email": "person18@example.test",
+    "tags": [
+      "javascript",
+      "even"
+    ],
+    "joinedAt": "2026-10-19T09:00:00Z"
+  },
+  {
+    "id": "person-019",
+    "displayName": "  Participant 19  ",
+    "email": "person19@example.test",
+    "tags": [
+      "javascript",
+      "odd"
+    ],
+    "joinedAt": "2026-10-20T09:00:00Z"
+  },
+  {
+    "id": "person-020",
+    "displayName": "  Participant 20  ",
+    "email": "person20@example.test",
+    "tags": [
+      "javascript",
+      "even"
+    ],
+    "joinedAt": "2026-10-01T09:00:00Z"
+  },
+  {
+    "id": "person-021",
+    "displayName": "  Participant 21  ",
+    "email": "person21@example.test",
+    "tags": [
+      "javascript",
+      "odd"
+    ],
+    "joinedAt": "2026-10-02T09:00:00Z"
+  },
+  {
+    "id": "person-022",
+    "displayName": "   ",
+    "email": "person22@example.test",
+    "tags": [
+      "javascript",
+      "even"
+    ],
+    "joinedAt": "2026-10-03T09:00:00Z"
+  },
+  {
+    "id": "person-023",
+    "displayName": "  Participant 23  ",
+    "email": "person23@example.test",
+    "tags": [
+      "javascript",
+      "odd"
+    ],
+    "joinedAt": "2026-10-04T09:00:00Z"
+  },
+  {
+    "id": "person-024",
+    "displayName": "  Participant 24  ",
+    "email": "person24@example.test",
+    "tags": [
+      "javascript",
+      "even"
+    ],
+    "joinedAt": "2026-10-05T09:00:00Z"
+  },
+  {
+    "id": "person-025",
+    "displayName": "  Participant 25  ",
+    "email": "person25@example.test",
+    "tags": [
+      "javascript",
+      "odd"
+    ],
+    "joinedAt": "2026-10-06T09:00:00Z"
+  },
+  {
+    "id": "person-026",
+    "displayName": "  Participant 26  ",
+    "email": "person26@example.test",
+    "tags": [
+      "javascript",
+      "even"
+    ],
+    "joinedAt": "2026-10-07T09:00:00Z"
+  },
+  {
+    "id": "person-027",
+    "displayName": "  Participant 27  ",
+    "email": "person27@example.test",
+    "tags": [
+      "javascript",
+      "odd"
+    ],
+    "joinedAt": "2026-10-08T09:00:00Z"
+  },
+  {
+    "id": "person-028",
+    "displayName": "  Participant 28  ",
+    "email": "person28@example.test",
+    "tags": [
+      "javascript",
+      "even"
+    ],
+    "joinedAt": "2026-10-09T09:00:00Z"
+  },
+  {
+    "id": "person-029",
+    "displayName": "  Participant 29  ",
+    "email": "person29@example.test",
+    "tags": [
+      "javascript",
+      "odd"
+    ],
+    "joinedAt": "2026-10-10T09:00:00Z"
+  },
+  {
+    "id": "person-030",
+    "displayName": "  Participant 30  ",
+    "email": "person30@example.test",
+    "tags": [
+      "javascript",
+      "even"
+    ],
+    "joinedAt": "2026-10-11T09:00:00Z"
+  },
+  {
+    "id": "person-031",
+    "displayName": "  Participant 31  ",
+    "email": "person31@example.test",
+    "tags": [
+      "javascript",
+      "odd"
+    ],
+    "joinedAt": "2026-10-12T09:00:00Z"
+  },
+  {
+    "id": "person-032",
+    "displayName": "  Participant 32  ",
+    "email": "person32@example.test",
+    "tags": [
+      "javascript",
+      "even"
+    ],
+    "joinedAt": "2026-10-13T09:00:00Z"
+  },
+  {
+    "id": "person-033",
+    "displayName": "  Participant 33  ",
+    "email": "person33@example.test",
+    "tags": [
+      "javascript",
+      "odd"
+    ],
+    "joinedAt": "2026-10-14T09:00:00Z"
+  },
+  {
+    "id": "person-034",
+    "displayName": "  Participant 34  ",
+    "email": "person34@example.test",
+    "tags": "javascript",
+    "joinedAt": "2026-10-15T09:00:00Z"
+  },
+  {
+    "id": "person-035",
+    "displayName": "  Participant 35  ",
+    "email": "person35@example.test",
+    "tags": [
+      "javascript",
+      "odd"
+    ],
+    "joinedAt": "2026-10-16T09:00:00Z"
+  },
+  {
+    "id": "person-036",
+    "displayName": "  Participant 36  ",
+    "email": "person36@example.test",
+    "tags": [
+      "javascript",
+      "even"
+    ],
+    "joinedAt": "2026-10-17T09:00:00Z"
+  },
+  {
+    "id": "person-037",
+    "displayName": "  Participant 37  ",
+    "email": "person37@example.test",
+    "tags": [
+      "javascript",
+      "odd"
+    ],
+    "joinedAt": "2026-10-18T09:00:00Z"
+  },
+  {
+    "id": "person-038",
+    "displayName": "  Participant 38  ",
+    "email": "person38@example.test",
+    "tags": [
+      "javascript",
+      "even"
+    ],
+    "joinedAt": "2026-10-19T09:00:00Z"
+  },
+  {
+    "id": "person-039",
+    "displayName": "  Participant 39  ",
+    "email": "person39@example.test",
+    "tags": [
+      "javascript",
+      "odd"
+    ],
+    "joinedAt": "2026-10-20T09:00:00Z"
+  },
+  {
+    "id": "person-040",
+    "displayName": "  Participant 40  ",
+    "email": "person40@example.test",
+    "tags": [
+      "javascript",
+      "even"
+    ],
+    "joinedAt": "2026-10-01T09:00:00Z"
+  },
+  {
+    "id": "person-041",
+    "displayName": "  Participant 41  ",
+    "email": "person41@example.test",
+    "tags": [
+      "javascript",
+      "odd"
+    ],
+    "joinedAt": "2026-10-02T09:00:00Z"
+  },
+  {
+    "id": "",
+    "displayName": "  Participant 42  ",
+    "email": "person42@example.test",
+    "tags": [
+      "javascript",
+      "even"
+    ],
+    "joinedAt": "2026-10-03T09:00:00Z"
+  },
+  {
+    "id": "person-043",
+    "displayName": "  Participant 43  ",
+    "email": "person43@example.test",
+    "tags": [
+      "javascript",
+      "odd"
+    ],
+    "joinedAt": "2026-10-04T09:00:00Z"
+  },
+  {
+    "id": "person-044",
+    "displayName": "  Participant 44  ",
+    "email": "person44@example.test",
+    "tags": [
+      "javascript",
+      "even"
+    ],
+    "joinedAt": "2026-10-05T09:00:00Z"
+  },
+  {
+    "id": "person-045",
+    "displayName": "  Participant 45  ",
+    "email": "person45@example.test",
+    "tags": [
+      "javascript",
+      "odd"
+    ],
+    "joinedAt": "2026-10-06T09:00:00Z"
+  },
+  {
+    "id": "person-046",
+    "displayName": "  Participant 46  ",
+    "email": "person46@example.test",
+    "tags": [
+      "javascript",
+      "even"
+    ],
+    "joinedAt": "2026-10-07T09:00:00Z"
+  },
+  {
+    "id": "person-047",
+    "displayName": "  Participant 47  ",
+    "email": "person47@example.test",
+    "tags": [
+      "javascript",
+      "odd"
+    ],
+    "joinedAt": "2026-10-08T09:00:00Z"
+  },
+  {
+    "id": "person-048",
+    "displayName": "  Participant 48  ",
+    "email": "person48@example.test",
+    "tags": [
+      "javascript",
+      "even"
+    ],
+    "joinedAt": "2026-10-09T09:00:00Z"
+  },
+  {
+    "id": "person-049",
+    "displayName": "  Participant 49  ",
+    "email": "person49@example.test",
+    "tags": [
+      "javascript",
+      "odd"
+    ],
+    "joinedAt": "not-a-date"
+  },
+  {
+    "id": "person-050",
+    "displayName": "  Participant 50  ",
+    "email": "person50@example.test",
+    "tags": [
+      "javascript",
+      "even"
+    ],
+    "joinedAt": "2026-10-11T09:00:00Z"
+  }
+]

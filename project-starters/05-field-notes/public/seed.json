@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "notes": [
+    {
+      "id": "note-1",
+      "title": "Trace a closure",
+      "body": "Draw the retained lexical environment before running the example.",
+      "tags": [
+        "language"
+      ],
+      "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Closures"
+    },
+    {
+      "id": "note-2",
+      "title": "Predict the request order",
+      "body": "Resolve the second request first and inspect the visible state.",
+      "tags": [
+        "async"
+      ],
+      "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises"
+    }
+  ]
+}

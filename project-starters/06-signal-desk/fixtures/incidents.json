@@ -1,0 +1,20 @@
+[
+  {
+    "id": "INC-001",
+    "title": "Search results arrive out of order",
+    "severity": "medium",
+    "status": "open"
+  },
+  {
+    "id": "INC-002",
+    "title": "Export button lacks an accessible name",
+    "severity": "high",
+    "status": "active"
+  },
+  {
+    "id": "INC-003",
+    "title": "Empty input total is incorrect",
+    "severity": "medium",
+    "status": "resolved"
+  }
+]

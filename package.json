@@ -1,0 +1,17 @@
+{
+  "name": "javascript-fieldwork",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "An independent JavaScript learning studio and book companion",
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "start": "node scripts/serve.mjs",
+    "test": "node tests/validate-content.mjs && node tests/validate-labs.mjs && node tests/validate-runner.mjs && node tests/validate-wiki.mjs && node tests/validate-state.mjs",
+    "materials": "node scripts/build-guide.mjs",
+    "wiki:export": "node scripts/export-wiki.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
