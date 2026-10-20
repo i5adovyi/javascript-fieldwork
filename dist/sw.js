@@ -1,5 +1,5 @@
-const CACHE='fieldwork-v3-content-validation';
-const FILES=['./','./index.html','./styles.css','./app.js','./content-loader.js','./wiki.js','./wiki.css','./data/wiki.json','./wiki-reference.md','./runner.js','./data/curriculum.json','./data/labs.json','./data/library.json','./handbook.md'];
+const CACHE='fieldwork-v4-wiki-playground';
+const FILES=['./','./index.html','./styles.css','./app.js','./content-loader.js','./wiki.js','./wiki-playground.js','./wiki-runner.js','./wiki-worker.js','./wiki-execution.js','./wiki-code.js','./vendor/acorn.js','./wiki.css','./wiki-playground.css','./data/wiki.json','./wiki-reference.md','./runner.js','./data/curriculum.json','./data/labs.json','./data/library.json','./handbook.md'];
 async function validAsset(request,response){
  if(!response?.ok||response.redirected)return false;
  const path=new URL(typeof request==='string'?request:request.url,self.location.href).pathname;

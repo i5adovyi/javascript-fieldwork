@@ -1,0 +1,128 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Wiki playground browser QA</title>
+<style>body{font:15px system-ui;margin:32px;max-width:1100px}button{padding:12px}pre{white-space:pre-wrap}iframe{width:400px;height:160px}#fixture{max-width:650px}</style>
+<h1>Wiki playground browser QA</h1><button id="run">Run playground checks</button><pre id="results">Ready</pre><div id="preview"></div><div id="fixture"></div>
+<script type="module">
+import {runWikiExample} from '/wiki-runner.js';
+import {playgroundExample,playgroundMarkup,bindPlayground} from '/wiki-playground.js';
+const results=document.querySelector('#results'),preview=document.querySelector('#preview');
+const esc=s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
+const assert=(value,message)=>{if(!value)throw Error(message);};
+function execute(options){
+  return new Promise(resolve=>{
+    const events=[];
+    let stop;
+    stop=runWikiExample({...options,preview,onEvent:event=>{
+      events.push(event);
+      if(event.type==='done'){stop();resolve({events,error:event.error,output:events.filter(e=>e.type==='log').map(e=>e.text).join('\n')});}
+    }});
+  });
+}
+document.querySelector('#run').onclick=async()=>{
+  const button=document.querySelector('#run');button.disabled=true;results.textContent='';
+  let passed=0,failed=0;
+  const check=async(name,test)=>{
+    try{await test();passed++;results.textContent+=`PASS ${name}\n`;}
+    catch(error){failed++;results.textContent+=`FAIL ${name}: ${error.message}\n`;}
+  };
+  const {wiki}=await(await fetch('/data/wiki.json')).json();
+  for(const article of wiki)await check(article.id,async()=>{
+    const e=playgroundExample(article),r=await execute({code:Object.values(e.files)[0],files:e.module?e.files:undefined,dom:e.dom});
+    assert(!r.error,r.output);assert(r.output===article.example.output,`Expected ${article.example.output}; got ${r.output}`);
+  });
+  await check('async callbacks and console methods',async()=>{
+    const r=await execute({code:'console.warn("start");setTimeout(()=>console.log("later"),20);'});
+    assert(r.output==='start\nlater',r.output);
+  });
+  await check('async thrown error',async()=>{
+    const r=await execute({code:'setTimeout(()=>{throw new Error("async failure")},10);'});
+    assert(r.error&&r.output.includes('async failure'),r.output);
+  });
+  await check('unhandled rejection',async()=>{
+    const r=await execute({code:'Promise.reject(new Error("unhandled"));'});
+    assert(r.error&&r.output.includes('unhandled'),r.output);
+  });
+  await check('syntax error',async()=>{
+    const r=await execute({code:'const = ;'});assert(r.error&&r.output.includes('SyntaxError'),r.output);
+  });
+  await check('falsy thrown values are errors',async()=>{
+    for(const value of ['null','undefined','0','""']){
+      const r=await execute({code:`throw ${value};`});assert(r.error&&r.output.includes('Error:'),value+' incorrectly succeeded');
+    }
+  });
+  await check('worker infinite loop stops',async()=>{
+    const r=await execute({code:'while(true) {}'});assert(r.error&&r.output.includes('Time limit'),r.output);
+  });
+  await check('DOM infinite loop stops',async()=>{
+    const r=await execute({code:'while(true);',dom:true});assert(r.error&&r.output.includes('Loop stopped'),r.output);
+  });
+  await check('log limit and structured values',async()=>{
+    const r=await execute({code:'const x={n:2n};x.self=x;console.log(x,undefined);for(let i=0;i<200;i++)console.log(i);'});
+    assert(r.events.filter(e=>e.type==='log').length===101,r.output);
+    assert(r.output.includes('[Circular]')&&r.output.includes('2n')&&r.output.includes('Output limit'),r.output);
+  });
+  await check('module edits change results',async()=>{
+    const r=await execute({files:{'summary.mjs':'export const total=values=>values.length;','app.mjs':'import {total} from "./summary.mjs";console.log(total([3,5,8]));'}});
+    assert(r.output==='3',r.output);
+  });
+  await check('missing module gives a useful error',async()=>{
+    const r=await execute({files:{'app.mjs':'import "./missing.mjs";'}});assert(r.error&&r.output.includes('Module not found'),r.output);
+  });
+  await check('isolated storage and parent DOM',async()=>{
+    const r=await execute({dom:true,code:'localStorage.setItem("qa","temporary");console.log(localStorage.getItem("qa"));try {parent.document.body.textContent="bad"}catch(e){console.log(e.name)}'});
+    assert(r.output==='temporary\nSecurityError',r.output);
+    const next=await execute({dom:true,code:'console.log(localStorage.getItem("qa"));'});assert(next.output==='null',next.output);
+  });
+  await check('DOM output after a user interaction',()=>new Promise((resolve,reject)=>{
+    let done=false;
+    const stop=runWikiExample({dom:true,preview,code:'const b=document.createElement("button");b.textContent="Try";b.onclick=()=>{for(let i=0;i<2;i++)console.log("clicked");};document.body.append(b);setTimeout(()=>b.click(),150);',onEvent:e=>{
+      if(e.type==='log'&&e.text==='clicked')done=true;
+      if(e.type==='done'){stop();done?resolve():reject(Error('No click output'));}
+    }});
+  }));
+  await check('cancel discards late output',()=>new Promise((resolve,reject)=>{
+    let count=0;
+    const stop=runWikiExample({code:'setTimeout(()=>console.log("late"),200);',onEvent:()=>count++});
+    stop();setTimeout(()=>count?reject(Error('Output arrived after cancellation')):resolve(),300);
+  }));
+  await check('editor saves, restores, switches files, resets',async()=>{
+    const article=wiki.find(a=>a.id==='modules'),fixture=document.querySelector('#fixture'),key='fieldwork.wiki-code.v1',prior=localStorage.getItem(key);
+    let dispose;
+    try{
+      localStorage.removeItem(key);
+      const mount=()=>{fixture.innerHTML=playgroundMarkup(article,esc,code=>`<pre>${esc(code)}</pre>`);return bindPlayground(fixture.querySelector('[data-playground]'),article);};
+      dispose=mount();let editor=fixture.querySelector('textarea');
+      editor.value='export const total = () => 99;';editor.dispatchEvent(new Event('input'));
+      fixture.querySelector('[data-example-file="app.mjs"]').click();
+      assert(editor.value.includes('import'),'File switch lost app.mjs');
+      dispose();dispose=mount();editor=fixture.querySelector('textarea');
+      assert(editor.value.includes('99'),'Draft did not survive remount');
+      fixture.querySelector('[data-example-reset]').click();
+      assert(editor.value===article.example.files['summary.mjs'],'Reset did not restore');
+      assert(!JSON.parse(localStorage.getItem(key)||'{}').modules,'Reset did not remove draft');
+    }finally{dispose?.();fixture.replaceChildren();if(prior===null)localStorage.removeItem(key);else localStorage.setItem(key,prior);}
+  });
+  await check('375px mobile editor fits the page',async()=>{
+    const frame=document.createElement('iframe');frame.style.width='375px';frame.style.height='800px';
+    frame.src='/#/wiki/closures';document.querySelector('#fixture').append(frame);
+    try{
+      await new Promise((resolve,reject)=>{
+        const deadline=Date.now()+5000;
+        const poll=()=>{
+          if(frame.contentDocument?.querySelector('[data-example-run]'))resolve();
+          else if(Date.now()>deadline)reject(Error('Mobile page did not load'));
+          else setTimeout(poll,50);
+        };poll();
+      });
+      const doc=frame.contentDocument;
+      assert(doc.documentElement.scrollWidth<=frame.clientWidth+1,'Mobile page overflows horizontally');
+      const editor=doc.querySelector('textarea');
+      assert(editor.getBoundingClientRect().width<=375,'Editor exceeds viewport');
+      doc.querySelector('[data-example-run]').click();
+      await new Promise(resolve=>setTimeout(resolve,500));
+      assert(doc.querySelector('[data-example-output]').textContent.trim()==='1 2 1','Mobile run did not produce expected output');
+    }finally{frame.remove();}
+  });
+  results.textContent+=`\n${passed} passed; ${failed} failed.`;
+  button.disabled=false;
+};
+</script></html>

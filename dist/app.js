@@ -60,6 +60,7 @@ function notebookPage(){const notes=Object.entries(state.notes).filter(([k,v])=>
 function notFound(){return shell(`<div class="empty-state"><h1>That page wandered off.</h1><p>Head back to your learning path.</p>${link('path','Open learning path','button orange')}</div>`);}
 function render(){
  if(!data)return;
+ wikiUI?.dispose();
  if(worker){worker.terminate();worker=null;clearTimeout(timer);}
  const hash=location.hash;
  if(hash==='#curriculum'||hash==='#method'){if(!$('.landing'))$('#app').innerHTML=home();requestAnimationFrame(()=>$(hash)?.scrollIntoView({behavior:'smooth'}));return;}
