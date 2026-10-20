@@ -1,0 +1,52 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Code editor browser QA</title>
+<link rel="stylesheet" href="/wiki-playground.css"><style>body{font:15px system-ui;margin:24px}#fixture{max-width:800px}button{padding:10px}pre{white-space:pre-wrap}</style>
+<h1>Code editor browser QA</h1><button id="run">Run editor checks</button><pre id="results">Ready</pre><div id="fixture"></div>
+<script type="module">
+import {EditorView} from '/code-editor.js';
+import {playgroundMarkup,bindPlayground} from '/wiki-playground.js';
+const assert=(condition,message)=>{if(!condition)throw Error(message);};
+const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+const wait=async predicate=>{const until=Date.now()+4000;while(!predicate()){if(Date.now()>until)throw Error('Timed out');await delay(25);}};
+const esc=s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
+const fixture=document.querySelector('#fixture'),results=document.querySelector('#results'),button=document.querySelector('#run');
+button.onclick=async()=>{
+ button.disabled=true;results.textContent='';let passed=0,failed=0,dispose;
+ const key='fieldwork.wiki-code.v1',prior=localStorage.getItem(key);
+ const check=async(name,fn)=>{try{await fn();passed++;results.textContent+=`PASS ${name}\n`;}catch(e){failed++;results.textContent+=`FAIL ${name}: ${e.message}\n`;}};
+ const {wiki}=await(await fetch('/data/wiki.json')).json();
+ const mount=article=>{dispose?.();fixture.innerHTML=playgroundMarkup(article,esc,code=>`<pre>${esc(code)}</pre>`);dispose=bindPlayground(fixture.firstElementChild,article);return EditorView.findFromDOM(fixture.querySelector('.cm-content'));};
+ let view;
+ const edit=code=>{view.dispatch({changes:{from:0,to:view.state.doc.length,insert:code},selection:{anchor:code.length},userEvent:'input.type'});view.focus();};
+ const press=(key,extra={})=>view.contentDOM.dispatchEvent(new KeyboardEvent('keydown',{key,bubbles:true,cancelable:true,...extra}));
+ const options=()=>[...fixture.querySelectorAll('[role=option]')].map(el=>el.textContent);
+ const suggest=async()=>{fixture.querySelector('[data-example-suggest]').click();await wait(()=>options().length);};
+ try {
+  localStorage.removeItem(key);view=mount(wiki.find(a=>a.id==='closures'));
+  await check('JavaScript tokens and line numbers are visible',async()=>{await wait(()=>fixture.querySelector('.tok-keyword'));assert(fixture.querySelector('.tok-number'),'No number highlighting');assert(fixture.querySelector('.cm-lineNumbers'),'No line numbers');});
+  await check('editor has an accessible label and shortcut help',()=>{assert(view.contentDOM.getAttribute('aria-label')==='Code editor for example.js','No label');assert(document.getElementById(view.contentDOM.getAttribute('aria-describedby')).textContent.includes('Ctrl + Space'),'No help');});
+  await check('typing opens common API suggestions',async()=>{edit('console.');await wait(()=>options().some(o=>o.startsWith('log')));assert(options().some(o=>o.startsWith('warn')),'No console members');});
+  await check('Escape dismisses suggestions without changing code',async()=>{press('Escape');await wait(()=>!options().length);assert(view.state.doc.toString()==='console.','Escape changed the code');});
+  await check('Ctrl+Space opens suggestions; Tab accepts',async()=>{edit('console.lo');press(' ',{code:'Space',ctrlKey:true});await wait(()=>options().some(o=>o.startsWith('log')));await delay(150);press('Tab');await wait(()=>view.state.doc.toString()==='console.log');});
+  await check('local declarations are suggested and Enter accepts',async()=>{edit('const lessonTotal = 42;\nlessonTo');await suggest();assert(options().some(o=>o.startsWith('lessonTotal')),'Missing local variable');await delay(150);press('Enter');assert(view.state.doc.toString().endsWith('lessonTotal'),'Enter did not accept');});
+  await check('comments do not offer code suggestions',async()=>{edit('// console.lo');fixture.querySelector('[data-example-suggest]').click();await delay(400);assert(!options().length,'Suggestions in comment');});
+  await check('strings do not offer code suggestions',async()=>{edit('"console.lo');fixture.querySelector('[data-example-suggest]').click();await delay(400);assert(!options().length,'Suggestions in string');});
+  await check('suggesting code does not run it',async()=>{edit('globalThis.__editorExecuted = true;\nconsole.');await suggest();assert(!globalThis.__editorExecuted,'Editor executed source');assert(fixture.querySelector('[data-run-status]').textContent==='Ready to experiment','Unexpected run');press('Escape');});
+  await check('Ctrl+Enter runs instead of accepting a suggestion',async()=>{edit('console.log(73);');press('Enter',{ctrlKey:true});await wait(()=>fixture.querySelector('[data-run-status]').textContent==='Finished');assert(fixture.querySelector('[data-example-output]').textContent.trim()==='73','Wrong run output');});
+  await check('module files preserve separate undo history and labels',async()=>{
+   view=mount(wiki.find(a=>a.id==='modules'));const original=view.state.doc.toString();
+   edit('export const total = () => 123;');fixture.querySelector('[data-example-file="app.mjs"]').click();
+   assert(view.contentDOM.getAttribute('aria-label').endsWith('app.mjs'),'Wrong app label');const app=view.state.doc.toString();
+   edit('import { total } from "./summary.mjs";\nconsole.log(total());');fixture.querySelector('[data-example-file="summary.mjs"]').click();
+   assert(view.state.doc.toString().includes('123'),'Lost first file');press('z',{metaKey:true});assert(view.state.doc.toString()===original,'First file undo lost');
+   fixture.querySelector('[data-example-file="app.mjs"]').click();press('z',{metaKey:true});assert(view.state.doc.toString()===app,'Second file undo lost');
+  });
+  await check('reset clears all module drafts and undo histories',async()=>{edit('console.log(99)');fixture.querySelector('[data-example-reset]').click();const original=view.state.doc.toString();press('z',{metaKey:true});assert(view.state.doc.toString()===original,'Undo brought back reset draft');assert(!JSON.parse(localStorage.getItem(key)||'{}').modules,'Reset draft remains');});
+  await check('DOM examples offer document API completions',async()=>{view=mount(wiki.find(a=>a.id==='dom'));edit('document.cre');await suggest();assert(options().some(o=>o.startsWith('createElement')),'No document API');});
+  await check('reopening editor restores the same code',async()=>{edit('console.log("restored");');view=mount(wiki.find(a=>a.id==='dom'));assert(view.state.doc.toString()==='console.log("restored");','Draft lost');});
+  await check('long lines scroll inside the editor',async()=>{edit('const longString = "'+'abc'.repeat(400)+'";');await delay(100);assert(fixture.scrollWidth<=fixture.clientWidth+1,'Editor widens article');assert(fixture.querySelector('.cm-scroller').scrollWidth>fixture.clientWidth,'Long line should scroll');});
+ } finally {
+  dispose?.();fixture.replaceChildren();prior===null?localStorage.removeItem(key):localStorage.setItem(key,prior);
+  results.textContent+=`\n${passed} passed; ${failed} failed.`;button.disabled=false;
+ }
+};
+</script></html>

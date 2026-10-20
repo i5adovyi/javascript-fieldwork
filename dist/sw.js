@@ -1,5 +1,5 @@
-const CACHE='fieldwork-v6-lesson-playgrounds';
-const FILES=['./','./index.html','./styles.css','./app.js','./content-loader.js','./wiki.js','./wiki-playground.js','./lesson-playgrounds.js','./wiki-runner.js','./wiki-worker.js','./wiki-execution.js','./wiki-code.js','./vendor/acorn.js','./wiki.css','./wiki-playground.css','./data/wiki.json','./wiki-reference.md','./runner.js','./data/curriculum.json','./data/labs.json','./data/library.json','./handbook.md','./CURRICULUM-MAP.md','./study-pack.zip','./field-guide.html','./project-starters.zip'];
+const CACHE='fieldwork-v7-code-editors';
+const FILES=['./','./index.html','./styles.css','./app.js','./content-loader.js','./wiki.js','./wiki-playground.js','./code-editor.js','./lesson-playgrounds.js','./wiki-runner.js','./wiki-worker.js','./wiki-execution.js','./wiki-code.js','./vendor/acorn.js','./wiki.css','./wiki-playground.css','./data/wiki.json','./wiki-reference.md','./runner.js','./data/curriculum.json','./data/labs.json','./data/library.json','./handbook.md','./CURRICULUM-MAP.md','./study-pack.zip','./field-guide.html','./project-starters.zip'];
 async function validAsset(request,response){
  if(!response?.ok||response.redirected)return false;
  const path=new URL(typeof request==='string'?request:request.url,self.location.href).pathname;

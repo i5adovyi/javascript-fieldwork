@@ -4,7 +4,7 @@ An independent, original learning studio built around the chapter structure of D
 
 ## Start here
 
-Requires Node.js 20 or newer. There are no dependencies to install.
+Requires Node.js 20 or newer. The checked-in app runs without installing dependencies.
 
 ```sh
 cd javascript-fieldwork
@@ -48,6 +48,8 @@ Read [the learner handbook](docs/LEARNER-HANDBOOK.md) for 8-week and 16-week sch
 
 All 38 code examples across the 36 lessons and all 35 wiki examples are editable. Open a lesson or a wiki topic and edit the example directly. Select **Run example** or press **⌘ / Ctrl + Enter** to see console output and errors. **Reset example** restores the original code. The expected result stays available in a separate disclosure so edited examples can produce different results.
 
+Editors highlight JavaScript syntax, match and close brackets, and suggest local variables, keywords, snippets, and common JavaScript APIs. Suggestions appear as you type; use **Ctrl + Space** or **Suggest code** to open them, arrow keys to select, **Enter / Tab** to accept, and **Esc** to dismiss. Tab moves focus out of the editor when no suggestion is selected. **⌘ / Ctrl + Z** undoes edits. Module files keep separate undo histories while the page stays open. Suggestions do not execute your code or provide full type checking.
+
 Drafts are saved automatically on this device, separately for each lesson example, wiki topic, and module file. They survive navigation and reloads. Lesson and wiki drafts are included in notebook backups; use **Copy code** to keep individual experiments elsewhere. If browser storage is unavailable, the editor reports that changes last only for the current session.
 
 Most examples run in a fresh Web Worker. DOM and event examples use an isolated document with a visible, interactive preview; append elements to `document.body` to display them. The storage example uses a fresh in-memory implementation of the Storage methods each run, so it cannot change your studio progress. Module examples have separate file editors and loads real ES modules; it supports local literal imports and reports unsupported circular imports.
@@ -66,7 +68,7 @@ Google Fonts is the only external UI asset provider; fallback fonts preserve usa
 
 ## Engineering
 
-The portal is buildless HTML, CSS, and JavaScript. Content lives in four JSON files in `dist/data/`. `dist/app.js` renders the hash routes. `dist/runner.js` runs each lab in a fresh Worker; the UI terminates a run after three seconds. Lesson and wiki examples share a runner in `dist/wiki-runner.js` and does not affect lab scoring. Acorn 8.19.0 is vendored in `dist/vendor/` under its MIT license to parse module imports and instrument DOM loops; no installation or external runtime CDN is needed. Console output is capped. It is a learning aid, not a security boundary or a certification grader. Do not paste untrusted code. The tests and solutions are intentionally visible to the learner.
+The portal is static HTML, CSS, and JavaScript. CodeMirror 6 and Lezer power the shared lesson/wiki editor, bundled locally in `dist/code-editor.js` with MIT notices in `dist/vendor/editor-LICENSES.txt`. To change the editor, run `npm ci`, edit `src/editor-entry.js` or `src/editor-completions.js`, then run `npm run editors:build`. The checked-in bundle is included in the offline cache; no editor CDN is used. Content lives in four JSON files in `dist/data/`. `dist/app.js` renders the hash routes. `dist/runner.js` runs each lab in a fresh Worker; the UI terminates a run after three seconds. Lesson and wiki examples share a runner in `dist/wiki-runner.js` and does not affect lab scoring. Acorn 8.19.0 is vendored in `dist/vendor/` under its MIT license to parse module imports and instrument DOM loops; no installation or external runtime CDN is needed. Console output is capped. It is a learning aid, not a security boundary or a certification grader. Do not paste untrusted code. The tests and solutions are intentionally visible to the learner.
 
 Lesson completion and project checklists are self-assessed. Lab completion means the supplied assertions passed, not a proof of correctness for all inputs. The hosted Site is public and does not synchronize learner state.
 
@@ -77,7 +79,8 @@ npm test
 node tests/validate-runner.mjs
 # Browser runner integration checks:
 node tests/serve-wiki-qa.mjs
-# Open http://127.0.0.1:4182/__playground-qa and select Run playground checks.
+# Open /__playground-qa, /__lesson-qa, and /__editor-qa on that server.
+# Select each page’s Run checks button (one suite at a time).
 # Open http://127.0.0.1:4182/__lesson-qa and select Run lesson checks.
 ```
 

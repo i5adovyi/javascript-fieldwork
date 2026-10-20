@@ -1,4 +1,5 @@
 import {runWikiExample} from './wiki-runner.js';
+import {createCodeEditor} from './code-editor.js';
 
 const DRAFT_KEY='fieldwork.wiki-code.v1';
 const browserVersions={
@@ -87,9 +88,9 @@ export function playgroundMarkup(article,esc,codeBlock) {
     <p class="wiki-playground-note">${esc(example.note)}</p>
     <div class="wiki-file-tabs" role="group" aria-label="Example files">${names.map((file,i)=>`<button type="button" data-example-file="${esc(file)}" aria-pressed="${i===0}">${esc(file)}</button>`).join('')}</div>
     <label class="sr-only" data-example-label for="${esc(editorId)}">Code editor for ${esc(name)}</label>
-    <textarea id="${esc(editorId)}" data-example-editor class="wiki-code-editor" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-describedby="${esc(helpId)}" wrap="off">${esc(example.files[name])}</textarea>
-    <div class="wiki-run-toolbar"><div><button type="button" class="button orange small" data-example-run>Run example <span aria-hidden="true">▶</span></button><button type="button" class="button outline small" data-example-stop disabled>Stop</button></div><div><button type="button" class="text-button" data-example-copy>Copy code</button><button type="button" class="text-button" data-example-reset>Reset example</button></div></div>
-    <div class="wiki-run-meta"><span id="${esc(helpId)}">⌘ / Ctrl + Enter to run · 3 second limit</span><span role="status" data-run-status>Ready to experiment</span></div>
+    <div data-example-editor data-editor-id="${esc(editorId)}" data-editor-help="${esc(helpId)}" class="wiki-code-editor"><pre>${esc(example.files[name])}</pre></div>
+    <div class="wiki-run-toolbar"><div><button type="button" class="button orange small" data-example-run>Run example <span aria-hidden="true">▶</span></button><button type="button" class="button outline small" data-example-stop disabled>Stop</button></div><div><button type="button" class="text-button" data-example-suggest>Suggest code</button><button type="button" class="text-button" data-example-copy>Copy code</button><button type="button" class="text-button" data-example-reset>Reset example</button></div></div>
+    <div class="wiki-run-meta"><span id="${esc(helpId)}">⌘ / Ctrl + Enter to run · Ctrl + Space for suggestions · Tab to accept · Esc to dismiss · 3 second limit</span><span role="status" data-run-status>Ready to experiment</span></div>
     <div class="wiki-console"><div class="wiki-console-heading"><span class="tiny-label">YOUR OUTPUT</span><button type="button" class="text-button" data-example-clear>Clear</button></div><pre data-example-output aria-label="Example console output">Run the example to see its output.</pre></div>
     ${example.dom?'<div class="wiki-preview"><span class="tiny-label">BROWSER PREVIEW</span><div data-example-preview><p>Run the example to open its isolated document.</p></div></div>':''}
     <details class="wiki-expected"><summary>Expected output of the original example</summary><pre>${esc(article.example.output)}</pre></details>
@@ -101,7 +102,7 @@ export function bindPlayground(root,article) {
   const example=playgroundExample(article);
   let files={...example.files},active=Object.keys(files)[0],cancel,runNumber=0;
   const $=selector=>root.querySelector(selector);
-  const editor=$('[data-example-editor]'),output=$('[data-example-output]'),status=$('[data-run-status]');
+  const editorHost=$('[data-example-editor]'),output=$('[data-example-output]'),status=$('[data-run-status]');
   const run=$('[data-example-run]'),stop=$('[data-example-stop]'),saved=$('[data-draft-status]');
   function readDrafts() {
     const value=JSON.parse(localStorage.getItem(DRAFT_KEY)||'{}');
@@ -121,14 +122,14 @@ export function bindPlayground(root,article) {
       saved.textContent=Object.keys(files).every(name=>files[name]===example.files[name])?'Original example':'Draft saved on this device';
     }catch{saved.textContent='Session only · copy code to keep it';}
   }
+  const editor=createCodeEditor({parent:editorHost,files,active,id:editorHost.dataset.editorId,describedBy:editorHost.dataset.editorHelp,dom:example.dom,
+    onChange:(name,code)=>{files[name]=code;save();},onRun:start});
   function showFile() {
-    editor.value=files[active];
+    editor.showFile(active);
     $('[data-example-label]').textContent=`Code editor for ${active}`;
-    editor.style.height=`${Math.min(480,Math.max(190,files[active].split('\n').length*22+36))}px`;
     root.querySelectorAll('[data-example-file]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.exampleFile===active)));
   }
   showFile();
-  editor.addEventListener('input',()=>{files[active]=editor.value;save();});
   root.querySelectorAll('[data-example-file]').forEach(button=>button.addEventListener('click',()=>{active=button.dataset.exampleFile;showFile();}));
   function cleanup() {runNumber++;cancel?.();cancel=null;run.disabled=false;stop.disabled=true;}
   function start() {
@@ -154,16 +155,16 @@ export function bindPlayground(root,article) {
     });
   }
   run.addEventListener('click',start);
-  editor.addEventListener('keydown',event=>{if(event.key==='Enter'&&(event.metaKey||event.ctrlKey)){event.preventDefault();start();}});
+  $('[data-example-suggest]').addEventListener('click',()=>editor.suggest());
   stop.addEventListener('click',()=>{cleanup();status.textContent='Stopped';});
   $('[data-example-reset]').addEventListener('click',()=>{
-    cleanup();files={...example.files};showFile();save();
+    cleanup();files={...example.files};editor.reset(files);showFile();save();
     output.textContent='Run the example to see its output.';status.textContent='Original example restored';
   });
   $('[data-example-clear]').addEventListener('click',()=>output.replaceChildren());
   $('[data-example-copy]').addEventListener('click',async event=>{
-    try{await navigator.clipboard.writeText(editor.value);event.target.textContent='Copied';}
-    catch{editor.focus();editor.select();event.target.textContent='Select and copy the code';}
+    try{await navigator.clipboard.writeText(editor.getValue());event.target.textContent='Copied';}
+    catch{editor.select();event.target.textContent='Select and copy the code';}
   });
-  return cleanup;
+  return ()=>{cleanup();editor.destroy();};
 }

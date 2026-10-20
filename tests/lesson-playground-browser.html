@@ -2,6 +2,7 @@
 <style>body{font:15px system-ui;margin:24px}button{padding:10px}pre{white-space:pre-wrap}iframe{width:1100px;max-width:100%;height:760px;border:1px solid #ccc}</style>
 <h1>Lesson playground browser QA</h1><button id="run">Run lesson checks</button><pre id="results">Ready</pre><div id="preview"></div>
 <script type="module">
+import {EditorView} from '/code-editor.js';
 import {lessonExamples} from '/lesson-playgrounds.js';
 const results=document.querySelector('#results'),button=document.querySelector('#run');
 const assert=(condition,message)=>{if(!condition)throw Error(message);};
@@ -26,7 +27,7 @@ button.onclick=async()=>{
   const doc=()=>frame.contentDocument;
   const panel=id=>doc().querySelector(`[data-playground="${id}"]`);
   const edit=(root,code)=>{
-    const editor=root.querySelector('textarea');editor.value=code;editor.dispatchEvent(new Event('input',{bubbles:true}));
+    const editor=EditorView.findFromDOM(root.querySelector('.cm-content'));editor.dispatch({changes:{from:0,to:editor.state.doc.length,insert:code}});
   };
   const navigate=async lesson=>{
     frame.contentWindow.location.hash=`#/lesson/${lesson.id}`;
@@ -64,24 +65,24 @@ button.onclick=async()=>{
     });
     await check('quiz rerender keeps both code drafts',async()=>{
       doc().querySelector('[data-quiz]').click();
-      assert(panel('lesson-02-conversion').querySelector('textarea').value.includes('first draft'),'First draft lost on quiz answer');
-      assert(panel('lesson-02-identity').querySelector('textarea').value.includes('second draft'),'Second draft lost on quiz answer');
+      assert(panel('lesson-02-conversion').querySelector('.cm-content').textContent.includes('first draft'),'First draft lost on quiz answer');
+      assert(panel('lesson-02-identity').querySelector('.cm-content').textContent.includes('second draft'),'Second draft lost on quiz answer');
     });
     await check('reload restores drafts',async()=>{
       const old=doc();frame.contentWindow.location.reload();
       await wait(()=>doc()!==old&&panel('lesson-02-identity'));
-      assert(panel('lesson-02-conversion').querySelector('textarea').value.includes('first draft'),'Draft lost after reload');
-      assert(panel('lesson-02-identity').querySelector('textarea').value.includes('second draft'),'Second draft lost after reload');
+      assert(panel('lesson-02-conversion').querySelector('.cm-content').textContent.includes('first draft'),'Draft lost after reload');
+      assert(panel('lesson-02-identity').querySelector('.cm-content').textContent.includes('second draft'),'Second draft lost after reload');
     });
     await check('reset affects only its own example',async()=>{
       panel('lesson-02-conversion').querySelector('[data-example-reset]').click();
-      assert(!panel('lesson-02-conversion').querySelector('textarea').value.includes('first draft'),'Reset did not restore original');
-      assert(panel('lesson-02-identity').querySelector('textarea').value.includes('second draft'),'Reset erased another example');
+      assert(!panel('lesson-02-conversion').querySelector('.cm-content').textContent.includes('first draft'),'Reset did not restore original');
+      assert(panel('lesson-02-identity').querySelector('.cm-content').textContent.includes('second draft'),'Reset erased another example');
       panel('lesson-02-identity').querySelector('[data-example-reset]').click();
     });
     await check('keyboard runs the focused editor',async()=>{
       const root=panel('lesson-02-identity');edit(root,'console.log("shortcut");');
-      root.querySelector('textarea').dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',ctrlKey:true,bubbles:true,cancelable:true}));
+      root.querySelector('.cm-content').dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',ctrlKey:true,bubbles:true,cancelable:true}));
       await wait(()=>root.querySelector('[data-run-status]').textContent==='Finished');
       assert(root.querySelector('[data-example-output]').textContent.trim()==='shortcut','Keyboard output incorrect');
       root.querySelector('[data-example-reset]').click();
@@ -104,7 +105,7 @@ button.onclick=async()=>{
       edit(root,'export const totalMinutes = lessons => lessons.length;');
       await run(root,'2');
       root.querySelector('[data-example-file="app.mjs"]').click();
-      assert(root.querySelector('textarea').value.includes('import'),'App file was replaced');
+      assert(root.querySelector('.cm-content').textContent.includes('import'),'App file was replaced');
       root.querySelector('[data-example-reset]').click();
       await run(root,'55');
     });
@@ -112,7 +113,7 @@ button.onclick=async()=>{
       frame.style.width='375px';await navigate(lessons[n-1]);
       assert(doc().documentElement.scrollWidth<=frame.clientWidth+1,'Page overflows horizontally');
       for(const root of doc().querySelectorAll('[data-playground]')){
-        assert(root.querySelector('textarea').getBoundingClientRect().width<=375,'Editor exceeds viewport');
+        assert(root.querySelector('.cm-editor').getBoundingClientRect().width<=375,'Editor exceeds viewport');
       }
       const e=lessonExamples(lessons[n-1])[0];await run(panel(e.id),e.example.output);
     });

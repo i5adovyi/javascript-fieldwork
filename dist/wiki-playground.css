@@ -5,10 +5,34 @@
 .wiki-file-tabs{display:flex;gap:1px;background:#1c241d;padding:7px 14px 0;overflow:auto}
 .wiki-file-tabs button{font-family:var(--mono);font-size:11px;color:#b3c0ac;background:transparent;border:0;border-bottom:2px solid transparent;padding:9px 12px;white-space:nowrap}
 .wiki-file-tabs button[aria-pressed=true]{border-color:#f2714b;color:#fff}
-.wiki-code-editor{display:block;width:100%;min-width:0;max-width:100%;min-height:190px;resize:vertical;border:0;border-radius:0;background:#202920;color:#f1f4e9;padding:20px 22px;font:13px/22px var(--mono),monospace;tab-size:2;caret-color:#ff9f79;white-space:pre;overflow:auto}
-.wiki-code-editor:focus{outline:2px solid #ec7044;outline-offset:-2px}
+/* CodeMirror stays within the article; long lines scroll inside the editor. */
+.wiki-code-editor{min-width:0;max-width:100%;background:#202920;color:#f1f4e9}
+.wiki-code-editor .cm-editor{font:13px/22px var(--mono),monospace;min-height:190px}
+.wiki-code-editor .cm-editor.cm-focused{outline:2px solid #ec7044;outline-offset:-2px}
+.wiki-code-editor .cm-scroller{overflow:auto;max-height:480px;min-height:190px;font-family:inherit}
+.wiki-code-editor .cm-content{padding:16px 0;caret-color:#ffad87}
+.wiki-code-editor .cm-line{padding:0 20px 0 12px}
+.wiki-code-editor .cm-gutters{background:#1c241d;border-right:1px solid #3b4838;color:#9eaa96;min-width:36px}
+.wiki-code-editor .cm-lineNumbers .cm-gutterElement{padding:0 8px 0 6px}
+.wiki-code-editor .cm-activeLine,.wiki-code-editor .cm-activeLineGutter{background:#ffffff09}
+.wiki-code-editor .cm-cursor{border-left-color:#ffad87}
+.wiki-code-editor .cm-selectionBackground,.wiki-code-editor .cm-focused .cm-selectionBackground{background:#526249!important}
+.wiki-code-editor .cm-matchingBracket{background:#60734b!important;outline:1px solid #9ab580}
+.wiki-code-editor .tok-keyword{color:#f6ab88}.wiki-code-editor .tok-string,.wiki-code-editor .tok-string2{color:#c3db93}
+.wiki-code-editor .tok-number,.wiki-code-editor .tok-bool,.wiki-code-editor .tok-atom{color:#dec0ff}
+.wiki-code-editor .tok-comment{color:#a3b09a;font-style:italic}.wiki-code-editor .tok-variableName{color:#e5ecd9}
+.wiki-code-editor .tok-propertyName{color:#a8d8df}.wiki-code-editor .tok-function{color:#f3d29a}
+.wiki-code-editor .tok-typeName,.wiki-code-editor .tok-className{color:#f1c675}.wiki-code-editor .tok-operator{color:#e6c9a9}
+.wiki-code-editor .tok-punctuation{color:#c6cebe}
+.wiki-code-editor .cm-tooltip{border:1px solid #6d7d60;background:#293626;color:#f1f4e9;border-radius:5px;box-shadow:0 5px 20px #0005;font:12px/1.6 var(--mono),monospace;max-width:calc(100vw - 32px)}
+.wiki-code-editor .cm-tooltip-autocomplete>ul{font-family:inherit;max-height:240px;max-width:min(440px,calc(100vw - 32px))}
+.wiki-code-editor .cm-tooltip-autocomplete>ul>li{padding:4px 10px;white-space:nowrap}
+.wiki-code-editor .cm-tooltip-autocomplete>ul>li[aria-selected]{background:#526744;color:#fff}
+.wiki-code-editor .cm-completionLabel{font-weight:500}.wiki-code-editor .cm-completionMatchedText{color:#ffd4ac;text-decoration:none;font-weight:700}
+.wiki-code-editor .cm-completionDetail{color:#c1cbb8;font-size:10px;margin-left:16px}
+.wiki-code-editor .cm-snippetField{background:#6d80574d}
 .wiki-run-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px 20px 12px}
-.wiki-run-toolbar>div{display:flex;align-items:center;gap:14px}.wiki-run-toolbar .text-button{font-size:11px}.wiki-run-toolbar .button{font-size:12px;padding:10px 13px}
+.wiki-run-toolbar>div{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.wiki-run-toolbar .text-button{font-size:11px}.wiki-run-toolbar .button{font-size:12px;padding:10px 13px}
 .wiki-run-meta{display:flex;gap:14px;justify-content:space-between;flex-wrap:wrap;padding:0 20px 15px;color:#747e69;font-size:10px}
 [data-run-status]{font-weight:600;color:#465b3a}
 .wiki-console{background:#f2f5ed;border-top:1px solid #dce2d3;padding:16px 20px}
@@ -19,7 +43,7 @@
 .wiki-playground .wiki-preview p{font-size:12px;color:#737d67;margin-top:12px}
 .wiki-expected,.wiki-original{padding:14px 20px;border-top:1px solid #dce2d3;font-size:12px;color:#5c684f}
 .wiki-expected summary,.wiki-original summary{cursor:pointer}.wiki-expected pre{margin-bottom:0}.wiki-original .code-block{margin-top:12px}
-@media(max-width:600px){.wiki-playground-heading{align-items:flex-start;flex-direction:column;gap:5px}.wiki-run-toolbar{align-items:flex-start;flex-direction:column}.wiki-run-toolbar,.wiki-console,.wiki-preview,.wiki-expected,.wiki-original{padding-left:14px;padding-right:14px}.wiki-code-editor{padding-left:14px;padding-right:14px;font-size:12px}.wiki-run-meta{padding-left:14px;padding-right:14px}.wiki-save-state{font-size:11px}}
-@media print{.wiki-run-toolbar,.wiki-run-meta,.wiki-console,.wiki-preview{display:none}.wiki-code-editor{height:auto!important;background:white;color:black}.wiki-playground{break-inside:avoid}}
+@media(max-width:600px){.wiki-playground-heading{align-items:flex-start;flex-direction:column;gap:5px}.wiki-run-toolbar{align-items:flex-start;flex-direction:column}.wiki-run-toolbar,.wiki-console,.wiki-preview,.wiki-expected,.wiki-original{padding-left:14px;padding-right:14px}.wiki-code-editor .cm-editor{font-size:12px}.wiki-code-editor .cm-line{padding-left:8px;padding-right:12px}.wiki-run-meta{padding-left:14px;padding-right:14px}.wiki-save-state{font-size:11px}}
+@media print{.wiki-run-toolbar,.wiki-run-meta,.wiki-console,.wiki-preview{display:none}.wiki-code-editor,.wiki-code-editor .cm-editor,.wiki-code-editor .cm-gutters{background:white;color:black}.wiki-code-editor .cm-scroller{max-height:none;overflow:visible}.wiki-code-editor .cm-line span{color:black!important}.wiki-playground{break-inside:avoid}}
 
 .lesson-article{min-width:0}.wiki-playground{min-width:0;max-width:100%}.wiki-playground pre{max-width:100%;overflow:auto}.wiki-playground .wiki-expected pre{white-space:pre-wrap;overflow-wrap:anywhere}

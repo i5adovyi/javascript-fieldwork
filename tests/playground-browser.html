@@ -2,6 +2,7 @@
 <style>body{font:15px system-ui;margin:32px;max-width:1100px}button{padding:12px}pre{white-space:pre-wrap}iframe{width:400px;height:160px}#fixture{max-width:650px}</style>
 <h1>Wiki playground browser QA</h1><button id="run">Run playground checks</button><pre id="results">Ready</pre><div id="preview"></div><div id="fixture"></div>
 <script type="module">
+import {EditorView} from '/code-editor.js';
 import {runWikiExample} from '/wiki-runner.js';
 import {playgroundExample,playgroundMarkup,bindPlayground} from '/wiki-playground.js';
 const results=document.querySelector('#results'),preview=document.querySelector('#preview');
@@ -90,14 +91,14 @@ document.querySelector('#run').onclick=async()=>{
     try{
       localStorage.removeItem(key);
       const mount=()=>{fixture.innerHTML=playgroundMarkup(article,esc,code=>`<pre>${esc(code)}</pre>`);return bindPlayground(fixture.querySelector('[data-playground]'),article);};
-      dispose=mount();let editor=fixture.querySelector('textarea');
-      editor.value='export const total = () => 99;';editor.dispatchEvent(new Event('input'));
+      dispose=mount();let editor=EditorView.findFromDOM(fixture.querySelector('.cm-content'));
+      editor.dispatch({changes:{from:0,to:editor.state.doc.length,insert:'export const total = () => 99;'}});
       fixture.querySelector('[data-example-file="app.mjs"]').click();
-      assert(editor.value.includes('import'),'File switch lost app.mjs');
-      dispose();dispose=mount();editor=fixture.querySelector('textarea');
-      assert(editor.value.includes('99'),'Draft did not survive remount');
+      assert(editor.state.doc.toString().includes('import'),'File switch lost app.mjs');
+      dispose();dispose=mount();editor=EditorView.findFromDOM(fixture.querySelector('.cm-content'));
+      assert(editor.state.doc.toString().includes('99'),'Draft did not survive remount');
       fixture.querySelector('[data-example-reset]').click();
-      assert(editor.value===article.example.files['summary.mjs'],'Reset did not restore');
+      assert(editor.state.doc.toString()===article.example.files['summary.mjs'],'Reset did not restore');
       assert(!JSON.parse(localStorage.getItem(key)||'{}').modules,'Reset did not remove draft');
     }finally{dispose?.();fixture.replaceChildren();if(prior===null)localStorage.removeItem(key);else localStorage.setItem(key,prior);}
   });
@@ -115,7 +116,7 @@ document.querySelector('#run').onclick=async()=>{
       });
       const doc=frame.contentDocument;
       assert(doc.documentElement.scrollWidth<=frame.clientWidth+1,'Mobile page overflows horizontally');
-      const editor=doc.querySelector('textarea');
+      const editor=doc.querySelector('.cm-editor');
       assert(editor.getBoundingClientRect().width<=375,'Editor exceeds viewport');
       doc.querySelector('[data-example-run]').click();
       await new Promise(resolve=>setTimeout(resolve,500));

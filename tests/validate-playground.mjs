@@ -32,7 +32,7 @@ for(const article of wiki){
   const example=playgroundExample(article);
   assert.ok(Object.values(example.files).every(code=>typeof code==='string'&&code.length));
   const markup=playgroundMarkup(article,s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;'),()=>'<pre>Original source</pre>');
-  assert.ok(markup.includes('data-example-run')&&markup.includes('textarea'));
+  assert.ok(markup.includes('data-example-run')&&markup.includes('data-example-editor'));
   assert.ok(!markup.includes('<script>'));
   if(article.example.runtime==='node')assert.match(example.note,/Browser version/);
 }
