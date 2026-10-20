@@ -6,6 +6,8 @@ const valid={stages:[],lessons:[]};
 let request;
 assert.deepEqual(await loadContent('curriculum',{baseURL:'https://example.com/studio/content-loader.js',fetcher:async(url,options)=>{request={url:String(url),options};return new Response(JSON.stringify(valid),{headers:{'content-type':'application/json'}});}}),valid);
 assert.equal(request.url,'https://example.com/studio/data/curriculum.json');assert.equal(request.options.credentials,'same-origin');
+assert.deepEqual(await loadContent('incidents',{fetcher:async()=>new Response('{"incidents":[]}',{headers:{'content-type':'application/json'}})}),{incidents:[]});
+await assert.rejects(loadContent('incidents',{fetcher:async()=>new Response('{"incidents":{}}',{headers:{'content-type':'application/json'}})}),ContentLoadError);
 const cases=[
  [200,'text/html','<!DOCTYPE html><title>Sign in required</title><a href="/signin-with-chatgpt">Sign in</a>','auth'],
  [401,'text/plain','Unauthorized','auth'],

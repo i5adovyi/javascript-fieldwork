@@ -1,5 +1,6 @@
 import {readFile,writeFile,copyFile} from 'node:fs/promises';
 import {buildStudyPack} from './build-study-pack.mjs';
+import {buildIncidents} from './build-incidents.mjs';
 const root=new URL('../dist/',import.meta.url);
 const c=JSON.parse(await readFile(new URL('data/curriculum.json',root),'utf8'));
 const l=JSON.parse(await readFile(new URL('data/library.json',root),'utf8'));
@@ -13,5 +14,6 @@ await Promise.all([
   copyFile(new URL('../docs/account-switch.md',import.meta.url),new URL('account-switch.md',root)),
   copyFile(new URL('../docs/CURRICULUM-MAP.md',import.meta.url),new URL('CURRICULUM-MAP.md',root))
 ]);
+await buildIncidents(root);
 await buildStudyPack(root);
 console.log(`Built original study guide: ${c.lessons.length} lessons + ${l.articles.length} articles; exported manuals and reproducible study-pack.zip.`);

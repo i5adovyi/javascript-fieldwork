@@ -37,3 +37,12 @@ Run `npm test` for the automated content, lab, runner, wiki, persistence, loader
 The six project starter kits intentionally contain unfinished exercises: 6 implemented checks pass and 18 tests are marked TODO. Lab starters are also intentionally unfinished. Completion checklists are self-assessment; lab assertions cover their stated cases rather than every possible program.
 
 This audit does not claim a full browser/device matrix. Progress remains local to each browser and origin; use notebook backups when moving devices. External courses and videos require connectivity.
+
+
+## Incident workshop addition · 20 October 2026
+
+Added 12 synthetic packets and eight repair labs without changing the original 48 lab records. All 56 reference solutions pass 299 assertions; the eight new labs account for 68 checks. Each new broken starter passes ordinary behavior and fails a relevant regression. Packet reproductions and auxiliary modules were executed locally, and the eight focused implementations were checked against their lab solutions.
+
+Browser checks on a separate localhost origin covered all 12 case routes and fixtures, all six filters, hidden clues/debriefs, investigation-note saving and reload, notebook/lesson/project links, all eight broken and repaired Workers, actual lab UI failure/success, 390px layouts, and workbook/ZIP/review availability. Global search finds incidents. Synthetic QA state is restored after the suite. The download validator compares every ZIP packet and fixture with current content; backup tests cover incident note export/import and unknown-ID rejection.
+
+The cases teach diagnosis and constrained repairs. Real distributed idempotency, full DST/calendar handling, crash-safe filesystem behavior, and actual deployment rollback remain explicitly documented extensions. This addition does not change the earlier offline verification limits.

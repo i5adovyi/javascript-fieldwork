@@ -34,7 +34,7 @@ export async function loadContent(name, { fetcher = fetch, baseURL = import.meta
   let content;
   try { content = JSON.parse(text); }
   catch { throw new ContentLoadError(`The ${name} data could not be read. Please reload the studio.`); }
-  const expected = { curriculum: ['stages', 'lessons'], labs: ['labs'], library: ['resources', 'articles', 'projects'], wiki: ['wiki'] }[name];
+  const expected = { curriculum: ['stages', 'lessons'], labs: ['labs'], library: ['resources', 'articles', 'projects'], wiki: ['wiki'], incidents: ['incidents'] }[name];
   if (!expected || !content || !expected.every(key => Array.isArray(content[key]))) {
     throw new ContentLoadError(`The ${name} data has an unexpected structure. Please reload the studio.`);
   }

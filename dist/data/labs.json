@@ -2075,6 +2075,530 @@
           "code": "const checks=Object.freeze([Object.freeze({name:\"a\",run:()=>{}})]);assertEqual((await runChecks(checks)).passed,1);"
         }
       ]
+    },
+    {
+      "id": "lab-49",
+      "stage": 1,
+      "kind": "incident",
+      "incidentId": "incident-01",
+      "afterLesson": "lesson-04",
+      "title": "Repair an optional integer setting",
+      "difficulty": "Foundation",
+      "minutes": 25,
+      "concept": "Missing values \u00b7 complete parsing \u00b7 safe integers",
+      "prompt": "A service accidentally replaces a configured zero with its default and accepts values such as \"12workers\". Repair readOptionalInteger(raw, {fallback, min, max}). Only undefined means absent and selects fallback. Otherwise raw must be a string: trim whitespace, require the complete string to match an optional + or - followed by one or more ASCII digits, and return a safe integer within inclusive bounds. Leading zeroes are accepted. Normalize negative zero to positive zero. Blank strings, nonstrings, and malformed syntax throw TypeError; a syntactically valid but unsafe or out-of-range integer throws RangeError. The three option values must be safe integers; invalid option types throw TypeError, while reversed bounds or a fallback outside them throw RangeError. Validate options even if raw is present. Do not use truthiness to decide whether a value exists.",
+      "examples": [
+        {
+          "input": "readOptionalInteger(\"0\", {fallback: 8, min: 0, max: 32})",
+          "output": "0"
+        },
+        {
+          "input": "readOptionalInteger(undefined, {fallback: 8, min: 0, max: 32})",
+          "output": "8"
+        },
+        {
+          "input": "readOptionalInteger(\"12workers\", {fallback: 8, min: 0, max: 32})",
+          "output": "throws TypeError"
+        }
+      ],
+      "starter": "function readOptionalInteger(raw, {fallback, min, max}) {\n  return Number.parseInt(raw, 10) || fallback;\n}",
+      "solution": "function readOptionalInteger(raw, {fallback, min, max}) {\n  if (![fallback, min, max].every(Number.isSafeInteger)) {\n    throw new TypeError(\"Options must be safe integers\");\n  }\n  if (min > max || fallback < min || fallback > max) {\n    throw new RangeError(\"Invalid bounds or fallback\");\n  }\n  if (raw === undefined) return fallback === 0 ? 0 : fallback;\n  if (typeof raw !== \"string\" || !/^[+-]?\\d+$/.test(raw.trim())) {\n    throw new TypeError(\"A complete decimal integer is required\");\n  }\n  const value = Number(raw.trim());\n  if (!Number.isSafeInteger(value) || value < min || value > max) {\n    throw new RangeError(\"Integer outside supported range\");\n  }\n  return value === 0 ? 0 : value;\n}",
+      "hints": [
+        "Use raw === undefined for absence. Zero, null, and an empty string are different inputs.",
+        "Validate the entire trimmed string before Number conversion; parseInt accepts trailing garbage.",
+        "Check Number.isSafeInteger, inclusive bounds, and the fallback contract separately. Return 0 when value === 0 to normalize -0."
+      ],
+      "tests": [
+        {
+          "name": "Ordinary setting and absent default",
+          "code": "assertEqual(readOptionalInteger(\"12\", {fallback:8,min:0,max:32}),12); assertEqual(readOptionalInteger(undefined,{fallback:8,min:0,max:32}),8);"
+        },
+        {
+          "name": "Explicit zero is not missing",
+          "code": "assertEqual(readOptionalInteger(\"0\",{fallback:8,min:0,max:32}),0);"
+        },
+        {
+          "name": "Signs whitespace leading zeroes and negative zero",
+          "code": "assertEqual(readOptionalInteger(\"  +003  \",{fallback:1,min:-4,max:8}),3); assertEqual(readOptionalInteger(\"-4\",{fallback:1,min:-4,max:8}),-4); assertEqual(readOptionalInteger(\"-0\",{fallback:1,min:-4,max:8}),0);"
+        },
+        {
+          "name": "Reject partial numbers and blank strings",
+          "code": "for(const raw of [\"\", \"  \", \"12workers\", \"1e2\", \"1.0\", \"0x10\", \"1 2\", \"\u221e\", \"\uff11\uff12\"]) { let error; try { readOptionalInteger(raw,{fallback:8,min:0,max:100}); } catch(e) { error=e; } assert(error instanceof TypeError,`Reject ${JSON.stringify(raw)}`); }"
+        },
+        {
+          "name": "No coercion of nonstring values",
+          "code": "for(const raw of [null,false,0,12,[],{toString(){throw new Error(\"Must not coerce\");}}]) { let error; try { readOptionalInteger(raw,{fallback:8,min:0,max:32}); } catch(e) { error=e; } assert(error instanceof TypeError); }"
+        },
+        {
+          "name": "Inclusive bounds and unsafe integers",
+          "code": "assertEqual(readOptionalInteger(\"32\",{fallback:8,min:0,max:32}),32); for(const raw of [\"-1\",\"33\",\"9007199254740993\"]) { let error; try { readOptionalInteger(raw,{fallback:8,min:0,max:32}); } catch(e) { error=e; } assert(error instanceof RangeError); } assertEqual(readOptionalInteger(\"9007199254740991\",{fallback:0,min:0,max:Number.MAX_SAFE_INTEGER}),Number.MAX_SAFE_INTEGER);"
+        },
+        {
+          "name": "Validate option types before accepting a value",
+          "code": "for(const options of [{fallback:\"8\",min:0,max:32},{fallback:8,min:NaN,max:32},{fallback:8,min:0,max:Infinity},{fallback:8,min:0,max:3.5}]) { let error; try { readOptionalInteger(\"1\",options); } catch(e) { error=e; } assert(error instanceof TypeError); }"
+        },
+        {
+          "name": "Invalid defaults cannot hide behind present values",
+          "code": "for(const options of [{fallback:8,min:10,max:2},{fallback:40,min:0,max:32}]) { let error; try { readOptionalInteger(\"1\",options); } catch(e) { error=e; } assert(error instanceof RangeError); }"
+        }
+      ]
+    },
+    {
+      "id": "lab-50",
+      "stage": 2,
+      "kind": "incident",
+      "incidentId": "incident-03",
+      "afterLesson": "lesson-07",
+      "title": "Apply a partial profile update without erasing data",
+      "difficulty": "Foundation",
+      "minutes": 35,
+      "concept": "Own properties \u00b7 explicit null \u00b7 atomic validation",
+      "prompt": "Repair patchProfile(current, patch) for a profile with exactly displayName, bio, and notifications. current is a valid ordinary record: displayName is a nonblank string, bio is a string or null, and notifications is boolean. An absent patch field preserves the current value; bio: null explicitly clears the bio; notifications: false disables notifications. A present undefined is invalid. A supplied displayName must be a string with nonblank trim(); store its trimmed value. bio accepts any string or null. patch must be a non-null, non-array object. Inspect its own properties, including non-enumerable properties; ignore inherited properties. Reject unknown string keys, symbols, and accessor properties with TypeError without invoking getters. All invalid field values also throw TypeError. Return a fresh ordinary record even for an empty patch. Never mutate current or patch, including when a later field fails validation. Proxy inputs are outside this exercise's domain.",
+      "examples": [
+        {
+          "input": "patchProfile({displayName:\"Ada\",bio:\"Engineer\",notifications:true}, {bio:null,notifications:false})",
+          "output": "{displayName:\"Ada\",bio:null,notifications:false}"
+        },
+        {
+          "input": "patchProfile({displayName:\"Ada\",bio:\"Engineer\",notifications:true}, {})",
+          "output": "a new record with the same three values"
+        }
+      ],
+      "starter": "function patchProfile(current, patch) {\n  return {\n    displayName: patch.displayName || current.displayName,\n    bio: patch.bio || current.bio,\n    notifications: patch.notifications || current.notifications\n  };\n}",
+      "solution": "function patchProfile(current, patch) {\n  if (patch === null || typeof patch !== \"object\" || Array.isArray(patch)) {\n    throw new TypeError(\"Patch must be an object\");\n  }\n  const result = {\n    displayName: current.displayName,\n    bio: current.bio,\n    notifications: current.notifications\n  };\n  const descriptors = Object.getOwnPropertyDescriptors(patch);\n  for (const key of Reflect.ownKeys(descriptors)) {\n    if (![\"displayName\", \"bio\", \"notifications\"].includes(key)) {\n      throw new TypeError(\"Unknown profile field\");\n    }\n    const descriptor = descriptors[key];\n    if (!Object.hasOwn(descriptor, \"value\")) throw new TypeError(\"Accessors are not accepted\");\n    const value = descriptor.value;\n    if (key === \"displayName\") {\n      if (typeof value !== \"string\" || !value.trim()) throw new TypeError(\"Invalid display name\");\n      result.displayName = value.trim();\n    } else if (key === \"bio\") {\n      if (value !== null && typeof value !== \"string\") throw new TypeError(\"Invalid bio\");\n      result.bio = value;\n    } else {\n      if (typeof value !== \"boolean\") throw new TypeError(\"Invalid notifications\");\n      result.notifications = value;\n    }\n  }\n  return result;\n}",
+      "hints": [
+        "Presence and truthiness answer different questions. null and false are intentional values in this API.",
+        "Object.getOwnPropertyDescriptors lets you inspect own data fields without calling getters. Reflect.ownKeys also exposes symbols.",
+        "Build a new record and validate every supplied descriptor before returning it. Throwing discards the local result without changing either input."
+      ],
+      "tests": [
+        {
+          "name": "Ordinary update preserves fields not supplied",
+          "code": "const current={displayName:\"Ada\",bio:\"Engineer\",notifications:true}; assertEqual(patchProfile(current,{displayName:\"Grace\"}),{displayName:\"Grace\",bio:\"Engineer\",notifications:true});"
+        },
+        {
+          "name": "Null false and empty bio are intentional values",
+          "code": "const current={displayName:\"Ada\",bio:\"Engineer\",notifications:true}; assertEqual(patchProfile(current,{bio:null,notifications:false}),{displayName:\"Ada\",bio:null,notifications:false}); assertEqual(patchProfile(current,{bio:\"\"}).bio,\"\");"
+        },
+        {
+          "name": "Empty patch yields an independent record",
+          "code": "const current={displayName:\"Ada\",bio:null,notifications:false}; const result=patchProfile(current,{}); assertEqual(result,current); assert(result!==current); assert(Object.getPrototypeOf(result)===Object.prototype);"
+        },
+        {
+          "name": "Inherited fields are not updates",
+          "code": "const current={displayName:\"Ada\",bio:\"Engineer\",notifications:true}; const patch=Object.create({displayName:\"Injected\",bio:null,notifications:false}); assertEqual(patchProfile(current,patch),current); const own=Object.create(null); own.bio=null; assertEqual(patchProfile(current,own).bio,null);"
+        },
+        {
+          "name": "Own undefined and invalid values fail",
+          "code": "const current={displayName:\"Ada\",bio:null,notifications:true}; for(const patch of [{bio:undefined},{notifications:0},{displayName:\"   \"},{bio:42},{displayName:null},null,[],\"bad\"]) { let error; try { patchProfile(current,patch); } catch(e) { error=e; } assert(error instanceof TypeError); }"
+        },
+        {
+          "name": "No getter execution and no unknown or symbolic fields",
+          "code": "const current={displayName:\"Ada\",bio:null,notifications:true}; let reads=0; const getter={get bio(){reads++; return \"secret\";}}; for(const patch of [getter,{extra:1},{[Symbol(\"bio\")]:\"hidden\"},JSON.parse(\"{\\\"__proto__\\\":{\\\"polluted\\\":true}}\")]) { let error; try { patchProfile(current,patch); } catch(e) { error=e; } assert(error instanceof TypeError); } assertEqual(reads,0);"
+        },
+        {
+          "name": "Non-enumerable own data and trim are handled",
+          "code": "const current={displayName:\"Ada\",bio:null,notifications:true}; const patch=Object.defineProperty({},\"displayName\",{value:\"  Grace  \",enumerable:false}); assertEqual(patchProfile(current,patch).displayName,\"Grace\"); assertEqual(patch.displayName,\"  Grace  \");"
+        },
+        {
+          "name": "Failed mixed patch leaves both inputs unchanged",
+          "code": "const current=Object.freeze({displayName:\"Ada\",bio:\"Engineer\",notifications:true}); const patch=Object.freeze({displayName:\"Grace\",notifications:\"yes\"}); let error; try { patchProfile(current,patch); } catch(e) { error=e; } assert(error instanceof TypeError); assertEqual(current,{displayName:\"Ada\",bio:\"Engineer\",notifications:true}); assertEqual(patch,{displayName:\"Grace\",notifications:\"yes\"});"
+        }
+      ]
+    },
+    {
+      "id": "lab-51",
+      "stage": 3,
+      "kind": "incident",
+      "incidentId": "incident-05",
+      "afterLesson": "lesson-17",
+      "title": "Close a resource scope even when cleanup fails",
+      "difficulty": "Intermediate",
+      "minutes": 35,
+      "concept": "Resource ownership \u00b7 LIFO cleanup \u00b7 AggregateError",
+      "prompt": "A screen acquires resources and registers synchronous cleanup callbacks. Repair createResourceScope(), returning add(cleanup) and close(). add requires a function and registers it; each registration is distinct even when it uses the same function. close marks the scope closed before invoking callbacks, executes every registration once in reverse registration order, and never skips later cleanup because one callback throws. Collect thrown values unchanged in execution order; after all cleanup, throw a new AggregateError(errors, \"Cleanup failed\") if anything failed. A repeated or reentrant close is a no-op, including after a failed close. add after closure throws an Error and must not invoke the supplied callback. Invalid cleanup arguments while open throw TypeError without creating a registration. Callbacks are synchronous; awaiting asynchronous cleanup is deliberately outside this contract.",
+      "examples": [
+        {
+          "input": "const s=createResourceScope(); s.add(()=>log.push(\"first\")); s.add(()=>log.push(\"second\")); s.close();",
+          "output": "log is [\"second\",\"first\"]"
+        },
+        {
+          "input": "s.close(); // a second call",
+          "output": "no callbacks run again"
+        }
+      ],
+      "starter": "function createResourceScope() {\n  const cleanups = [];\n  let closed = false;\n  return {\n    add(cleanup) {\n      if (closed) throw new Error(\"Scope is closed\");\n      cleanups.push(cleanup);\n    },\n    close() {\n      if (closed) return;\n      for (const cleanup of cleanups) cleanup();\n      closed = true;\n    }\n  };\n}",
+      "solution": "function createResourceScope() {\n  const cleanups = [];\n  let closed = false;\n  return {\n    add(cleanup) {\n      if (closed) throw new Error(\"Scope is closed\");\n      if (typeof cleanup !== \"function\") throw new TypeError(\"Cleanup must be a function\");\n      cleanups.push(cleanup);\n    },\n    close() {\n      if (closed) return;\n      closed = true;\n      const errors = [];\n      while (cleanups.length) {\n        const cleanup = cleanups.pop();\n        try { cleanup(); } catch (error) { errors.push(error); }\n      }\n      if (errors.length) throw new AggregateError(errors, \"Cleanup failed\");\n    }\n  };\n}",
+      "hints": [
+        "Mark the scope closed before running user callbacks; a callback can call close again.",
+        "Treat registrations as a stack. Catch errors around each individual callback, not around the whole loop.",
+        "Keep every thrown value, including null or strings, and throw one AggregateError only after the stack is empty."
+      ],
+      "tests": [
+        {
+          "name": "Ordinary resource closes once",
+          "code": "const scope=createResourceScope(); let calls=0; scope.add(()=>calls++); scope.close(); scope.close(); assertEqual(calls,1);"
+        },
+        {
+          "name": "Cleanup reverses acquisition order",
+          "code": "const scope=createResourceScope(); const log=[]; scope.add(()=>log.push(\"connection\")); scope.add(()=>log.push(\"subscription\")); scope.add(()=>log.push(\"timer\")); scope.close(); assertEqual(log,[\"timer\",\"subscription\",\"connection\"]);"
+        },
+        {
+          "name": "Every registration runs despite thrown values",
+          "code": "const scope=createResourceScope(); const log=[]; const failure=new Error(\"detach failed\"); scope.add(()=>{log.push(\"first\"); throw null;}); scope.add(()=>{log.push(\"second\"); throw failure;}); scope.add(()=>log.push(\"third\")); let error; try {scope.close();} catch(e) {error=e;} assertEqual(log,[\"third\",\"second\",\"first\"]); assert(error instanceof AggregateError); assertEqual(error.message,\"Cleanup failed\"); assert(error.errors[0]===failure); assert(error.errors[1]===null); assertEqual(error.errors.length,2);"
+        },
+        {
+          "name": "Failed close is still closed and not retried",
+          "code": "const scope=createResourceScope(); let calls=0; scope.add(()=>{calls++; throw \"failure\";}); try {scope.close();} catch {} let second; try {scope.close();} catch(e) {second=e;} assertEqual(calls,1); assertEqual(second,undefined); let ran=false, error; try {scope.add(()=>{ran=true;});} catch(e) {error=e;} assert(error instanceof Error); assertEqual(ran,false);"
+        },
+        {
+          "name": "Reentrant close cannot rerun cleanup",
+          "code": "const scope=createResourceScope(); let calls=0; scope.add(()=>{calls++; if(calls===1) scope.close();}); scope.close(); assertEqual(calls,1);"
+        },
+        {
+          "name": "Duplicate functions remain separate registrations",
+          "code": "const scope=createResourceScope(); let calls=0; const cleanup=()=>calls++; scope.add(cleanup); scope.add(cleanup); scope.close(); assertEqual(calls,2);"
+        },
+        {
+          "name": "Invalid callbacks do not enter the stack",
+          "code": "const scope=createResourceScope(); for(const cleanup of [null,undefined,0,{}]) {let error; try {scope.add(cleanup);} catch(e) {error=e;} assert(error instanceof TypeError);} let calls=0; scope.add(()=>calls++); scope.close(); assertEqual(calls,1);"
+        },
+        {
+          "name": "Scope is already closed inside cleanup",
+          "code": "const scope=createResourceScope(); let rejected=false, ran=false; scope.add(()=>{try {scope.add(()=>{ran=true;});} catch(e) {rejected=e instanceof Error;}}); scope.close(); assert(rejected); assertEqual(ran,false);"
+        }
+      ]
+    },
+    {
+      "id": "lab-52",
+      "stage": 4,
+      "kind": "incident",
+      "incidentId": "incident-07",
+      "afterLesson": "lesson-20",
+      "title": "Keep complete graphemes in a message preview",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "concept": "Unicode grapheme clusters \u00b7 Intl.Segmenter \u00b7 text contracts",
+      "prompt": "Repair truncateGraphemes(text, limit, suffix = \"\u2026\"). Return text unchanged when it contains at most limit extended grapheme clusters; otherwise return its first limit grapheme clusters followed by suffix. The suffix is outside the content limit and is not itself truncated. Use Intl.Segmenter(\"en\", {granularity: \"grapheme\"}) so combining accents, emoji modifiers, flag pairs, and joined family emoji remain whole. Preserve the original code units of retained text: do not normalize, case-fold, or trim. text and suffix must be strings or throw TypeError. limit must be a nonnegative safe integer or throw RangeError. For limit 0, nonempty text produces suffix while empty text remains empty. This is a grapheme-count limit, not a byte limit or a guarantee of display width; segmentation follows the runtime's Unicode data.",
+      "examples": [
+        {
+          "input": "truncateGraphemes(\"Cafe\\u0301 noir\", 4)",
+          "output": "\"Cafe\u0301\u2026\" (the combining accent stays attached)"
+        },
+        {
+          "input": "truncateGraphemes(\"\ud83d\udc68\u200d\ud83d\udc69\u200d\ud83d\udc67\u200d\ud83d\udc66!\", 1)",
+          "output": "\"\ud83d\udc68\u200d\ud83d\udc69\u200d\ud83d\udc67\u200d\ud83d\udc66\u2026\""
+        }
+      ],
+      "starter": "function truncateGraphemes(text, limit, suffix = \"\u2026\") {\n  return text.length <= limit ? text : text.slice(0, limit) + suffix;\n}",
+      "solution": "function truncateGraphemes(text, limit, suffix = \"\u2026\") {\n  if (typeof text !== \"string\" || typeof suffix !== \"string\") {\n    throw new TypeError(\"Text and suffix must be strings\");\n  }\n  if (!Number.isSafeInteger(limit) || limit < 0) throw new RangeError(\"Invalid grapheme limit\");\n  const segmenter = new Intl.Segmenter(\"en\", {granularity: \"grapheme\"});\n  let kept = \"\";\n  let count = 0;\n  for (const {segment} of segmenter.segment(text)) {\n    if (count === limit) return kept + suffix;\n    kept += segment;\n    count++;\n  }\n  return text;\n}",
+      "hints": [
+        "String.length and slice count UTF-16 code units. Array.from counts code points; neither counts what this contract needs.",
+        "Intl.Segmenter returns objects with a segment field for each complete grapheme cluster.",
+        "Keep at most limit segments. Only add suffix after you actually observe another segment; otherwise return the original string."
+      ],
+      "tests": [
+        {
+          "name": "Ordinary ASCII preview and exact boundary",
+          "code": "assertEqual(truncateGraphemes(\"hello\",3),\"hel\u2026\"); assertEqual(truncateGraphemes(\"hello\",5),\"hello\");"
+        },
+        {
+          "name": "Combining accent stays with its base without normalization",
+          "code": "const input=\"Cafe\\u0301 noir\"; assertEqual(truncateGraphemes(input,4),\"Cafe\\u0301\u2026\"); assertEqual(truncateGraphemes(\"e\\u0301\",1),\"e\\u0301\");"
+        },
+        {
+          "name": "Joined emoji are one grapheme",
+          "code": "assertEqual(truncateGraphemes(\"\ud83d\udc68\u200d\ud83d\udc69\u200d\ud83d\udc67\u200d\ud83d\udc66!\",1),\"\ud83d\udc68\u200d\ud83d\udc69\u200d\ud83d\udc67\u200d\ud83d\udc66\u2026\"); assertEqual(truncateGraphemes(\"\ud83d\udc69\u200d\ud83d\udcbb\",1),\"\ud83d\udc69\u200d\ud83d\udcbb\");"
+        },
+        {
+          "name": "Modifiers flags and supplementary characters stay whole",
+          "code": "assertEqual(truncateGraphemes(\"\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffb\",1),\"\ud83d\udc4d\ud83c\udffd\u2026\"); assertEqual(truncateGraphemes(\"\ud83c\uddf5\ud83c\uddf1\ud83c\uddfa\ud83c\udde6\",1),\"\ud83c\uddf5\ud83c\uddf1\u2026\"); assertEqual(truncateGraphemes(\"\ud83d\ude00x\",1),\"\ud83d\ude00\u2026\");"
+        },
+        {
+          "name": "Zero limit and empty content",
+          "code": "assertEqual(truncateGraphemes(\"x\",0),\"\u2026\"); assertEqual(truncateGraphemes(\"\",0),\"\"); assertEqual(truncateGraphemes(\"\",4),\"\");"
+        },
+        {
+          "name": "Custom suffix is outside the content budget",
+          "code": "assertEqual(truncateGraphemes(\"abc\",1,\" [more]\"),\"a [more]\"); assertEqual(truncateGraphemes(\"abc\",2,\"\"),\"ab\"); assertEqual(truncateGraphemes(\"a\",1,\" [more]\"),\"a\");"
+        },
+        {
+          "name": "Invalid limits are rejected",
+          "code": "for(const limit of [-1,1.5,NaN,Infinity,\"2\",Number.MAX_SAFE_INTEGER+1]) {let error; try {truncateGraphemes(\"abc\",limit);} catch(e) {error=e;} assert(error instanceof RangeError);}"
+        },
+        {
+          "name": "Text types are not coerced",
+          "code": "for(const [text,suffix] of [[null,\"\u2026\"],[42,\"\u2026\"],[\"abc\",null],[\"abc\",1]]) {let error; try {truncateGraphemes(text,1,suffix);} catch(e) {error=e;} assert(error instanceof TypeError);}"
+        },
+        {
+          "name": "Line break grapheme and literal whitespace are retained",
+          "code": "assertEqual(truncateGraphemes(\"\\r\\nX\",1),\"\\r\\n\u2026\"); assertEqual(truncateGraphemes(\" a \",2),\" a\u2026\");"
+        }
+      ]
+    },
+    {
+      "id": "lab-53",
+      "stage": 4,
+      "kind": "incident",
+      "incidentId": "incident-08",
+      "afterLesson": "lesson-23",
+      "title": "Stop stale requests from replacing newer state",
+      "difficulty": "Intermediate",
+      "minutes": 40,
+      "concept": "Promise races \u00b7 request generations \u00b7 error ownership",
+      "prompt": "Repair createLatestRequest(load), which returns run(input) and snapshot(). load is a function; reject any other constructor argument with TypeError. The initial snapshot is {status:\"idle\", value:undefined, error:undefined}. Each run synchronously calls load(input), immediately replaces state with {status:\"pending\", value:undefined, error:undefined}, and returns a promise for that call's own result. Only the most recently started call may publish a completion: success uses {status:\"success\", value:result, error:undefined}; failure uses {status:\"error\", value:undefined, error:reason}. A stale completion still fulfills or rejects its own promise, but cannot overwrite current state. Preserve result and rejection identities, including thrown primitives. Convert synchronous loader throws to rejected run promises. snapshot() returns a fresh top-level record so callers cannot alter internal state; values and errors themselves are not cloned. Requests are not canceled and successes are not cached. Tests must control completion order explicitly without timers.",
+      "examples": [
+        {
+          "input": "const r=createLatestRequest(load); const old=r.run(\"old\"); const fresh=r.run(\"new\"); // fresh resolves first",
+          "output": "After both settle, snapshot().value still belongs to \"new\"."
+        },
+        {
+          "input": "createLatestRequest(async x=>x).snapshot()",
+          "output": "{status:\"idle\",value:undefined,error:undefined}"
+        }
+      ],
+      "starter": "function createLatestRequest(load) {\n  let state = {status: \"idle\", value: undefined, error: undefined};\n  return {\n    snapshot() { return {...state}; },\n    async run(input) {\n      state = {status: \"pending\", value: undefined, error: undefined};\n      try {\n        const value = await load(input);\n        state = {status: \"success\", value, error: undefined};\n        return value;\n      } catch (error) {\n        state = {status: \"error\", value: undefined, error};\n        throw error;\n      }\n    }\n  };\n}",
+      "solution": "function createLatestRequest(load) {\n  if (typeof load !== \"function\") throw new TypeError(\"Loader must be a function\");\n  let generation = 0;\n  let state = {status: \"idle\", value: undefined, error: undefined};\n  return {\n    snapshot() { return {...state}; },\n    async run(input) {\n      const ownGeneration = ++generation;\n      state = {status: \"pending\", value: undefined, error: undefined};\n      try {\n        const value = await load(input);\n        if (ownGeneration === generation) state = {status: \"success\", value, error: undefined};\n        return value;\n      } catch (error) {\n        if (ownGeneration === generation) state = {status: \"error\", value: undefined, error};\n        throw error;\n      }\n    }\n  };\n}",
+      "hints": [
+        "Every run owns both a caller-facing promise and a possible state update. Stale work still owes its caller a result.",
+        "Increment a generation counter when a request starts, and capture that number in the request.",
+        "Guard both the success and failure state assignments with the same generation comparison. An async run method also turns synchronous throws into promise rejections."
+      ],
+      "tests": [
+        {
+          "name": "Ordinary success and synchronous pending state",
+          "code": "const calls=[]; const r=createLatestRequest(x=>{calls.push(x);return x*2;}); assertEqual(r.snapshot(),{status:\"idle\",value:undefined,error:undefined}); const promise=r.run(3); assertEqual(calls,[3]); assertEqual(r.snapshot(),{status:\"pending\",value:undefined,error:undefined}); assertEqual(await promise,6); assertEqual(r.snapshot(),{status:\"success\",value:6,error:undefined});"
+        },
+        {
+          "name": "Older success cannot overwrite a newer success",
+          "code": "let finishOld,finishNew; const oldWork=new Promise(resolve=>{finishOld=resolve;}); const newWork=new Promise(resolve=>{finishNew=resolve;}); const r=createLatestRequest(key=>key===\"old\"?oldWork:newWork); const old=r.run(\"old\"), fresh=r.run(\"new\"); finishNew(\"new value\"); assertEqual(await fresh,\"new value\"); finishOld(\"old value\"); assertEqual(await old,\"old value\"); assertEqual(r.snapshot(),{status:\"success\",value:\"new value\",error:undefined});"
+        },
+        {
+          "name": "Stale failure still rejects its caller but does not change success",
+          "code": "let rejectOld,finishNew; const oldWork=new Promise((resolve,reject)=>{rejectOld=reject;}); const newWork=new Promise(resolve=>{finishNew=resolve;}); const r=createLatestRequest(key=>key===\"old\"?oldWork:newWork); const old=r.run(\"old\"); const oldOutcome=old.then(value=>({value}),error=>({error})); const fresh=r.run(\"new\"); const failure=new Error(\"old failure\"); finishNew(\"fresh\"); await fresh; rejectOld(failure); assert((await oldOutcome).error===failure); assertEqual(r.snapshot(),{status:\"success\",value:\"fresh\",error:undefined});"
+        },
+        {
+          "name": "Stale completion cannot clear newer pending state",
+          "code": "let finishOld,finishNew; const a=new Promise(resolve=>{finishOld=resolve;}); const b=new Promise(resolve=>{finishNew=resolve;}); const r=createLatestRequest(key=>key===1?a:b); const old=r.run(1), fresh=r.run(2); finishOld(\"old\"); await old; const during=r.snapshot(); finishNew(\"new\"); await fresh; assertEqual(during,{status:\"pending\",value:undefined,error:undefined});"
+        },
+        {
+          "name": "Latest failure wins over later old success",
+          "code": "let finishOld,rejectNew; const a=new Promise(resolve=>{finishOld=resolve;}); const b=new Promise((resolve,reject)=>{rejectNew=reject;}); const r=createLatestRequest(key=>key===1?a:b); const old=r.run(1); const freshOutcome=r.run(2).then(value=>({value}),error=>({error})); const failure={code:\"LATEST_FAILED\"}; rejectNew(failure); assert((await freshOutcome).error===failure); finishOld(\"old\"); await old; const state=r.snapshot(); assertEqual(state.status,\"error\"); assertEqual(state.value,undefined); assert(state.error===failure);"
+        },
+        {
+          "name": "Synchronous throw invalidates older work and is a rejection",
+          "code": "let finishOld; const work=new Promise(resolve=>{finishOld=resolve;}); const r=createLatestRequest(key=>{if(key===\"bad\") throw null; return work;}); const old=r.run(\"old\"); let thrownSynchronously=false,promise; try {promise=r.run(\"bad\");} catch {thrownSynchronously=true;} const outcome=promise&&promise.then(value=>({value}),error=>({error})); finishOld(\"old\"); await old; const result=await outcome; assertEqual(thrownSynchronously,false); assert(Object.hasOwn(result,\"error\")); assertEqual(result.error,null); assertEqual(r.snapshot(),{status:\"error\",value:undefined,error:null});"
+        },
+        {
+          "name": "Snapshots cannot mutate state and results retain identity",
+          "code": "const value={items:[1]}; const r=createLatestRequest(()=>value); const initial=r.snapshot(); initial.status=\"changed\"; assertEqual(r.snapshot().status,\"idle\"); assert((await r.run())===value); const state=r.snapshot(); state.value=\"changed\"; assert(r.snapshot().value===value); assert(r.snapshot()!==r.snapshot());"
+        },
+        {
+          "name": "Starting again clears the preceding error",
+          "code": "let resolveLater; const later=new Promise(resolve=>{resolveLater=resolve;}); let calls=0; const r=createLatestRequest(()=>{if(++calls===1) throw \"offline\"; return later;}); await r.run().catch(()=>{}); const pending=r.run(); const state=r.snapshot(); resolveLater(undefined); assertEqual(await pending,undefined); assertEqual(state,{status:\"pending\",value:undefined,error:undefined}); assertEqual(r.snapshot(),{status:\"success\",value:undefined,error:undefined});"
+        },
+        {
+          "name": "Invalid loader is rejected immediately",
+          "code": "for(const load of [null,undefined,{},42]) {let error; try {createLatestRequest(load);} catch(e) {error=e;} assert(error instanceof TypeError);}"
+        }
+      ]
+    },
+    {
+      "id": "lab-54",
+      "stage": 5,
+      "kind": "incident",
+      "incidentId": "incident-09",
+      "afterLesson": "lesson-28",
+      "title": "Diagnose a response before parsing its body",
+      "difficulty": "Advanced",
+      "minutes": 40,
+      "concept": "HTTP status \u00b7 media types \u00b7 one-shot body reads",
+      "prompt": "Repair async readJSONResponse(response) using a plain injected adapter, not fetch or the Response class. response must be an object with integer status 100..599, string contentType, and callable text(), otherwise throw TypeError. First, a non-2xx status returns {ok:false, status, kind:\"http\"} without reading the body. Next, accept application/json or an application subtype ending in +json, case-insensitively, ignoring parameters after the first semicolon and surrounding whitespace. A subtype consists of ASCII letters, digits, or !#$%&'*+.^_`|~- token characters; text/json and malformed media types are not accepted. Unsupported types return {ok:false, status, kind:\"content-type\"} without reading. For accepted types, call response.text() exactly once with response as its receiver. Its result may be a string or a promise for a string. A thrown/rejected read returns {ok:false, status, kind:\"read\", error} preserving the reason; a nonstring body gets the same kind with a TypeError. Invalid or empty JSON returns {ok:false, status, kind:\"json\"}. Valid JSON, including null, false, numbers, and arrays, returns {ok:true, status, data}. Status 204 with an empty declared JSON body is a JSON failure here. Do not include raw bodies in diagnostic results; this is a small protocol exercise, not a complete HTTP client.",
+      "examples": [
+        {
+          "input": "await readJSONResponse({status:200,contentType:\"text/html\",text:()=>\"<html>Login</html>\"})",
+          "output": "{ok:false,status:200,kind:\"content-type\"}; text is not called"
+        },
+        {
+          "input": "await readJSONResponse({status:200,contentType:\"application/json\",text:()=>\"null\"})",
+          "output": "{ok:true,status:200,data:null}"
+        }
+      ],
+      "starter": "async function readJSONResponse(response) {\n  return {ok: true, status: response.status, data: JSON.parse(await response.text())};\n}",
+      "solution": "async function readJSONResponse(response) {\n  if (!response || typeof response !== \"object\" || !Number.isInteger(response.status) ||\n      response.status < 100 || response.status > 599 || typeof response.contentType !== \"string\" ||\n      typeof response.text !== \"function\") {\n    throw new TypeError(\"Invalid response adapter\");\n  }\n  const {status} = response;\n  if (status < 200 || status >= 300) return {ok: false, status, kind: \"http\"};\n  const mediaType = response.contentType.split(\";\", 1)[0].trim().toLowerCase();\n  const match = /^application\\/([a-z0-9!#$%&'*+.^_`|~-]+)$/.exec(mediaType);\n  const subtype = match && match[1];\n  if (!subtype || (subtype !== \"json\" && !subtype.endsWith(\"+json\"))) {\n    return {ok: false, status, kind: \"content-type\"};\n  }\n  let body;\n  try {\n    body = await response.text();\n    if (typeof body !== \"string\") throw new TypeError(\"Body reader must return a string\");\n  } catch (error) {\n    return {ok: false, status, kind: \"read\", error};\n  }\n  let data;\n  try { data = JSON.parse(body); }\n  catch { return {ok: false, status, kind: \"json\"}; }\n  return {ok: true, status, data};\n}",
+      "hints": [
+        "A successful transport does not imply a successful status or a JSON representation. Check those two gates before consuming the body.",
+        "Normalize only the media type before its parameters. Recognize application/json and structured +json suffixes, then read exactly once.",
+        "Separate body-read failures from JSON syntax failures with separate try/catch blocks. JSON.parse(\"null\") is a successful parse."
+      ],
+      "tests": [
+        {
+          "name": "Ordinary JSON response reads once with the adapter receiver",
+          "code": "let reads=0; const response={status:200,contentType:\"application/json\",text(){assert(this===response); reads++; return \"{\\\"items\\\":[1,2]}\";}}; assertEqual(await readJSONResponse(response),{ok:true,status:200,data:{items:[1,2]}}); assertEqual(reads,1);"
+        },
+        {
+          "name": "Non-success status short-circuits even with HTML",
+          "code": "let reads=0; for(const status of [199,301,401,500]) {const result=await readJSONResponse({status,contentType:\"text/html\",text(){reads++;return \"private body\";}}); assertEqual(result,{ok:false,status,kind:\"http\"});} assertEqual(reads,0);"
+        },
+        {
+          "name": "HTML and invalid media types are not consumed",
+          "code": "let reads=0; for(const contentType of [\"text/html\",\"text/json\",\"application/jsonp\",\"application/json/extra\",\"application /json\",\"application/bad type+json\",\"\"]) {assertEqual(await readJSONResponse({status:200,contentType,text(){reads++;return \"{}\";}}),{ok:false,status:200,kind:\"content-type\"});} assertEqual(reads,0);"
+        },
+        {
+          "name": "Case parameters and structured JSON suffixes are accepted",
+          "code": "for(const contentType of [\" Application/JSON ; charset=utf-8\", \"application/problem+json\", \"APPLICATION/vnd.example.v2+JSON; charset=UTF-8\"]) {assertEqual(await readJSONResponse({status:201,contentType,text:async()=>\"{\\\"ok\\\":true}\"}),{ok:true,status:201,data:{ok:true}});}"
+        },
+        {
+          "name": "Valid falsy values arrays and boundary success statuses",
+          "code": "for(const [status,body,data] of [[200,\"null\",null],[299,\"false\",false],[200,\"0\",0],[200,\"[]\",[]],[200,\"\\\"\\\"\",\"\"]]) {assertEqual(await readJSONResponse({status,contentType:\"application/json\",text:()=>body}),{ok:true,status,data});}"
+        },
+        {
+          "name": "Malformed and empty JSON produce body-free diagnostics",
+          "code": "for(const [status,body] of [[200,\"<html>private session</html>\"],[200,\"{\"],[204,\"\"]]) {let reads=0; assertEqual(await readJSONResponse({status,contentType:\"application/json\",text(){reads++;return body;}}),{ok:false,status,kind:\"json\"}); assertEqual(reads,1);}"
+        },
+        {
+          "name": "Read rejection and synchronous throw preserve original reasons",
+          "code": "for(const reason of [new Error(\"offline\"),null,\"disconnected\"]) {for(const sync of [true,false]) {let reads=0; const result=await readJSONResponse({status:200,contentType:\"application/json\",text(){reads++;if(sync) throw reason; return Promise.reject(reason);}}); assertEqual(result.ok,false); assertEqual(result.kind,\"read\"); assertEqual(result.status,200); assert(result.error===reason); assertEqual(reads,1);}}"
+        },
+        {
+          "name": "Nonstring body is an adapter read failure",
+          "code": "const result=await readJSONResponse({status:200,contentType:\"application/json\",text:()=>null}); assertEqual(result.kind,\"read\"); assert(result.error instanceof TypeError);"
+        },
+        {
+          "name": "Malformed response adapters reject rather than masquerading as HTTP",
+          "code": "for(const response of [null,{}, {status:99,contentType:\"application/json\",text(){}},{status:600,contentType:\"application/json\",text(){}},{status:200.5,contentType:\"application/json\",text(){}},{status:\"200\",contentType:\"application/json\",text(){}},{status:200,contentType:null,text(){}},{status:200,contentType:\"application/json\",text:\"{}\"}]) {let error; try {await readJSONResponse(response);} catch(e) {error=e;} assert(error instanceof TypeError);}"
+        }
+      ]
+    },
+    {
+      "id": "lab-55",
+      "stage": 5,
+      "kind": "incident",
+      "incidentId": "incident-10",
+      "afterLesson": "lesson-30",
+      "title": "Publish state only after persistence succeeds",
+      "difficulty": "Advanced",
+      "minutes": 40,
+      "concept": "Commit ordering \u00b7 serialization \u00b7 snapshot ownership",
+      "prompt": "Repair createPersistentStore(initial, storage, key), returning synchronous snapshot() and commit(next). storage provides synchronous setItem(key, text), which throws on failure; key must be a string. Reject an invalid adapter or key with TypeError. Store JSON snapshots using JSON.stringify followed by JSON.parse: normal JSON conversion semantics apply, and a top-level value that produces undefined is rejected with TypeError. Cycles, BigInt, and throwing toJSON methods propagate their serialization errors. Initialization creates the in-memory JSON snapshot but performs no write. commit must completely serialize and parse next, call storage.setItem with its receiver and the serialized text exactly once, then publish the new in-memory snapshot only after the write returns successfully. Any serialization or storage failure throws the original reason and leaves the previous snapshot unchanged. snapshot() and a successful commit's return value are independent deep JSON copies: mutating caller inputs or returned objects cannot alter stored state. A storage callback may inspect snapshot() while writing and must see the previous committed state. The adapter must not recursively call commit; asynchronous storage, cross-tab concurrency, and crash durability are outside this exercise.",
+      "examples": [
+        {
+          "input": "const s=createPersistentStore({count:1}, storage, \"progress\"); s.commit({count:2});",
+          "output": "writes [\"progress\", \"{\\\"count\\\":2}\"] then publishes {count:2}"
+        },
+        {
+          "input": "storage.setItem throws quotaError during s.commit({count:3})",
+          "output": "the same error is thrown; s.snapshot() remains {count:2}"
+        }
+      ],
+      "starter": "function createPersistentStore(initial, storage, key) {\n  let state = initial;\n  return {\n    snapshot() { return state; },\n    commit(next) {\n      state = next;\n      storage.setItem(key, JSON.stringify(next));\n      return state;\n    }\n  };\n}",
+      "solution": "function createPersistentStore(initial, storage, key) {\n  if (!storage || typeof storage.setItem !== \"function\" || typeof key !== \"string\") {\n    throw new TypeError(\"Invalid storage adapter or key\");\n  }\n  function encode(value) {\n    const text = JSON.stringify(value);\n    if (text === undefined) throw new TypeError(\"Value has no JSON representation\");\n    return {text, value: JSON.parse(text)};\n  }\n  let state = encode(initial).value;\n  const copy = () => JSON.parse(JSON.stringify(state));\n  return {\n    snapshot: copy,\n    commit(next) {\n      const prepared = encode(next);\n      storage.setItem(key, prepared.text);\n      state = prepared.value;\n      return copy();\n    }\n  };\n}",
+      "hints": [
+        "Think of commit as prepare, write, publish. Changing state before either of the first two steps can report a save that never happened.",
+        "Build the serialized text and its parsed snapshot before calling storage. A write failure must leave the old state reachable.",
+        "Do not expose the internal snapshot directly. Both initialization and every public return need independent JSON data, with JSON.stringify errors propagated."
+      ],
+      "tests": [
+        {
+          "name": "Ordinary commit writes once with the adapter receiver",
+          "code": "const writes=[]; const storage={setItem(key,text){assert(this===storage);writes.push([key,text]);}}; const s=createPersistentStore({count:1},storage,\"progress\"); assertEqual(writes,[]); assertEqual(s.commit({count:2}),{count:2}); assertEqual(writes,[[\"progress\",\"{\\\"count\\\":2}\"]]); assertEqual(s.snapshot(),{count:2});"
+        },
+        {
+          "name": "Quota failure does not publish and keeps original error identity",
+          "code": "const failure=new Error(\"quota exceeded\"); let attempts=0; const s=createPersistentStore({count:1},{setItem(){attempts++;throw failure;}},\"progress\"); let error; try {s.commit({count:2});} catch(e) {error=e;} assert(error===failure); assertEqual(s.snapshot(),{count:1}); assertEqual(attempts,1);"
+        },
+        {
+          "name": "Serialization failure performs no write and no state change",
+          "code": "let writes=0; const s=createPersistentStore({count:1},{setItem(){writes++;}},\"progress\"); const cyclic={}; cyclic.self=cyclic; for(const next of [cyclic,{amount:1n},undefined,()=>{}]) {let error; try {s.commit(next);} catch(e) {error=e;} assert(error instanceof TypeError); assertEqual(s.snapshot(),{count:1});} assertEqual(writes,0);"
+        },
+        {
+          "name": "Input and public snapshots do not alias committed state",
+          "code": "const initial={items:[{value:1}]}; const s=createPersistentStore(initial,{setItem(){}},\"progress\"); initial.items[0].value=9; assertEqual(s.snapshot(),{items:[{value:1}]}); const next={items:[{value:2}]}; const returned=s.commit(next); next.items[0].value=8; returned.items[0].value=7; const snapshot=s.snapshot(); snapshot.items.push({value:3}); assertEqual(s.snapshot(),{items:[{value:2}]});"
+        },
+        {
+          "name": "The adapter observes previous state until write succeeds",
+          "code": "let observed; let s; const storage={setItem(){observed=s.snapshot();}}; s=createPersistentStore({count:1},storage,\"progress\"); s.commit({count:2}); assertEqual(observed,{count:1}); assertEqual(s.snapshot(),{count:2});"
+        },
+        {
+          "name": "Prepared snapshot agrees with the text even if input changes during write",
+          "code": "const next={count:2}; let written; const s=createPersistentStore({count:1},{setItem(key,text){written=text;next.count=99;}},\"progress\"); assertEqual(s.commit(next),{count:2}); assertEqual(written,\"{\\\"count\\\":2}\"); assertEqual(s.snapshot(),{count:2});"
+        },
+        {
+          "name": "Failure does not poison a later successful commit",
+          "code": "let fail=true; const writes=[]; const s=createPersistentStore(null,{setItem(key,text){if(fail) throw \"unavailable\"; writes.push(text);}},\"progress\"); let error; try {s.commit({count:1});} catch(e) {error=e;} assertEqual(error,\"unavailable\"); assertEqual(s.snapshot(),null); fail=false; assertEqual(s.commit({count:2}),{count:2}); assertEqual(writes,[\"{\\\"count\\\":2}\"]);"
+        },
+        {
+          "name": "JSON conversion and throwing toJSON obey the same transaction boundary",
+          "code": "const writes=[]; const s=createPersistentStore({n:NaN,skip:undefined},{setItem(key,text){writes.push(text);}},\"progress\"); assertEqual(s.snapshot(),{n:null}); const reason={code:\"SERIALIZATION\"}; let error; try {s.commit({toJSON(){throw reason;}});} catch(e) {error=e;} assert(error===reason); assertEqual(writes,[]); assertEqual(s.snapshot(),{n:null});"
+        },
+        {
+          "name": "Invalid constructors are rejected without writing",
+          "code": "let writes=0; for(const [initial,storage,key] of [[{},null,\"x\"],[{},{} ,\"x\"],[{},{setItem(){}},9],[undefined,{setItem(){writes++;}},\"x\"]]) {let error; try {createPersistentStore(initial,storage,key);} catch(e) {error=e;} assert(error instanceof TypeError);} assertEqual(writes,0);"
+        }
+      ]
+    },
+    {
+      "id": "lab-56",
+      "stage": 6,
+      "kind": "incident",
+      "incidentId": "incident-11",
+      "afterLesson": "lesson-32",
+      "title": "Keep a serialized write queue alive after rejection",
+      "difficulty": "Advanced",
+      "minutes": 40,
+      "concept": "Promise queues \u00b7 recovery chains \u00b7 completion barriers",
+      "prompt": "Repair createWriteQueue(write), returning enqueue(value) and idle(). write must be a function or the constructor throws TypeError. Each enqueue returns a promise for that write's own result, preserving value and rejection identities. Invoke writes once each, in enqueue order, with at most one unsettled write at a time. A synchronous throw or rejected write fails only its own returned promise; later writes must still run. idle() returns a promise that never rejects and fulfills after all writes submitted before that idle call have settled; writes submitted afterward do not extend that particular barrier. An empty queue is already idle. The writer may return a value, promise, or thenable. The queue retains input values by reference and does not clone or mutate them. There is no cancellation or automatic retry; a failed write must not be repeated silently. Tests use manually resolved promises rather than wall-clock delays.",
+      "examples": [
+        {
+          "input": "const q=createWriteQueue(write); q.enqueue(\"first\"); q.enqueue(\"second\");",
+          "output": "\"second\" starts only after \"first\" settles, even if \"first\" rejects."
+        },
+        {
+          "input": "await q.idle();",
+          "output": "all work queued before this call has settled; write errors remain on their individual promises"
+        }
+      ],
+      "starter": "function createWriteQueue(write) {\n  let tail = Promise.resolve();\n  return {\n    enqueue(value) {\n      tail = tail.then(() => write(value));\n      return tail;\n    },\n    idle() { return tail; }\n  };\n}",
+      "solution": "function createWriteQueue(write) {\n  if (typeof write !== \"function\") throw new TypeError(\"Writer must be a function\");\n  let tail = Promise.resolve();\n  return {\n    enqueue(value) {\n      const result = tail.then(() => write(value));\n      tail = result.then(() => undefined, () => undefined);\n      return result;\n    },\n    idle() { return tail; }\n  };\n}",
+      "hints": [
+        "The promise returned to a caller must reject when its write fails. The internal sequencing promise has a different job: it must let later work start.",
+        "Create a result promise from the previous tail. Then replace the internal tail with a promise that fulfills after either result outcome.",
+        "Return the original result to enqueue callers and the current recovered tail to idle callers. Capturing that tail makes idle a barrier for only the already queued work."
+      ],
+      "tests": [
+        {
+          "name": "Ordinary FIFO writes preserve results",
+          "code": "const seen=[]; const q=createWriteQueue(value=>{seen.push(value); return value.toUpperCase();}); const first=q.enqueue(\"a\"), second=q.enqueue(\"b\"); assertEqual(await first,\"A\"); assertEqual(await second,\"B\"); await q.idle(); assertEqual(seen,[\"a\",\"b\"]);"
+        },
+        {
+          "name": "A pending write prevents overlap",
+          "code": "let finishFirst; const gate=new Promise(resolve=>{finishFirst=resolve;}); const calls=[]; let active=0,maxActive=0; const q=createWriteQueue(async value=>{calls.push(value);active++;maxActive=Math.max(maxActive,active);try {if(value===1) await gate;return value;} finally {active--;}}); const first=q.enqueue(1),second=q.enqueue(2); await Promise.resolve(); const before=[...calls]; finishFirst(); assertEqual(await first,1); assertEqual(await second,2); assertEqual(before,[1]); assertEqual(calls,[1,2]); assertEqual(maxActive,1);"
+        },
+        {
+          "name": "Rejected write does not poison following work",
+          "code": "const failure=new Error(\"disk full\"); const calls=[]; const q=createWriteQueue(value=>{calls.push(value);return value===1?Promise.reject(failure):Promise.resolve(value*10);}); const first=q.enqueue(1).then(value=>({value}),error=>({error})); const second=q.enqueue(2).then(value=>({value}),error=>({error})); assert((await first).error===failure); assertEqual(await second,{value:20}); await q.idle(); assertEqual(calls,[1,2]);"
+        },
+        {
+          "name": "Synchronous throw is isolated without automatic retry",
+          "code": "const calls=[]; const q=createWriteQueue(value=>{calls.push(value);if(value===\"bad\") throw null;return value;}); let threw=false,first; try {first=q.enqueue(\"bad\");} catch {threw=true;} const a=first&&first.then(value=>({value}),error=>({error})); const b=q.enqueue(\"good\").then(value=>({value}),error=>({error})); assertEqual(await a,{error:null}); assertEqual(await b,{value:\"good\"}); assertEqual(threw,false); assertEqual(calls,[\"bad\",\"good\"]);"
+        },
+        {
+          "name": "Idle absorbs failures without changing individual rejection",
+          "code": "const failure={code:\"WRITE\"}; const q=createWriteQueue(()=>{throw failure;}); const result=q.enqueue(\"x\").then(value=>({value}),error=>({error})); const idleResult=await q.idle().then(()=>\"idle\",()=>\"rejected\"); assertEqual(idleResult,\"idle\"); assert((await result).error===failure);"
+        },
+        {
+          "name": "Idle captures only work already submitted",
+          "code": "let finishFirst,finishSecond; const firstGate=new Promise(resolve=>{finishFirst=resolve;}); const secondGate=new Promise(resolve=>{finishSecond=resolve;}); const q=createWriteQueue(value=>value===1?firstGate:secondGate); const first=q.enqueue(1); const barrier=q.idle(); const second=q.enqueue(2); let secondSettled=false; const observedSecond=second.then(value=>{secondSettled=true;return value;}); finishFirst(\"first\"); await barrier; const pendingAtBarrier=!secondSettled; finishSecond(\"second\"); assertEqual(await first,\"first\"); assertEqual(await observedSecond,\"second\"); assert(pendingAtBarrier,\"Later work must not extend an earlier idle barrier\");"
+        },
+        {
+          "name": "Thenables and values are adopted without cloning input",
+          "code": "const input={id:1},value={saved:true}; let received; const q=createWriteQueue(item=>{received=item;return {then(resolve){resolve(value);}};}); assert((await q.enqueue(input))===value); assert(received===input); assertEqual(input,{id:1});"
+        },
+        {
+          "name": "Empty queue is idle and writer must be callable",
+          "code": "const q=createWriteQueue(()=>{}); await q.idle(); for(const write of [null,undefined,{},42]) {let error; try {createWriteQueue(write);} catch(e) {error=e;} assert(error instanceof TypeError);}"
+        }
+      ]
     }
   ]
 }

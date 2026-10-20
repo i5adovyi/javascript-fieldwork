@@ -4,9 +4,13 @@
 
 `curriculum.json` owns stage metadata and lessons. Lesson ids are stable `lesson-01` through `lesson-36`. Preserve IDs when editing: progress uses them as keys. Each lesson has three explanatory sections, objectives, quizzes, three written assignments, pitfalls, and recap.
 
-`labs.json` owns 48 executable challenges. Each starter and solution defines a function or class in the same lexical scope as its tests. Tests run in separate async closures, so test-local declarations cannot collide. Available assertions are `assert(condition, message)` and `assertEqual(actual, expected)`. The latter compares plain structures recursively with cycle handling and has Date, Map, and Set support. Its Set/Map key semantics use identity. It is not a general-purpose testing library.
+`labs.json` owns 56 executable challenges: 48 core labs and eight incident repairs. Preserve the original IDs. Incident labs use `kind: "incident"`, `incidentId`, and `afterLesson`. Their deliberately plausible starter must pass an ordinary case and fail a regression. Each starter and solution defines a function or class in the same lexical scope as its tests. Tests run in separate async closures, so test-local declarations cannot collide. Available assertions are `assert(condition, message)` and `assertEqual(actual, expected)`. The latter compares plain structures recursively with cycle handling and has Date, Map, and Set support. Its Set/Map key semantics use identity. It is not a general-purpose testing library.
 
 `library.json` owns linked resources, original articles, and project briefs. HTML is not accepted in content fields. Rendering escapes all text. Resource URLs should be HTTPS and reviewed before merging.
+
+`incidents.json` owns 12 original synthetic case packets, two per stage. Keep IDs, lesson prerequisites, project links, and repair-lab links consistent. Cases render in `incidents.js`; case text, fixtures, and notes are escaped before rendering. Core reproductions run in local Node; extensions explicitly state where a real browser, server, or filesystem experiment is still needed. No personal reports or book text belong in these packets.
+
+Run `npm run materials` after changing cases or manuals. It builds `incident-workbook.md`, `incident-kits.zip`, `curriculum-review.md`, and the expanded study pack. Each ZIP case contains `incident.mjs` and its supporting files in the same directory, so relative imports work. `tests/validate-incidents.mjs` checks cross-references and exact archive contents. The development-only `/__incident-qa` page exercises navigation, persistence, repair Workers, and narrow layouts.
 
 ## Add a lab
 

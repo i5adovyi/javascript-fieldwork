@@ -24,7 +24,8 @@ You can also deploy `dist/` to any static HTTPS host. Hash-based routes require 
 - 36 original lessons across six stages, aligned to all 17 chapters.
 - 72 retrieval questions with explained answers.
 - 108 written practice assignments with acceptance criteria.
-- 48 executable labs with progressive hints, solutions, and real assertions.
+- 56 executable labs: the original 48 plus eight incident repairs, with progressive hints, solutions, and real assertions.
+- 12 synthetic incident packets with supplied broken code, evidence, fixtures, and regression criteria.
 - 35 wiki reference pages linked from lessons, each with an editable, runnable example.
 - Six portfolio briefs with milestones, self-review checklists, and 100-point rubrics.
 - Eight original articles and 25 curated external resources, including author-published free books, courses, documentation, and video talks.
@@ -40,8 +41,10 @@ You can also deploy `dist/` to any static HTTPS host. Hash-based routes require 
 3. Study the original lesson, predict outcomes, and answer its retrieval questions.
 4. Open **Practice lab**, implement a solution, and run the tests.
 5. Complete the written prompts in your own editor, then mark the lesson complete.
-6. Finish the stage project and record your evidence in its build log.
+6. Investigate the relevant **Incident workshop** cases after their listed lessons; record evidence and carry one failure rehearsal into the stage project. Finish the stage project and record your evidence in its build log.
 7. Export progress regularly from **My notebook**, and export private book annotations separately from the reader.
+
+Read [the curriculum review](docs/CURRICULUM-REVIEW.md) for existing coverage, the incident route, and remaining advanced extensions. Download case files and the workbook from **Incident workshop**. Investigation notes save locally and travel in the existing notebook backup.
 
 Read [the learner handbook](docs/LEARNER-HANDBOOK.md) for 8-week and 16-week schedules, and [the curriculum map](docs/CURRICULUM-MAP.md) for chapter coverage.
 
@@ -89,7 +92,7 @@ The UI fonts and PDF.js runtime are bundled locally, with their open-source lice
 
 ## Engineering
 
-The portal is static HTML, CSS, and JavaScript. CodeMirror 6 and Lezer power the shared lesson/wiki editor, bundled locally in `dist/code-editor.js` with MIT notices in `dist/vendor/editor-LICENSES.txt`. To change the editor, run `npm ci`, edit `src/editor-entry.js` or `src/editor-completions.js`, then run `npm run editors:build`. The checked-in bundle is included in the offline cache; no editor CDN is used. Content lives in four JSON files in `dist/data/`. `dist/app.js` renders the hash routes. `dist/runner.js` runs each lab in a fresh Worker; the UI terminates a run after three seconds. Lesson and wiki examples share a runner in `dist/wiki-runner.js` and does not affect lab scoring. Acorn 8.19.0 is vendored in `dist/vendor/` under its MIT license to parse module imports and instrument DOM loops; no installation or external runtime CDN is needed. The local reader uses bundled PDF.js and its worker; `dist/book-map.js` contains section headings and physical-page ranges, without book prose or PDF bytes. Console output is capped. It is a learning aid, not a security boundary or a certification grader. Do not paste untrusted code. The tests and solutions are intentionally visible to the learner.
+The portal is static HTML, CSS, and JavaScript. CodeMirror 6 and Lezer power the shared lesson/wiki editor, bundled locally in `dist/code-editor.js` with MIT notices in `dist/vendor/editor-LICENSES.txt`. To change the editor, run `npm ci`, edit `src/editor-entry.js` or `src/editor-completions.js`, then run `npm run editors:build`. The checked-in bundle is included in the offline cache; no editor CDN is used. Content lives in five JSON files in `dist/data/`. `dist/app.js` renders the hash routes. `dist/runner.js` runs each lab in a fresh Worker; the UI terminates a run after three seconds. Lesson and wiki examples share a runner in `dist/wiki-runner.js` and does not affect lab scoring. Acorn 8.19.0 is vendored in `dist/vendor/` under its MIT license to parse module imports and instrument DOM loops; no installation or external runtime CDN is needed. The local reader uses bundled PDF.js and its worker; `dist/book-map.js` contains section headings and physical-page ranges, without book prose or PDF bytes. Console output is capped. It is a learning aid, not a security boundary or a certification grader. Do not paste untrusted code. The tests and solutions are intentionally visible to the learner.
 
 Lesson completion and project checklists are self-assessed. Lab completion means the supplied assertions passed, not a proof of correctness for all inputs. The hosted Site is public and does not synchronize learner state.
 
@@ -100,7 +103,7 @@ npm test
 node tests/validate-runner.mjs
 # Browser runner integration checks:
 node tests/serve-wiki-qa.mjs
-# Open /__playground-qa, /__lesson-qa, and /__editor-qa on that server.
+# Open /__incident-qa, /__playground-qa, /__lesson-qa, and /__editor-qa on that server.
 # Select each page’s Run checks button (one suite at a time).
 # Open http://127.0.0.1:4182/__lesson-qa and select Run lesson checks.
 ```

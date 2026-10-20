@@ -1,6 +1,6 @@
 import {readFile,writeFile} from 'node:fs/promises';
 
-export const STUDY_FILES=['field-guide.html','handbook.md','CURRICULUM-MAP.md','wiki-reference.md'];
+export const STUDY_FILES=['field-guide.html','handbook.md','CURRICULUM-MAP.md','wiki-reference.md','incident-workbook.md','curriculum-review.md'];
 
 function crc32(bytes){
   let crc=0xffffffff;
@@ -13,12 +13,13 @@ function crc32(bytes){
 
 // ZIP32, stored entries: no dependencies, timestamps, host paths, or variable metadata.
 // A fixed entry order and DOS date (1980-01-01) make unchanged inputs byte-reproducible.
-export async function buildStudyPack(root){
+export function storedZip(entries){
   const local=[],directory=[];
   let offset=0;
-  for(const name of STUDY_FILES){
+  for(const [name,content] of entries){
+    if(!/^[a-zA-Z0-9_./-]+$/.test(name)||name.startsWith('/')||name.split('/').some(part=>part==='..'||!part))throw Error(`Unsafe ZIP path: ${name}`);
     const filename=Buffer.from(name);
-    const bytes=await readFile(new URL(name,root));
+    const bytes=Buffer.from(content);
     const checksum=crc32(bytes);
     const header=Buffer.alloc(30);
     header.writeUInt32LE(0x04034b50,0);
@@ -47,9 +48,14 @@ export async function buildStudyPack(root){
   }
   const central=Buffer.concat(directory),end=Buffer.alloc(22);
   end.writeUInt32LE(0x06054b50,0);
-  end.writeUInt16LE(STUDY_FILES.length,8);
-  end.writeUInt16LE(STUDY_FILES.length,10);
+  end.writeUInt16LE(entries.length,8);
+  end.writeUInt16LE(entries.length,10);
   end.writeUInt32LE(central.length,12);
   end.writeUInt32LE(offset,16);
-  await writeFile(new URL('study-pack.zip',root),Buffer.concat([...local,central,end]));
+  return Buffer.concat([...local,central,end]);
+}
+
+export async function buildStudyPack(root){
+  const entries=await Promise.all(STUDY_FILES.map(async name=>[name,await readFile(new URL(name,root))]));
+  await writeFile(new URL('study-pack.zip',root),storedZip(entries));
 }

@@ -8,19 +8,27 @@ const dataPath = new URL("../dist/data/labs.json", import.meta.url);
 const { labs } = JSON.parse(await readFile(dataPath, "utf8"));
 const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
 
-assert.equal(labs.length, 48, "The curriculum must include 48 labs.");
-assert.equal(new Set(labs.map(lab => lab.id)).size, 48, "Lab IDs must be unique.");
+const coreLabs = labs.filter(lab => lab.kind !== "incident");
+const incidentLabs = labs.filter(lab => lab.kind === "incident");
+assert.equal(coreLabs.length, 48, "The curriculum must retain 48 core labs.");
+assert.equal(incidentLabs.length, 8, "The curriculum must include eight incident labs.");
+assert.equal(labs.length, 56, "The curriculum must include 48 core and eight incident labs.");
+assert.equal(new Set(labs.map(lab => lab.id)).size, labs.length, "Lab IDs must be unique.");
 for (let stage = 1; stage <= 6; stage++) {
-  assert.equal(labs.filter(lab => lab.stage === stage).length, 8, `Stage ${stage} needs eight labs.`);
+  assert.equal(coreLabs.filter(lab => lab.stage === stage).length, 8, `Stage ${stage} needs eight core labs.`);
 }
+assert.deepEqual(coreLabs.map(lab => lab.id), Array.from({length: 48}, (_, i) => `lab-${String(i + 1).padStart(2, "0")}`));
+assert.deepEqual(incidentLabs.map(lab => lab.id), Array.from({length: 8}, (_, i) => `lab-${i + 49}`));
+const {lessons} = JSON.parse(await readFile(new URL("../dist/data/curriculum.json", import.meta.url), "utf8"));
+const lessonsById = new Map(lessons.map(lesson => [lesson.id, lesson]));
 
 async function runSuite(source, tests) {
   const blocks = tests.map(test => `
     try {
       await (async () => { ${test.code}\n })();
-      outcomes.push({name: ${JSON.stringify(test.name)}, passed: true});
+      __fieldworkValidationResults.push({name: ${JSON.stringify(test.name)}, passed: true});
     } catch (error) {
-      outcomes.push({
+      __fieldworkValidationResults.push({
         name: ${JSON.stringify(test.name)},
         passed: false,
         message: error?.stack || String(error)
@@ -30,7 +38,7 @@ async function runSuite(source, tests) {
   const execute = new AsyncFunction(
     "assert",
     "assertEqual",
-    `"use strict";\n${source}\nconst outcomes = [];\n${blocks}\nreturn outcomes;`
+    `"use strict";\n${source}\nconst __fieldworkValidationResults = [];\n${blocks}\nreturn __fieldworkValidationResults;`
   );
   let timer;
   try {
@@ -58,6 +66,16 @@ for (const lab of labs) {
     assert.equal(lab.hints.length, 3, `${lab.id}: three progressive hints required`);
     assert.ok(lab.examples.length >= 1, `${lab.id}: worked input/output required`);
     assert.ok(lab.tests.length >= 4, `${lab.id}: four test cases required`);
+    if (lab.kind === "incident") {
+      assert.match(lab.incidentId, /^incident-\d{2}$/, `${lab.id}: incident link required`);
+      assert.equal(
+        lessonsById.get(lab.afterLesson)?.stage,
+        lab.stage,
+        `${lab.id}: the prerequisite lesson must belong to the lab's stage`
+      );
+      assert.ok(lab.tests.length >= 6, `${lab.id}: six incident checks required`);
+      assert.ok(!/Not implemented/i.test(lab.starter), `${lab.id}: supply a plausible broken implementation`);
+    }
     assert.equal(
       new Set(lab.tests.map(test => test.name)).size,
       lab.tests.length,
@@ -77,6 +95,12 @@ for (const lab of labs) {
       starterResults.some(result => !result.passed),
       `${lab.id}: starter unexpectedly passes every test`
     );
+    if (lab.kind === "incident") {
+      assert.ok(
+        starterResults[0]?.passed,
+        `${lab.id}: the broken starter must pass its first ordinary-case test`
+      );
+    }
   } catch (error) {
     failures.push(`${lab.id}: ${error.stack || error}`);
   }
@@ -87,6 +111,6 @@ if (failures.length) {
   console.error(`\nFAILED: ${failures.length} problem(s); ${passedTests} solution tests passed.`);
   process.exitCode = 1;
 } else {
-  console.log(`PASS: ${labs.length} solutions, ${passedTests} tests, ${labs.length} intentionally unfinished starters.`);
+  console.log(`PASS: ${coreLabs.length} core + ${incidentLabs.length} incident solutions, ${passedTests} tests, ${labs.length} starters with failing checks.`);
   console.log(`Validated ${fileURLToPath(dataPath)}`);
 }

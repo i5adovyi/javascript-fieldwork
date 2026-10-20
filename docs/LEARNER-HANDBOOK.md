@@ -52,6 +52,40 @@ Shrink the input. Remove unrelated interface code. Identify the first point wher
 
 After twenty minutes with no new evidence, write the smallest reproduction and consult one relevant resource in **Library**. Avoid opening five new courses. More explanations help only when they answer the question you have identified.
 
+## Practice real failure cases
+
+The optional incident workshop adds 12 investigation packets, two per stage, and eight executable repair labs numbered 49–56. The original 48 labs remain your core practice sequence. Open **Incident workshop** in the portal, or use the downloadable [incident workbook](incident-workbook.md). The [curriculum review](curriculum-review.md) explains what the core already covers, what the cases add, and which harder extensions remain.
+
+Use this order: **core lesson → normal practice → incident after its prerequisites → project rehearsal**. First learn the mechanism and attempt the ordinary exercises. Then investigate the packet's reported failure using its supplied conditions. If it has a linked repair lab, use the assertions to test the isolated mechanism. Finally, reproduce the same failure class in your stage project with that project's own data and contract. Passing a repair lab does not replace the investigation or prove the entire project correct.
+
+| Stage | Incident route | Prerequisites | Next project rehearsal |
+| --- | --- | --- | --- |
+| 1 | 01: optional integer configuration; 02: lossy identifier normalization | 01 after lesson 04; 02 after lessons 02 and 06 | In Dispatch, distinguish absent configuration from valid zero and preserve identifiers through validation. |
+| 2 | 03: missing/null atomic patches; 04: hostile imports | 03 after lesson 07; 04 after lesson 12 | In Dataset Studio, prove rejected updates/imports preserve the original data and report useful reasons. |
+| 3 | 05: resource cleanup; 06: stale cache ownership | 05 after lesson 17; 06 after lesson 18 | In Workflow Kit, repeat setup/disposal and check that returned or cached values obey the ownership contract. |
+| 4 | 07: Unicode graphemes; 08: latest request wins | 07 after lesson 20; 08 after lesson 23 | In Research Queue, preserve text deliberately and force old work to complete after newer work. |
+| 5 | 09: HTTP JSON/HTML diagnosis; 10: persistence failures and multiple-tab conflicts | 09 after lesson 28; 10 after lesson 30 | In Field Notes, inspect an unexpected response, reject a save, and demonstrate recovery without silently losing a draft. |
+| 6 | 11: serialized writes after rejection; 12: old tab/new release triage | 11 after lesson 32; 12 after lessons 35 and 36 | In Signal Desk, prove later writes still run after failure and prepare an evidence-based release incident report. |
+
+Repair labs 49, 50, 51, 52, 53, 54, 55, and 56 accompany incidents 01, 03, 05, 07, 08, 09, 10, and 11 respectively. The other packets are investigations to complete with your editor, browser tools, and notes.
+
+Reserve extra optional study time for these cases. Use each packet's estimate in the portal, then adjust after your first reproduction. The schedules below retain their original pacing; they do not guarantee that every incident will fit into the same weekly budget. You can postpone a case until its prerequisites are comfortable or carry a precise unresolved reproduction into another session.
+
+### Your incident evidence record
+
+Keep six pieces of evidence for each investigation:
+
+1. **Minimal reproduction:** input, starting state, environment, and exact steps or event order, with expected and observed results.
+2. **Hypotheses:** plausible causes and the observations that support or rule them out.
+3. **Failing test:** an assertion or repeatable browser check that exposes the original defect before the fix.
+4. **Fix:** a focused change and an explanation of why it preserves the packet's contract and constraints.
+5. **Regression:** the original failure now passes, neighboring valid behavior remains correct, and a meaningful variation is checked.
+6. **Operational notes:** user impact, recovery or containment, possible unsaved data, useful diagnostics, and what remains unverified.
+
+For races, control promise resolution order instead of waiting for a random failure. For persistence, inspect both the current screen and restored state after reload. For ownership, check the original data as well as the returned value. Record failed hypotheses honestly; they are part of how you reached the explanation.
+
+These cases are deliberately bounded. They do not yet provide a complete distributed-idempotency implementation, full daylight-saving calendar coverage, a bounded production NDJSON parser, or a real deployment rollback rehearsal. Use the remaining-extension list in the curriculum review when you are ready to go deeper.
+
 ## Your route through the program
 
 Every stage contains six lessons. Use the mapped reading ranges in the lesson’s reader for the supplied PDF, and consult [CURRICULUM-MAP.md](CURRICULUM-MAP.md) for chapter and section coverage. The reader uses physical PDF positions; printed page numbers and differently paginated copies can differ.

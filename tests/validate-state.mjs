@@ -63,6 +63,16 @@ assert.equal(JSON.parse(d.storage.get(DRAFT_KEY))['lesson-01-missing'],undefined
 d.context.exportBackup();
 assert.deepEqual(d.downloads.at(-1).value.wikiDrafts['lesson-01-example'],{'example.js':'console.log("restored lesson")'});
 assert.equal(JSON.parse(d.storage.get(DRAFT_KEY)).runtime['example.js'],'edited','Importing lesson drafts preserves wiki drafts');
+// New incident notes round-trip through the existing v1 backup, without widening valid IDs.
+data.incidents=[{id:'incident-01'}];
+await importInto(d,{...backup,notes:{general:'new','incident-01':'Observed zero becoming three','incident-unknown':'discard'}});
+assert.equal(d.state.notes['incident-01'],'Observed zero becoming three');
+assert.equal(d.state.notes['incident-unknown'],undefined);
+d.context.exportBackup();
+const restoredIncident=harness();
+await importInto(restoredIncident,d.downloads.at(-1).value);
+assert.equal(restoredIncident.state.notes['incident-01'],'Observed zero becoming three');
+delete data.incidents;
 // A failed progress write must not mutate the live session, drafts, or persisted progress.
 let blocked=true;
 const f=harness({failWrite:key=>blocked&&key===KEY});const beforeState=f.state,beforeProgress=f.storage.get(KEY),beforeDrafts=f.storage.get(DRAFT_KEY);

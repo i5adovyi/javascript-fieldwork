@@ -1,0 +1,76 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Incident workshop browser QA</title>
+<style>body{font:15px/1.6 system-ui;margin:24px;background:#f5f3ed;color:#253124}button{padding:12px 20px}iframe{width:1100px;max-width:100%;height:700px;border:1px solid #aaa}pre{white-space:pre-wrap}.pass{color:#196339}.fail{color:#a21d17}</style>
+<h1>Incident workshop browser QA</h1>
+<p>Development-only. Uses synthetic notes on this localhost origin and restores prior progress at the end.</p>
+<button id="run">Run incident checks</button><pre id="results" role="status">Ready.</pre><iframe title="Portal under test"></iframe>
+<script type="module">
+const frame=document.querySelector('iframe'),out=document.querySelector('#results'),button=document.querySelector('#run');
+const wait=async predicate=>{const deadline=Date.now()+12000;while(!predicate()){if(Date.now()>deadline)throw Error('Timed out waiting for portal');await new Promise(r=>setTimeout(r,30));}};
+const assert=(condition,message)=>{if(!condition)throw Error(message);out.textContent+=`\nPASS ${message}`;};
+const route=async path=>{frame.contentWindow.location.hash='#/'+path;await wait(()=>frame.contentDocument.querySelector('#main'));await new Promise(r=>setTimeout(r,60));};
+const runWorker=(code,tests)=>new Promise((resolve,reject)=>{
+ const worker=new Worker('/runner.js'),timeout=setTimeout(()=>{worker.terminate();reject(Error('Worker timeout'));},3500);
+ worker.onmessage=event=>{clearTimeout(timeout);worker.terminate();resolve(event.data);};
+ worker.onerror=event=>{clearTimeout(timeout);worker.terminate();reject(Error(event.message));};
+ worker.postMessage({code,tests});
+});
+button.onclick=async()=>{
+ button.disabled=true;out.className='';out.textContent='Running…';
+ const saved=localStorage.getItem('fieldwork.progress.v1');
+ try{
+  const [{incidents},{labs}]=await Promise.all(['/data/incidents.json','/data/labs.json'].map(url=>fetch(url).then(r=>r.json())));
+  frame.src='/#/incidents';await wait(()=>frame.contentDocument.querySelectorAll('.incident-card').length===12);
+  assert(frame.contentDocument.querySelectorAll('.incident-card').length===12,'All 12 cases render');
+  for(let stage=1;stage<=6;stage++){
+   frame.contentDocument.querySelector(`[data-stage="${stage}"]`).click();
+   assert(frame.contentDocument.querySelectorAll('.incident-card').length===2,`Stage ${stage} filter shows two cases`);
+  }
+  frame.contentDocument.querySelector('[data-stage="0"]').click();
+  for(const item of incidents){
+   await route(`incident/${item.id}`);await wait(()=>frame.contentDocument.querySelector('[data-note]')?.dataset.note===item.id);
+   assert(frame.contentDocument.querySelector('h1')?.textContent===item.title,`${item.id} renders its report`);
+   assert(frame.contentDocument.querySelectorAll('.incident-help details[open]').length===0,`${item.id} clues and debrief start closed`);
+   assert(frame.contentDocument.querySelectorAll('.incident-file').length===item.files.length,`${item.id} includes all fixtures`);
+  }
+  await route('incident/incident-01');
+  const note=frame.contentDocument.querySelector('#incident-note');
+  note.value='Synthetic QA: zero is valid; absence selects the default.';note.dispatchEvent(new Event('input',{bubbles:true}));
+  assert(JSON.parse(localStorage.getItem('fieldwork.progress.v1')).notes['incident-01']===note.value,'Investigation note persists');
+  await new Promise(resolve=>{frame.addEventListener('load',resolve,{once:true});frame.contentWindow.location.reload();});
+  await wait(()=>frame.contentDocument.querySelector('#incident-note')?.value===note.value);
+  assert(frame.contentDocument.querySelector('#incident-note').value===note.value,'Note restores after reload');
+  await route('notebook');
+  assert([...frame.contentDocument.querySelectorAll('.note-entry')].some(a=>a.getAttribute('href')==='#/incident/incident-01'&&a.textContent.includes('Synthetic QA')),'Notebook links to the investigation');
+  await route('lesson/lesson-04');
+  assert(!!frame.contentDocument.querySelector('.incident-related a[href="#/incident/incident-01"]'),'Lesson links to its incident');
+  await route('project/dispatch');
+  assert(frame.contentDocument.querySelectorAll('.incident-related-links a').length===2,'Project links to its two cases');
+  for(const lab of labs.filter(l=>l.kind==='incident')){
+   const broken=await runWorker(lab.starter,lab.tests),fixed=await runWorker(lab.solution,lab.tests);
+   assert(!broken.error&&broken.results.some(t=>t.passed)&&broken.results.some(t=>!t.passed),`${lab.id} starter passes ordinary behavior and fails a regression`);
+   assert(!fixed.error&&fixed.results.length===lab.tests.length&&fixed.results.every(t=>t.passed),`${lab.id} solution passes all browser Worker checks`);
+  }
+  await route('lab/lab-49');
+  assert(!!frame.contentDocument.querySelector('.incident-lab-context a[href="#/incident/incident-01"]'),'Repair lab links back to its packet');
+  frame.contentDocument.querySelector('[data-action="run"]').click();
+  await wait(()=>/PASSED/.test(frame.contentDocument.querySelector('#test-summary').textContent));
+  assert(frame.contentDocument.querySelectorAll('.test-result.fail').length>0,'Actual lab UI displays failing starter assertions');
+  frame.contentDocument.querySelector('.solution-details').open=true;
+  frame.contentDocument.querySelector('[data-action="load-solution"]').click();
+  frame.contentDocument.querySelector('[data-action="run"]').click();
+  await wait(()=>/PASSED/.test(frame.contentDocument.querySelector('#test-summary').textContent));
+  assert(frame.contentDocument.querySelectorAll('.test-result.fail').length===0&&frame.contentDocument.querySelectorAll('.test-result.pass').length>0,'Actual lab UI displays passing repair');
+  for(const path of ['incidents','incident/incident-09']){
+   frame.style.width='390px';await route(path);await new Promise(r=>setTimeout(r,80));
+   const doc=frame.contentDocument;
+   assert(doc.documentElement.scrollWidth<=doc.documentElement.clientWidth+1,`${path} fits a 390px viewport`);
+   assert(doc.querySelector('h1').getBoundingClientRect().width<=390,`${path} mobile heading fits`);
+  }
+  for(const path of ['incident-workbook.md','incident-kits.zip','curriculum-review.md']){
+   const response=await fetch('/'+path);assert(response.ok&&(await response.arrayBuffer()).byteLength>100,`${path} is downloadable`);
+  }
+  out.className='pass';out.textContent+='\nALL INCIDENT BROWSER CHECKS PASSED';
+ }catch(error){out.className='fail';out.textContent+='\nFAIL '+error.stack;}
+ finally{saved===null?localStorage.removeItem('fieldwork.progress.v1'):localStorage.setItem('fieldwork.progress.v1',saved);button.disabled=false;}
+};
+</script></html>
