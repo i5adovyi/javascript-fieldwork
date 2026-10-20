@@ -1,10 +1,15 @@
-const CACHE='fieldwork-v11-run-anywhere';
+const CACHE='fieldwork-v12-local-database';
 // Only application assets are cached. Selected PDF bytes never enter this list.
 const FILES=[
  './',
  './index.html',
  './styles.css',
  './app.js',
+ './study-storage.js',
+ './data-settings.js',
+ './data-settings.css',
+ './site-config.js',
+ './new-account.md',
  './incidents.js',
  './run-anywhere.js',
  './run-anywhere.css',

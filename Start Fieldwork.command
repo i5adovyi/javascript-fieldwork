@@ -6,7 +6,7 @@ if command -v node >/dev/null 2>&1; then
 elif [[ -x "$HOME/.local/bin/node" ]]; then
   FIELDWORK_NODE="$HOME/.local/bin/node"
 else
-  print 'Install Node.js 20.11 or newer from https://nodejs.org, then open this launcher again.'
+  print 'Install Node.js 22.13 or newer from https://nodejs.org, then open this launcher again.'
   read '?Press Return to close.'
   exit 1
 fi

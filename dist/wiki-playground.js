@@ -1,3 +1,4 @@
+import {studyStorage as localStorage} from './study-storage.js';
 import {runWikiExample} from './wiki-runner.js';
 import {createCodeEditor} from './code-editor.js';
 

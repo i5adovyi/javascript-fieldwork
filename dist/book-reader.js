@@ -1,3 +1,4 @@
+import {studyStorage as localStorage} from './study-storage.js';
 import {getDocument,GlobalWorkerOptions,TextLayer} from './vendor/pdfjs/pdf.mjs';
 import {createBookStore,validateBookNotes,mergeBookAnnotations} from './book-storage.js';
 import {BOOK_MAP} from './book-map.js';
@@ -27,7 +28,7 @@ export function createBookReader({toast=()=>{}}={}){
     <div class="br-selection-status" data-br-selection role="status">Select a passage to highlight, or add a note to a page.</div>
     <div class="br-page-scroll" data-br-scroll tabindex="-1"><div class="br-empty" data-br-empty><span class="br-empty-symbol">{ read → try }</span><h3>Keep the source close.</h3><p>Open the book you own. Read the assigned pages, highlight a useful idea, and return to the code.</p><button type="button" class="br-button br-primary" data-br="choose">Choose your PDF</button><small>Local file only · up to 200 MB<br>Use Remember PDF to reopen it automatically after reload.</small></div><div class="br-page-wrap" data-br-page-wrap hidden></div></div>
     <details class="br-marks" data-br-marks><summary><span>Your book notes <b data-br-mark-count>0</b></span><span data-br-saved-state>Device only</span></summary><div class="br-marks-body"><div class="br-marks-toolbar"><label for="br-mark-filter">Show</label><select id="br-mark-filter"><option value="page">This page</option><option value="all">All pages</option></select><button type="button" class="br-button br-compact" data-br="export" disabled>Export notes ↓</button><button type="button" class="br-button br-compact" data-br="import" disabled>Import notes ↑</button><input type="file" data-br-import accept="application/json,.json" hidden></div>
-    <form class="br-note-editor" data-br-editor hidden><label for="br-note-text" data-br-editor-title>Note for this page</label><blockquote data-br-editor-quote hidden></blockquote><textarea id="br-note-text" rows="4" maxlength="20000" placeholder="What does this help you understand?" aria-describedby="br-note-help"></textarea><small id="br-note-help">Your note and any selected quote stay in this browser. Export notes to keep a backup.</small><div><button type="submit" class="br-button br-primary">Save note</button><button type="button" class="br-button" data-br="cancel-note">Cancel</button></div></form>
+    <form class="br-note-editor" data-br-editor hidden><label for="br-note-text" data-br-editor-title>Note for this page</label><blockquote data-br-editor-quote hidden></blockquote><textarea id="br-note-text" rows="4" maxlength="20000" placeholder="What does this help you understand?" aria-describedby="br-note-help"></textarea><small id="br-note-help">Your note and any selected quote stay on this device. Export notes to keep a backup.</small><div><button type="submit" class="br-button br-primary">Save note</button><button type="button" class="br-button" data-br="cancel-note">Cancel</button></div></form>
     <div class="br-marks-list" data-br-mark-list><p class="br-marks-empty">Your highlights and notes will appear here.</p></div><p class="br-backup-help">Notes exports contain your notes and selected quotes, never the PDF. They are separate from the studio progress backup.</p></div></details>
     <footer class="br-footer"><span data-br-footer>Read locally. Think for yourself.</span><button type="button" class="br-text-button" data-br="release" disabled>Release PDF</button></footer>`;
   document.body.append(pane);
@@ -35,7 +36,7 @@ export function createBookReader({toast=()=>{}}={}){
   const action=name=>$(`[data-br="${name}"]`);
   const viewport=$('[data-br-scroll]'),pageWrap=$('[data-br-page-wrap]');
   let store,storageWarning='';
-  try{store=createBookStore();}catch(error){storageWarning=error.message||'Browser storage is unavailable.';}
+  try{store=createBookStore(localStorage);}catch(error){storageWarning=error.message||'Browser storage is unavailable.';}
   let pdf=null,bookId=null,fileName='',record={page:1,annotations:[]},pageNumber=1;
   let currentLesson=null,currentAssignment=null,pendingPage=null,opened=false,opener;
   let loadingTask=null,activeLoadingTask=null,loading=false,loadVersion=0,renderVersion=0,renderTask=null,textTask=null;

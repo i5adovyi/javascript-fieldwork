@@ -1,58 +1,49 @@
 # Keep Fieldwork when changing accounts
 
-Your learning app is a self-contained website. It needs no OpenAI account, API key, subscription, database service, or package installation to run locally. Node.js 20.11 or newer is the only local runtime requirement. The bundled lessons, labs, wiki, reader, editors, fonts, and download materials are included.
+You can open this project in Codex under another OpenAI account and continue editing it. You can also study locally without any OpenAI account. A new hosted Site must be created under the new account; copying source does not transfer the old Site's ownership.
+
+The complete workflow, commands, and ready-to-paste Codex prompts are in [Open Fieldwork in another account](new-account.md). Storage and recovery instructions are in [Run online or locally](running.md).
 
 ## Before switching
 
-1. Keep the `javascript-fieldwork` folder and the complete source ZIP somewhere you control. The study-pack ZIP contains learning documents, not the entire application.
-2. In the public portal, open **My notebook → Export backup** to save progress, notes, lab code, quiz answers, project checklists, and lesson/wiki drafts.
-3. Open your PDF in the private reader, expand **Your book notes**, and choose **Export notes**. This saves reading position and annotations separately from progress.
-4. Keep your original book PDF separately. Neither ZIP nor either JSON backup includes it. Never put private exports or your book into a published folder.
+1. Keep the source folder or clone the private [GitHub repository](https://github.com/i5adovyi/javascript-fieldwork) using an authorized GitHub account.
+2. Export progress from **My notebook → Export backup** and private annotations from **Your book notes → Export notes** in the reader.
+3. Keep your original PDF separately. The source, database, and JSON exports do not include it.
+4. If using local SQLite, finish pending writes, stop Fieldwork, and back up its application-data directory. Keep it outside Git and the published folder.
 
-See [Run online or locally](running.md) for both launch modes and GitHub source setup.
+## Continue locally
 
-## Continue learning
+Use Node.js 22.13 or newer; Node.js 24 LTS is recommended. Open the source folder in Codex using its local folder/project picker, or use `codex -C /absolute/path/to/javascript-fieldwork` if the CLI is installed. No previous chat history is needed: `AGENTS.md` and the repository documentation give the new session its project instructions.
 
-Bookmark the existing public portal:
+Run `npm run start:open`, or open **Start Fieldwork.command** on Mac / **Start Fieldwork.cmd** on Windows. Keep Terminal open and visit `http://localhost:4187`. No package installation is needed for the bundled application.
 
-https://javascript-fieldwork-igor.igor-sadovyi87.chatgpt.site/
+Local SQLite saves live outside the project and persist across sessions and OpenAI account changes on the same computer and operating-system user. Another browser can read saved database records through the local server, but its remembered PDF and pending browser edits remain separate. Keep the original local URL when possible. See the setup guide for exact database paths, backup, and `FIELDWORK_DATA_DIR`.
 
-It is configured for public access, without a learner login. Hosted availability still depends on the original Site and its hosting service; use the local copy if that URL becomes unavailable.
+## Create a new hosted copy
 
-On this Mac, open **Start Fieldwork.command** inside the project folder. Keep its Terminal window open and visit the printed address, normally `http://localhost:4187`. Alternatively, run `npm start` from the project directory. No `npm install` is needed to use the checked-in app. Keep the same hostname and port for future sessions so your browser can find its stored data. Do not open `dist/index.html` directly with `file://`.
+Commit source changes, then run `npm run prepare:new-account`. Open the resulting new sibling folder under the new account and follow `docs/NEW-ACCOUNT.md`. The export removes the old Site identity and hosted launch link without modifying the original checkout. It contains committed source only, not your private learner data.
 
-At a new URL, browser profile, device, or account’s in-app browser:
+Use Sites tools available to the new account to create and publish a **new private Site**. The account must have Sites access. The export command does not create that Site, grant account access, or publish automatically. Keep its eventual project ID in the new copy; do not replace the original checkout's ID.
 
-1. Open **My notebook → Import backup** and select your progress JSON. Export any existing destination work first.
-2. Choose your original PDF in the reader and import the private book-notes JSON.
-3. Select **Remember PDF** once. The browser stores a private local copy and reopens it after reload. **Forget PDF** removes only that copy.
-4. Check a completed lesson, an edited example, and a book note before relying on the destination.
+The original public portal may remain available at <https://javascript-fieldwork-igor.igor-sadovyi87.chatgpt.site/>, subject to its original owner and hosting service. You do not need that URL for local learning.
 
-The app does not key data by OpenAI account. Switching accounts does not itself migrate browser storage, and the desktop app may separate or clear browser profiles. Export before switching even if you expect to use the same computer. Clearing site data, private browsing, and storage eviction can remove local saves.
+## Move learning data to a new URL or device
 
-## Continue editing with another account
+The hosted app uses browser saves for each URL and browser profile. An OpenAI account switch may use a different profile; it does not migrate those saves. Import the progress and book-note JSON backups at the destination, choose your original PDF there, and select **Remember PDF** once. Check a completed lesson, an edited example, and a book note.
 
-Attach the existing `javascript-fieldwork` folder as a local project under the new account, or extract the source ZIP and attach that folder. Start a new chat with this prompt:
-
-> Continue JavaScript Fieldwork from this local folder. Read README.md and docs/account-switch.md. The app runs with npm start and validates with npm test. Preserve the local-only PDF and private note storage, the course content, and existing code editors. The old hosted Site belongs to the previous account; do not assume this account can update it. Keep learner files and PDFs out of published assets.
-
-This preserves the actual code and documentation. It does not transfer this chat’s history or ownership of the hosted Site. Local project setup is documented in [OpenAI’s Projects and chats guide](https://learn.chatgpt.com/docs/projects).
-
-## Hosting independently
-
-The `dist/` directory is the complete static web application. It can be served by a static HTTPS host without server functions, account integration, or a build step. Routes use hashes, so they need no rewrite rules. Preserve the directory structure and JavaScript, `.mjs`, WebAssembly, and font MIME types. HTTPS or localhost is required for browser storage, PDF fingerprinting, workers, and offline support.
-
-For a new Site under the new account, make a separate copy of the source without `.git/` or `.openai/hosting.json` and ask to publish that copy as a new public Site. The old manifest identifies the old account’s Site; it must not be reused as a new Site identity. The portable ZIP already omits `.openai/` and Git metadata. Do not delete or change the working checkout’s identity merely to switch accounts.
+Neither backup includes the book. Browser clearing, private browsing, and storage eviction can remove hosted saves or the remembered PDF. The local database provides durable local records once writes finish, but it still needs a private backup against device loss. Hosted and local copies do not automatically synchronize.
 
 ## Maintainer map
 
-- `dist/`: complete deployable app; all runtime assets are local.
-- `dist/data/`: curriculum, labs, wiki, library, and incident content.
-- `dist/app.js`: routes, learning progress, and backup validation.
-- `dist/book-reader.js`, `book-storage.js`, `book-file-storage.js`: reader, private annotations, and optional remembered PDF.
-- `dist/book-map.js`: chapter/section references and physical PDF page numbers, with no copied book prose.
-- `src/`: editor source; `npm ci && npm run editors:build` rebuilds its checked-in bundle when needed.
-- `scripts/`: dependency-free local serving and learning-material generation.
-- `tests/`: release, content, runner, state, and browser checks.
+- `AGENTS.md`: account identity, publication, private data, and testing rules.
+- `dist/`: deployable static app and learning downloads.
+- `dist/site-config.js`: public launch links; no credentials.
+- `dist/data/`: curriculum, labs, wiki, library, and incidents.
+- `dist/app.js`: routes, progress, and import/export boundaries.
+- `dist/book-reader.js`, `book-storage.js`, `book-file-storage.js`: private reader, annotations, and remembered PDF.
+- `dist/book-map.js`: chapter references and physical PDF ranges without book prose.
+- `scripts/`: local server, database support, account export, and materials generation.
+- `src/`: editor source; use `npm ci && npm run editors:build` when rebuilding it.
+- `tests/`: content, runner, persistence, privacy, launch, and portability checks.
 
-Run `npm test` after changes. Use `npm run materials` after editing learner manuals. See `docs/PRIVATE-READER-QA.md` for the private-reader browser suite.
+Run `npm test` after changes and `npm run materials` after editing manuals. Private-reader browser checks are in `docs/PRIVATE-READER-QA.md`.

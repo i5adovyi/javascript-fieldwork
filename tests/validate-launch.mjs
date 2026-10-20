@@ -12,6 +12,7 @@ for(const href of ['http://localhost:4173/#/run','http://127.0.0.1:4187/','http:
 assert.equal(runtimeInfo(HOSTED_URL).label,'OpenAI Sites');
 assert.equal(runtimeInfo('https://localhost.evil.example/').local,false);
 assert.equal(runtimeInfo('https://example.org/').label,'Another web host');
+assert.equal(runtimeInfo('https://different.other.chatgpt.site/').hostedURL,'https://different.other.chatgpt.site/');
 assert.deepEqual(browserCommand(LOCAL_URL,'darwin'),['open',[LOCAL_URL]]);
 assert.deepEqual(browserCommand(LOCAL_URL,'win32'),['rundll32.exe',['url.dll,FileProtocolHandler',LOCAL_URL]]);
 assert.deepEqual(browserCommand(LOCAL_URL,'linux'),['xdg-open',[LOCAL_URL]]);
@@ -19,14 +20,14 @@ assert.throws(()=>browserCommand('file:///etc/passwd'),TypeError);
 const html=runAnywherePage({href:HOSTED_URL,esc:String,link:(path,text)=>`<a href="#/${path}">${text}</a>`});
 assert.ok(html.includes('does not sync or move it'));
 assert.ok(html.includes(LOCAL_URL)&&html.includes(HOSTED_URL));
-assert.equal(await readFile(new URL('../docs/RUNNING.md',import.meta.url),'utf8'),await readFile(new URL('../dist/running.md',import.meta.url),'utf8'));
+assert.equal((await readFile(new URL('../docs/RUNNING.md',import.meta.url),'utf8')).replaceAll('(NEW-ACCOUNT.md)','(new-account.md)').replaceAll('(RUNNING.md)','(running.md)'),await readFile(new URL('../dist/running.md',import.meta.url),'utf8'));
 
 // Reserve a free loopback port for an isolated real-server integration check.
 const probe=createServer();probe.listen(0,'127.0.0.1');await once(probe,'listening');
 const port=probe.address().port;await new Promise(resolve=>probe.close(resolve));
 const root=new URL('../',import.meta.url);
 function start(value){
- const child=spawn(process.execPath,['scripts/serve.mjs'],{cwd:root,env:{...process.env,PORT:String(value)},stdio:['ignore','pipe','pipe']});
+ const child=spawn(process.execPath,['scripts/serve.mjs','--static'],{cwd:root,env:{...process.env,PORT:String(value)},stdio:['ignore','pipe','pipe']});
  let output='';child.stdout.on('data',bytes=>output+=bytes);child.stderr.on('data',bytes=>output+=bytes);
  return {child,get output(){return output;}};
 }

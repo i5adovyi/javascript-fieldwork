@@ -6,7 +6,7 @@ Source: [i5adovyi/javascript-fieldwork](https://github.com/i5adovyi/javascript-f
 
 ## Start here
 
-Requires Node.js 20.11 or newer. The checked-in app runs without installing dependencies.
+Requires Node.js 22.13 or newer (24 LTS recommended). The checked-in app runs without installing dependencies.
 
 ```sh
 cd javascript-fieldwork
@@ -28,13 +28,12 @@ Open **Run anywhere** in the portal for the current mode, launch links, and prog
 | Mode | Start | Requirements |
 | --- | --- | --- |
 | OpenAI Sites | [Hosted studio](https://javascript-fieldwork-igor.igor-sadovyi87.chatgpt.site/) or `npm run open:hosted` | Browser and internet access |
-| Localhost | `npm start` → `http://localhost:4187` | Node.js 20.11+; no OpenAI account or API key |
+| Localhost | `npm start` → `http://localhost:4187` | Node.js 22.13+; no OpenAI account or API key |
 | Localhost + browser | `npm run start:open`, `Start Fieldwork.command` (Mac), or `Start Fieldwork.cmd` (Windows) | Same local requirements; keep the terminal open |
 
-Both modes use the exact same application. There is no automatic data sync: export/import
-progress and book notes when changing browser origins. The PDF remains local.
+Both modes use the same application. Local mode adds SQLite storage outside the repository for progress, notes, annotations, and drafts. Hosted mode uses browser storage. The PDF stays in browser IndexedDB in both modes. There is no automatic data sync: use **Data & backups** to transfer all saved records, or the existing progress/book-note exports.
 Read [the setup and publishing guide](docs/RUNNING.md) for ports, backups, GitHub, and Sites updates.
-GitHub stores source; pushing a commit does not automatically deploy the Site.
+GitHub stores source; pushing a commit does not automatically deploy the Site. To open the folder in Codex under another account and create that account’s own Site, follow [the new-account guide](docs/NEW-ACCOUNT.md). `npm run prepare:new-account` creates a clean, separate source export without the original Site identity.
 
 ## What is inside
 
@@ -59,7 +58,7 @@ GitHub stores source; pushing a commit does not automatically deploy the Site.
 4. Open **Practice lab**, implement a solution, and run the tests.
 5. Complete the written prompts in your own editor, then mark the lesson complete.
 6. Investigate the relevant **Incident workshop** cases after their listed lessons; record evidence and carry one failure rehearsal into the stage project. Finish the stage project and record your evidence in its build log.
-7. Export progress regularly from **My notebook**, and export private book annotations separately from the reader.
+7. Back up regularly from **Data & backups**. You can also export progress from **My notebook** and private book annotations separately from the reader. In local mode, check that writes have reached SQLite before closing the server.
 
 Read [the curriculum review](docs/CURRICULUM-REVIEW.md) for existing coverage, the incident route, and remaining advanced extensions. Download case files and the workbook from **Incident workshop**. Investigation notes save locally and travel in the existing notebook backup.
 
@@ -95,21 +94,23 @@ Lesson snippets include editable sample inputs, dependencies, and calls where th
 
 ## Data and ownership
 
-Progress is localStorage on the current origin and browser, not an account-backed service. Localhost, hosted deployment, and another browser have separate progress; transfer it using Export backup / Import backup. Imports merge completed lessons and labs; matching notes, code, quiz answers, and project entries are replaced by the imported entries. Backup format is version 1.
+With `npm start`, learner records persist in a local SQLite database outside this repository. The browser keeps current and pending edits; the interface reports saves, connection failures, and revision conflicts. The database survives server restarts, source updates, and OpenAI account changes on the same operating-system user. The hosted copy uses browser storage for its own origin. **Data & backups** provides complete textual-data export/import, including reader annotations. Existing **My notebook** progress backups still work: they merge completed lessons and labs and replace matching notes, code, quiz answers, and project entries. Neither export includes the PDF. See [storage paths and recovery](docs/RUNNING.md).
 
-The bundled PDF.js reader reads selected PDF bytes in memory and optionally remembers one private copy in IndexedDB on this device. It does not upload the PDF, put it in the application’s offline cache, or copy it into the repository. The book fingerprint, reading position, highlights, and notes are stored locally. Private book annotations have their own export/import workflow, separate from general progress backups. The supplied copyrighted book is not redistributed. This project is not affiliated with O’Reilly or David Flanagan.
+The bundled PDF.js reader reads selected PDF bytes in memory and optionally remembers one private copy in IndexedDB on this device. It does not upload the PDF, put it in the application’s offline cache, or copy it into the repository. The book fingerprint, reading position, highlights, and notes are stored locally and mirror to SQLite in local mode. Private book annotations retain their own export/import workflow, separate from general progress backups; all-data backups include them too. The supplied copyrighted book is not redistributed. This project is not affiliated with O’Reilly or David Flanagan.
 
 ## Keep access when changing accounts
 
-Learning in the public portal does not require an OpenAI login. This folder also runs independently of ChatGPT with `npm start`, or **Start Fieldwork.command** on macOS. Keep [the account-switch guide](docs/account-switch.md), the full source backup, and both private data exports before changing accounts or browser profiles. A local project can be attached to a new chat under your new account; the source files provide the continuing project context.
+Use the desktop app’s local project/folder picker to open this source folder under the new account; with an installed Codex CLI, use `codex -C /absolute/path/to/javascript-fieldwork`. Read [the new-account workflow](docs/NEW-ACCOUNT.md) for setup and a ready-to-paste prompt. Private GitHub access is a separate GitHub permission. The source carries your project forward, not the previous chat history.
 
-The app’s data belongs to its browser profile and URL, not an OpenAI account. A different account’s in-app browser may use a separate profile. Import your progress and book-note backups there, then select and remember your original PDF once. The hosted Site’s ownership and this conversation are not transferred by copying the source. See the account-switch guide for independent hosting and continued development.
+Local SQLite data stays in your user application-data directory and survives OpenAI account changes. Browser profiles keep the PDF and pending edits separately. Before switching browsers, URLs, or devices, export your data and keep your original PDF. [The account-switch guide](docs/account-switch.md) covers the checklist.
+
+To publish under a different account, commit source changes and run `npm run prepare:new-account`. Open the newly created sibling folder in that account and follow its `AGENTS.md` / `docs/NEW-ACCOUNT.md`. The export removes the original Site identity and hosted launch link without changing the working checkout. It does not create or publish a Site. The new account needs Sites access; create a new private Site there, persist its returned identity, and publish through the Sites skill. See the guide for configuring its new URL and keeping deployment identities separate.
 
 The UI fonts and PDF.js runtime are bundled locally, with their open-source licenses. Reading does not require external font or viewer services. External library links open separately. Service-worker caching makes the core app available offline after a successful first load on a supported browser; linked websites, external fonts, and videos need their own connectivity. The study pack, wiki reference, handbook, curriculum map, printable guide, and starter kits are included in the offline cache.
 
 ## Engineering
 
-The portal is static HTML, CSS, and JavaScript. CodeMirror 6 and Lezer power the shared lesson/wiki editor, bundled locally in `dist/code-editor.js` with MIT notices in `dist/vendor/editor-LICENSES.txt`. To change the editor, run `npm ci`, edit `src/editor-entry.js` or `src/editor-completions.js`, then run `npm run editors:build`. The checked-in bundle is included in the offline cache; no editor CDN is used. Content lives in five JSON files in `dist/data/`. `dist/app.js` renders the hash routes. `dist/runner.js` runs each lab in a fresh Worker; the UI terminates a run after three seconds. Lesson and wiki examples share a runner in `dist/wiki-runner.js` and does not affect lab scoring. Acorn 8.19.0 is vendored in `dist/vendor/` under its MIT license to parse module imports and instrument DOM loops; no installation or external runtime CDN is needed. The local reader uses bundled PDF.js and its worker; `dist/book-map.js` contains section headings and physical-page ranges, without book prose or PDF bytes. Console output is capped. It is a learning aid, not a security boundary or a certification grader. Do not paste untrusted code. The tests and solutions are intentionally visible to the learner.
+The deployable portal is static HTML, CSS, and JavaScript. The loopback-only local Node server adds a private SQLite API for local sessions; `npm run start:static` previews browser-only hosted behavior without opening that database. CodeMirror 6 and Lezer power the shared lesson/wiki editor, bundled locally in `dist/code-editor.js` with MIT notices in `dist/vendor/editor-LICENSES.txt`. To change the editor, run `npm ci`, edit `src/editor-entry.js` or `src/editor-completions.js`, then run `npm run editors:build`. The checked-in bundle is included in the offline cache; no editor CDN is used. Content lives in five JSON files in `dist/data/`. `dist/app.js` renders the hash routes. `dist/runner.js` runs each lab in a fresh Worker; the UI terminates a run after three seconds. Lesson and wiki examples share a runner in `dist/wiki-runner.js` and does not affect lab scoring. Acorn 8.19.0 is vendored in `dist/vendor/` under its MIT license to parse module imports and instrument DOM loops; no installation or external runtime CDN is needed. The local reader uses bundled PDF.js and its worker; `dist/book-map.js` contains section headings and physical-page ranges, without book prose or PDF bytes. Console output is capped. It is a learning aid, not a security boundary or a certification grader. Do not paste untrusted code. The tests and solutions are intentionally visible to the learner.
 
 Lesson completion and project checklists are self-assessed. Lab completion means the supplied assertions passed, not a proof of correctness for all inputs. The hosted Site is public and does not synchronize learner state.
 
@@ -133,7 +134,10 @@ The content validator checks coverage, uniqueness, quiz structure, project rubri
 - `docs/`: learning manuals and architecture/maintenance notes.
 - `project-starters/`: six independent teaching scaffolds.
 - `tests/`: content and runner verification.
-- `scripts/serve.mjs`: dependency-free local development server.
+- `scripts/serve.mjs`: local server with SQLite persistence; `--static` selects browser-only preview.
+- `scripts/prepare-new-account.mjs`: committed-source export with account identity removed.
+- `dist/site-config.js`: public hosted/source links; no credentials.
+- `AGENTS.md`: instructions for the next Codex session, including account and private-data boundaries.
 - `.openai/hosting.json`: Sites deployment configuration.
 
 ## Scope

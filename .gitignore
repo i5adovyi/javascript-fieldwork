@@ -12,3 +12,12 @@ fieldwork-backup-*.json
 fieldwork-book-notes-*.json
 *.pem
 *.key
+
+# Local study databases and recovery exports never belong in source control.
+*.sqlite
+*.sqlite-*
+*.db
+*.db-*
+.local-data/
+fieldwork-local-backup-*.json
+fieldwork-local-recovery-*.json
