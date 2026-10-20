@@ -40,13 +40,13 @@ for(const path of ['vendor/pdfjs/pdf.mjs','vendor/pdfjs/pdf.worker.mjs']){
  assert.equal(await context.validAsset('./'+path,new Response('export {};',{headers:{'Content-Type':'text/javascript'}})),true);
 }
 const cacheFiles=vm.runInContext('FILES',context);
-for(const name of ['book-reader.js','book-reader.css','book-storage.js','book-map.js','vendor/pdfjs/pdf.mjs','vendor/pdfjs/pdf.worker.mjs']){
+for(const name of ['book-reader.js','book-reader.css','book-storage.js','book-file-storage.js','book-map.js','vendor/pdfjs/pdf.mjs','vendor/pdfjs/pdf.worker.mjs']){
  assert(cacheFiles.includes('./'+name),`Offline reader is missing ${name}`);
 }
 for(const path of cacheFiles){
  if(path!=='./')await readFile(new URL(path,root));
 }
-const reader=await readFile(new URL('book-reader.js',root),'utf8');
+const reader=(await Promise.all(['book-reader.js','book-file-storage.js'].map(name=>readFile(new URL(name,root),'utf8')))).join('\n');
 assert(!/\b(?:fetch|XMLHttpRequest|WebSocket|sendBeacon)\s*\(/.test(reader),'The reader must not send document or annotation content over the network');
 assert(!/https?:\/\//.test(reader),'Reader assets must come from the local application, without runtime CDNs');
 console.log(`Reader release boundary passed: ${count} assets contain no PDFs; private files bypass caching; offline runtime is present; reader has no network-send API.`);

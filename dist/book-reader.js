@@ -1,11 +1,13 @@
 import {getDocument,GlobalWorkerOptions,TextLayer} from './vendor/pdfjs/pdf.mjs';
 import {createBookStore,validateBookNotes,mergeBookAnnotations} from './book-storage.js';
 import {BOOK_MAP} from './book-map.js';
+import {createBookFileStore,MAX_BOOK_FILE_BYTES} from './book-file-storage.js';
 
 GlobalWorkerOptions.workerSrc=new URL('./vendor/pdfjs/pdf.worker.mjs',import.meta.url).href;
 const asset=name=>new URL(`./vendor/pdfjs/${name}/`,import.meta.url).href;
 const COLORS=['yellow','green','pink'];
-const MAX_PDF_BYTES=200*1024*1024;
+const MAX_PDF_BYTES=MAX_BOOK_FILE_BYTES;
+const READER_OPEN_KEY='fieldwork.book-reader-open.v1';
 const clamp=(value,min,max)=>Math.min(max,Math.max(min,value));
 const copy=value=>structuredClone(value);
 
@@ -15,14 +17,15 @@ export function createBookReader({toast=()=>{}}={}){
   pane.setAttribute('aria-label','Your private book reader');
   pane.innerHTML=`
     <header class="br-header"><div><span class="br-eyebrow">READ ALONG / YOUR PRIVATE COPY</span><h2>The reading room.</h2></div><button type="button" class="br-icon-button" data-br="close" aria-label="Close book reader" title="Close reader · Escape">×</button></header>
-    <div class="br-book-bar"><div class="br-book-identity"><strong data-br-filename>No book selected</strong><span data-br-privacy>Your PDF stays in this tab. Notes stay in this browser.</span></div><button type="button" class="br-button br-primary" data-br="choose">Choose PDF</button><input type="file" data-br-file accept="application/pdf,.pdf" hidden></div>
+    <div class="br-book-bar"><div class="br-book-identity"><strong data-br-filename>No book selected</strong><span data-br-privacy>Your PDF and notes stay on this device.</span></div><button type="button" class="br-button br-primary" data-br="choose">Choose PDF</button><input type="file" data-br-file accept="application/pdf,.pdf" hidden></div>
+    <div class="br-memory"><span data-br-memory-status role="status">Optional: remember a private copy in this browser.</span><div><button type="button" class="br-text-button" data-br="remember" disabled>Remember PDF</button><button type="button" class="br-text-button" data-br="forget" hidden>Forget PDF</button></div></div>
     <details class="br-assignment" data-br-assignment open><summary aria-label="Expand or collapse current reading assignment"><span class="br-eyebrow">ALONGSIDE YOUR LESSON</span><strong data-br-assignment-title>Choose a lesson or explore your book</strong><span class="br-edition-indicator" data-br-edition-indicator hidden>Check edition</span></summary><div class="br-reading-links" data-br-ranges></div><p data-br-edition hidden></p></details>
     <div class="br-notice" data-br-notice role="status" aria-live="polite">Choose your own PDF to read and annotate alongside the lesson.</div>
     <div class="br-loading" data-br-loading hidden><span data-br-loading-label>Opening your PDF locally…</span><button type="button" class="br-button" data-br="cancel-load">Cancel</button></div>
     <div class="br-controls" data-br-controls><div class="br-page-navigation"><button type="button" class="br-icon-button" data-br="previous" aria-label="Previous PDF page" disabled>←</button><label for="br-page-number">PDF page</label><input id="br-page-number" type="number" min="1" value="1" inputmode="numeric" disabled><span data-br-page-count>/ —</span><button type="button" class="br-icon-button" data-br="next" aria-label="Next PDF page" disabled>→</button></div><div class="br-zoom"><button type="button" class="br-icon-button" data-br="zoom-out" aria-label="Zoom out" disabled>−</button><span data-br-zoom-value>Fit</span><button type="button" class="br-icon-button" data-br="zoom-in" aria-label="Zoom in" disabled>+</button><button type="button" class="br-button br-compact" data-br="fit" disabled>Fit width</button></div></div>
     <div class="br-annotation-tools"><div class="br-colors" role="group" aria-label="Highlight color">${COLORS.map((color,index)=>`<button type="button" class="br-color br-color-${color}" data-br-color="${color}" aria-label="${color[0].toUpperCase()+color.slice(1)} highlight" aria-pressed="${index===0}"><span aria-hidden="true">${index===0?'✓':''}</span></button>`).join('')}</div><button type="button" class="br-button br-compact" data-br="highlight" disabled>Highlight selection</button><button type="button" class="br-button br-compact" data-br="note" disabled>Add note</button><button type="button" class="br-button br-compact br-undo" data-br="undo" disabled>Undo</button></div>
     <div class="br-selection-status" data-br-selection role="status">Select a passage to highlight, or add a note to a page.</div>
-    <div class="br-page-scroll" data-br-scroll tabindex="-1"><div class="br-empty" data-br-empty><span class="br-empty-symbol">{ read → try }</span><h3>Keep the source close.</h3><p>Open the book you own. Read the assigned pages, highlight a useful idea, and return to the code.</p><button type="button" class="br-button br-primary" data-br="choose">Choose your PDF</button><small>Local file only · up to 200 MB<br>Reselect your file after reloading this page.</small></div><div class="br-page-wrap" data-br-page-wrap hidden></div></div>
+    <div class="br-page-scroll" data-br-scroll tabindex="-1"><div class="br-empty" data-br-empty><span class="br-empty-symbol">{ read → try }</span><h3>Keep the source close.</h3><p>Open the book you own. Read the assigned pages, highlight a useful idea, and return to the code.</p><button type="button" class="br-button br-primary" data-br="choose">Choose your PDF</button><small>Local file only · up to 200 MB<br>Use Remember PDF to reopen it automatically after reload.</small></div><div class="br-page-wrap" data-br-page-wrap hidden></div></div>
     <details class="br-marks" data-br-marks><summary><span>Your book notes <b data-br-mark-count>0</b></span><span data-br-saved-state>Device only</span></summary><div class="br-marks-body"><div class="br-marks-toolbar"><label for="br-mark-filter">Show</label><select id="br-mark-filter"><option value="page">This page</option><option value="all">All pages</option></select><button type="button" class="br-button br-compact" data-br="export" disabled>Export notes ↓</button><button type="button" class="br-button br-compact" data-br="import" disabled>Import notes ↑</button><input type="file" data-br-import accept="application/json,.json" hidden></div>
     <form class="br-note-editor" data-br-editor hidden><label for="br-note-text" data-br-editor-title>Note for this page</label><blockquote data-br-editor-quote hidden></blockquote><textarea id="br-note-text" rows="4" maxlength="20000" placeholder="What does this help you understand?" aria-describedby="br-note-help"></textarea><small id="br-note-help">Your note and any selected quote stay in this browser. Export notes to keep a backup.</small><div><button type="submit" class="br-button br-primary">Save note</button><button type="button" class="br-button" data-br="cancel-note">Cancel</button></div></form>
     <div class="br-marks-list" data-br-mark-list><p class="br-marks-empty">Your highlights and notes will appear here.</p></div><p class="br-backup-help">Notes exports contain your notes and selected quotes, never the PDF. They are separate from the studio progress backup.</p></div></details>
@@ -39,6 +42,72 @@ export function createBookReader({toast=()=>{}}={}){
   let fitWidth=true,zoomScale=1,renderedScale=1,selected=null,currentColor='yellow',editing=null;
   let undoStack=[],sessionOnly=!store,allowStorageWrite=true,resizeTimer,lastViewportWidth=0;
   let currentTextLayer=null,currentOverlay=null,currentPageElement=null,focusedMark=null;
+  let fileStore,localFile=null,rememberedId=null,rememberedName='',memoryBusy=false,memoryError='',memoryUnreadable=false;
+  let restorePromise=null,restoreGeneration=0,memoryVersion=0;
+  try{fileStore=createBookFileStore();}catch(error){memoryError=error.message;}
+
+  function readerPreference(value){
+    try{if(value!==undefined)localStorage.setItem(READER_OPEN_KEY,value?'open':'closed');return localStorage.getItem(READER_OPEN_KEY)!=='closed';}catch{return true;}
+  }
+  function memoryControls(){
+    const remembered=!!bookId&&rememberedId===bookId;
+    action('remember').hidden=remembered;
+    action('remember').disabled=!fileStore||!pdf||!localFile||loading||memoryBusy||!!restorePromise;
+    action('forget').hidden=!rememberedId&&!memoryUnreadable;
+    action('forget').disabled=memoryBusy||!!restorePromise;
+    action('release').disabled=action('release').disabled||memoryBusy;
+    pane.querySelectorAll('[data-br="choose"]').forEach(button=>button.disabled=memoryBusy);
+    const status=$('[data-br-memory-status]');
+    status.dataset.warning=String(!!memoryError);
+    status.textContent=memoryBusy?'Updating the private copy on this device…':memoryError||
+      (remembered?'Remembered on this device · reopens after reload.':rememberedId?
+       `Remembered: ${rememberedName}. Remember PDF replaces that local copy.`:
+       pdf?'Session only. Remember PDF keeps a private copy in this browser.':'Optional: remember a private copy in this browser.');
+  }
+  async function rememberFile(){
+    if(!pdf||!localFile||!fileStore||memoryBusy||restorePromise)return;
+    const entry={bookId,name:fileName,blob:localFile};
+    memoryBusy=true;memoryError='';memoryVersion++;controls();
+    try{
+      await fileStore.remember(entry);
+      rememberedId=entry.bookId;rememberedName=entry.name;memoryUnreadable=false;
+      notice('PDF remembered on this device. It will reopen after reload; nothing was uploaded.');
+    }catch(error){
+      memoryError=error.name==='QuotaExceededError'?'Not remembered: this browser has no space for another PDF. Free site storage and try again.':
+        'Not remembered: local storage is unavailable. You can keep reading in this session and try again.';
+      notice(memoryError,'warning');
+    }finally{memoryBusy=false;controls();}
+  }
+  async function forgetFile(){
+    if(!fileStore||memoryBusy||restorePromise)return;
+    memoryBusy=true;memoryError='';memoryVersion++;restoreGeneration++;controls();
+    try{
+      await fileStore.forget();rememberedId=null;rememberedName='';memoryUnreadable=false;
+      notice('Remembered copy removed. Your original file, highlights, and notes are unchanged. The open PDF lasts for this session.');
+    }catch{
+      memoryError='The remembered copy could not be removed. Try Forget PDF again; it may still reopen after reload.';
+      notice(memoryError,'warning');
+    }finally{memoryBusy=false;controls();}
+  }
+  function restoreRemembered({startup=false}={}){
+    if(!fileStore||restorePromise||memoryBusy)return restorePromise;
+    const generation=restoreGeneration,revision=memoryVersion;
+    restorePromise=(async()=>{
+      try{
+        const saved=await fileStore.read();
+        if(revision!==memoryVersion)return;
+        rememberedId=saved?.bookId||null;rememberedName=saved?.name||'';memoryUnreadable=false;
+        controls();
+        if(!saved||pdf||generation!==restoreGeneration||(startup&&!readerPreference()))return;
+        if(!opened)open({restore:false});
+        await chooseFile(new File([saved.blob],saved.name,{type:'application/pdf'}),{restoring:true,expectedId:saved.bookId});
+      }catch{
+        if(revision!==memoryVersion)return;
+        memoryUnreadable=true;memoryError='Could not read the remembered PDF. Choose your original file for this session, or use Forget PDF and try again.';
+      }
+    })().finally(()=>{restorePromise=null;controls();});
+    return restorePromise;
+  }
 
   function notice(text,kind='info'){
     const element=$('[data-br-notice]');element.textContent=text;element.dataset.kind=kind;
@@ -72,6 +141,7 @@ export function createBookReader({toast=()=>{}}={}){
     $('[data-br-saved-state]').textContent=sessionOnly?'Session only · export notes':'Saved on this device';
     $('[data-br-saved-state]').dataset.unsaved=String(sessionOnly);
     $('[data-br-footer]').textContent=pdf?`PDF page ${pageNumber} · ${record.annotations.filter(mark=>mark.page===pageNumber).length} marks on this page`:'Read locally. Think for yourself.';
+    memoryControls();
   }
   function persist(next,{quiet=false}={}){
     record=copy(next);
@@ -289,8 +359,9 @@ export function createBookReader({toast=()=>{}}={}){
     const cancelled=loadingTask;loadingTask=null;destroyTask(cancelled);
     controls();notice(pdf?'Opening cancelled. Your previous PDF is still available.':'Opening cancelled. Choose a PDF when you are ready.');
   }
-  async function chooseFile(file){
-    if(!file)return;
+  async function chooseFile(file,{restoring=false,expectedId=null}={}){
+    if(!file||memoryBusy)return;
+    if(!restoring)restoreGeneration++;
     if(file.size>MAX_PDF_BYTES){notice('Choose a PDF smaller than 200 MB.','error');return;}
     if(file.type!=='application/pdf'&&!file.name.toLowerCase().endsWith('.pdf')){notice('Choose a PDF file.','error');return;}
     if(!dismissEditor({ask:true}))return;
@@ -303,6 +374,7 @@ export function createBookReader({toast=()=>{}}={}){
       const buffer=await file.arrayBuffer();if(version!==loadVersion)return;
       const digest=await crypto.subtle.digest('SHA-256',buffer);if(version!==loadVersion)return;
       const identity=Array.from(new Uint8Array(digest),byte=>byte.toString(16).padStart(2,'0')).join('');
+      if(expectedId&&identity!==expectedId)throw new Error('The remembered PDF did not match its saved fingerprint. Forget it and choose your original file again.');
       if(bookId&&identity!==bookId&&sessionOnly&&record.annotations.length&&!window.confirm('Your current book has notes saved only in this tab. Cancel and export them before switching PDFs. Switch anyway?')){
         loading=false;controls();notice('Your current PDF and session notes are still available. Export notes before switching books.','warning');return;
       }
@@ -316,7 +388,7 @@ export function createBookReader({toast=()=>{}}={}){
       if(store){try{restored=store.load(identity,documentRef.numPages);}catch(error){allowStorageWrite=false;sessionOnly=true;storageWarning=error.message||'Saved notes could not be read.';}}
       // Reselecting the same file in this session also preserves any unsaved in-memory notes.
       if(identity===bookId)restored=copy(record);
-      cancelRendering();const oldTask=activeLoadingTask;activeLoadingTask=candidate;pdf=documentRef;bookId=identity;fileName=file.name;record=restored;
+      cancelRendering();const oldTask=activeLoadingTask;activeLoadingTask=candidate;pdf=documentRef;bookId=identity;fileName=file.name;record=restored;localFile=new Blob([file],{type:'application/pdf'});
       pageNumber=clamp(pendingPage||record.page||1,1,pdf.numPages);pendingPage=null;record.page=pageNumber;
       loading=false;loadingTask=null;undoStack=[];selected=null;fitWidth=true;focusedMark=null;
       pane.classList.add('has-book');$('[data-br-assignment]').open=false;
@@ -356,13 +428,15 @@ export function createBookReader({toast=()=>{}}={}){
     }catch(error){notice(`Import rejected: ${error.message} Your current notes are unchanged.`,'error');}
   }
   function release(){
+    if(memoryBusy)return;
+    restoreGeneration++;
     if(!dismissEditor({ask:true}))return;
     if(sessionOnly&&record.annotations.length&&!window.confirm('These notes are only in this tab. Export them before releasing the PDF. Release anyway?'))return;
     if(loading)cancelLoad();cancelRendering();
-    const previousTask=activeLoadingTask;activeLoadingTask=null;pdf=null;bookId=null;fileName='';record={page:1,annotations:[]};pageNumber=1;pendingPage=null;undoStack=[];selected=null;
+    const previousTask=activeLoadingTask;activeLoadingTask=null;pdf=null;bookId=null;fileName='';localFile=null;record={page:1,annotations:[]};pageNumber=1;pendingPage=null;undoStack=[];selected=null;
     pane.classList.remove('has-book');$('[data-br-assignment]').open=true;
     currentTextLayer=null;currentOverlay=null;currentPageElement=null;pageWrap.replaceChildren();pageWrap.hidden=true;$('[data-br-empty]').hidden=false;
-    destroyTask(previousTask);renderMarks();updateAssignment();controls();notice('PDF released from this tab. Saved book notes remain in this browser.');
+    destroyTask(previousTask);renderMarks();updateAssignment();controls();notice(rememberedId?'PDF released from this tab. The remembered copy remains on this device; use Forget PDF to remove it.':'PDF released from this tab. Saved book notes remain in this browser.');
   }
   function syncLesson(lesson,assignment){
     currentLesson=typeof lesson==='string'?{id:lesson}:lesson||null;
@@ -371,14 +445,16 @@ export function createBookReader({toast=()=>{}}={}){
   }
   function open(options={}){
     if(Object.hasOwn(options,'lesson')||Object.hasOwn(options,'assignment'))syncLesson(options.lesson,options.assignment);
-    opener=document.activeElement;opened=true;pane.hidden=false;document.body.classList.add('book-reading');
+    opener=document.activeElement;opened=true;readerPreference(true);pane.hidden=false;document.body.classList.add('book-reading');
     const requested=Number(options.page);
     if(Number.isInteger(requested)&&requested>0){if(pdf)goPage(requested);else{pendingPage=requested;notice(`Choose your local PDF to open at PDF page ${requested}.`);}}
     else if(pdf)void renderPage({scrollTop:false});
     controls();updateAssignment();
+    if(!pdf&&options.restore!==false)void restoreRemembered();
     requestAnimationFrame(()=>{lastViewportWidth=viewport.clientWidth;if(!pdf)action('choose').focus({preventScroll:true});});
   }
   function close(){
+    restoreGeneration++;readerPreference(false);
     if(loading)cancelLoad();cancelRendering();opened=false;pane.hidden=true;document.body.classList.remove('book-reading');
     if(opener?.isConnected)opener.focus({preventScroll:true});
   }
@@ -397,6 +473,7 @@ export function createBookReader({toast=()=>{}}={}){
     }
     const button=event.target.closest('[data-br]');if(!button||button.disabled)return;
     switch(button.dataset.br){
+      case 'remember':void rememberFile();break;case 'forget':void forgetFile();break;
       case 'close':close();break;case 'choose':$('[data-br-file]').click();break;case 'cancel-load':cancelLoad();break;
       case 'previous':goPage(pageNumber-1);break;case 'next':goPage(pageNumber+1);break;
       case 'zoom-in':fitWidth=false;zoomScale=clamp(renderedScale*1.2,.15,4);void renderPage({scrollTop:false});break;
@@ -432,5 +509,7 @@ export function createBookReader({toast=()=>{}}={}){
     lastViewportWidth=width;clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>void renderPage({scrollTop:false}),140);
   });
   observer.observe(viewport);
+  controls();
+  void restoreRemembered({startup:true});
   return {open,syncLesson,close};
 }

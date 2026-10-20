@@ -22,7 +22,9 @@ Use **Read beside lesson** to keep the explanation and the assigned reading toge
 
 To leave evidence of your reading, select text and choose a highlight color. Add a note either to that selection or to the current page. Write a prediction, a question, or an explanation in your own words. You can edit or delete annotations and use undo to reverse an annotation change. Page notes help when a thought concerns a whole example rather than one selectable phrase. Book annotations stay separate from your lesson reflections and project logs.
 
-The bundled PDF.js reader reads the selected file’s bytes in memory. The PDF is never uploaded, added to the application’s offline cache, or copied into the repository. After a reload, choose the local PDF again. A fingerprint identifies the matching copy so the reader can restore its last page, highlights, and notes saved in this browser. A different PDF may have a different fingerprint even if its title looks the same.
+The bundled PDF.js reader reads the selected file’s bytes on your device. Select **Remember PDF** to store one private copy in this browser’s IndexedDB and reopen it after reload. The PDF is never uploaded, added to the application’s offline cache, or copied into the repository. A fingerprint identifies the matching copy and restores its last page, highlights, and notes. A different PDF may have a different fingerprint even if its title looks the same.
+
+Closing the reader keeps it closed after reload; opening it again restores the remembered PDF without a chooser. Choosing another PDF does not replace the remembered copy until you select **Remember PDF**. **Forget PDF** removes only the remembered copy; your original file and annotations remain. **Release PDF** closes the session’s document while retaining its remembered copy. If browser storage is unavailable or full, the reader reports the failure and lets you keep reading for the session.
 
 Private book notes have their own export and import controls in the reader. Export them separately from your general progress backup, and keep the annotation file somewhere you control. Neither export includes the PDF itself. There is no account or cloud synchronization; clearing browser data removes annotations unless you have a backup. On another browser or device, choose the matching PDF and import your private book notes to restore them.
 
@@ -128,9 +130,17 @@ Use **My notebook → Export backup** at the end of each week and before clearin
 
 A general progress backup is separate from a private book annotation backup. Use the reader’s export/import controls for reading positions, highlights, and book notes; **My notebook → Export backup** preserves your learning workspace instead. Export both before changing browsers or clearing site data. Inspect a highlighted passage and a book note after restoring annotations.
 
-These backups are files you own; the portal does not provide cloud retention. Keep at least one copy outside the browser profile. The selected book PDF is not part of either backup and is not cached with the app. Select the matching local file again after a reload or on a new device so its fingerprint can reconnect the saved reading state.
+These backups are files you own; the portal does not provide cloud retention. Keep at least one copy outside the browser profile. The selected book PDF is not part of either backup and is not cached with the app. After choosing **Remember PDF**, reloads restore the local copy automatically. On a new browser, device, or URL, select the matching original file and remember it once. Clearing browser data, private browsing, and browser storage eviction can remove the remembered copy.
 
 **Download handbook** provides this guide for offline reference. The built-in lab executes code in a worker with a three-second timeout. It is a learning aid with visible checks, not a secure remote grading service. Larger programs, DOM experiments, and Node projects should be run in their appropriate environments.
+
+## Changing your OpenAI account
+
+The public portal has no learner login, and the complete local app runs without ChatGPT. Save the full source ZIP or project folder, your progress backup, your private book-note backup, and your original PDF before switching accounts. The study pack is only the learning documents; it is not the full app.
+
+A new account’s in-app browser may have separate storage. Import both JSON backups there and select your original PDF once, then choose **Remember PDF**. To keep working on the code, attach the existing project folder to a local project under the new account. The source backup does not transfer the old conversation or hosted Site ownership.
+
+For independent access on macOS, open **Start Fieldwork.command** in the full project folder, or run `npm start` with Node.js 20.11 or newer. Use the same printed localhost URL on later visits. The app also supports static HTTPS hosting of `dist/`. The full [account-switch guide](account-switch.md) explains restoration and continued development.
 
 ## The notebook template
 

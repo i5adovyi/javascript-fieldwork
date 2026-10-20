@@ -1,4 +1,4 @@
-const CACHE='fieldwork-v8-private-reader-editors';
+const CACHE='fieldwork-v9-remembered-pdf';
 // Only application assets are cached. Selected PDF bytes never enter this list.
 const FILES=[
  './',
@@ -24,12 +24,14 @@ const FILES=[
  './data/labs.json',
  './data/library.json',
  './handbook.md',
+ './account-switch.md',
  './CURRICULUM-MAP.md',
  './study-pack.zip',
  './field-guide.html',
  './project-starters.zip',
  './book-reader.js',
  './book-storage.js',
+ './book-file-storage.js',
  './book-map.js',
  './book-reader.css',
  './vendor/fonts/0a8b854cc18641bd1b82.woff2',

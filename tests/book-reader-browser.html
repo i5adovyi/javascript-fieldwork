@@ -113,7 +113,22 @@
         resources: [],
         downloads: [],
         writes: [],
-        failKey: null
+        failKey: null, failFileWrite: false, failFileDelete: false, failFileOpen: false
+      };
+      const originalFilePut=IDBObjectStore.prototype.put;
+      const originalFileDelete=IDBObjectStore.prototype.delete;
+      const originalFileOpen=IDBFactory.prototype.open;
+      IDBObjectStore.prototype.put=function(...args){
+        if(qa.failFileWrite)throw new DOMException('Synthetic PDF quota failure','QuotaExceededError');
+        return originalFilePut.apply(this,args);
+      };
+      IDBObjectStore.prototype.delete=function(...args){
+        if(qa.failFileDelete)throw new DOMException('Synthetic PDF deletion failure','UnknownError');
+        return originalFileDelete.apply(this,args);
+      };
+      IDBFactory.prototype.open=function(...args){
+        if(qa.failFileOpen)throw new DOMException('Synthetic storage denial','SecurityError');
+        return originalFileOpen.apply(this,args);
       };
       const originalFetch = window.fetch.bind(window);
       const originalOpen = XMLHttpRequest.prototype.open;
@@ -179,6 +194,8 @@
       }).observe({type: 'resource', buffered: true});
       try {
         // Instrumentation above runs before loading the production reader.
+        const {createBookFileStore}=await import('/book-file-storage.js');
+        qa.fileStore=createBookFileStore();
         const {createBookReader} = await import('/book-reader.js');
         qa.reader = createBookReader({toast: message => {
           document.querySelector('#driver-toasts').textContent = message;
@@ -309,6 +326,7 @@
               assignment: {label: 'Synthetic page two', ranges: [{label: 'Private notes', start: 2, end: 2}]}
             });
             await choose(first, 2);
+            assert(await qa.fileStore.read()===null,'Selecting a PDF must not automatically keep a copy.');
             assert(stored(bookId)?.page === 2, 'The requested first page was not persisted.');
             assert(find('[data-br-page-count]').textContent.includes('2'), 'Synthetic PDF must have exactly two pages.');
           }, true);
@@ -469,10 +487,87 @@
             click('undo');
             assert(JSON.stringify(stored(bookId).annotations.find(mark => mark.id === last.id)) === JSON.stringify(last), 'Undo did not restore the exact note.');
           });
+          await check('Remember PDF stores a local Blob only after opt-in and survives reload without a chooser', async()=>{
+            const before=structuredClone(stored(bookId).annotations);
+            await until(()=>!find('[data-br="remember"]').disabled,'Remember PDF did not become available.');
+            click('remember');
+            await until(()=>find('[data-br-memory-status]').textContent.startsWith('Remembered on this device'),'PDF was not reported remembered.');
+            const saved=await qa.fileStore.read();
+            assert(saved.bookId===bookId&&saved.blob.size===first.size,'Wrong local PDF copy stored.');
+            assert(await fingerprint(saved.blob)===bookId,'Remembered bytes differ from the original file.');
+            qa=await initialize(); // No attach(), choose(), or reader.open() after this reload.
+            await rendered(2);
+            assert(!find('#book-reader').hidden,'Remembered reader did not reopen automatically.');
+            assert(find('[data-br-filename]').textContent===first.name,'Wrong PDF restored.');
+            assert(JSON.stringify(stored(bookId).annotations)===JSON.stringify(before),'Auto restore changed annotations.');
+            assert(find('.br-highlight-green'),'Auto restore lost the green highlight.');
+            const backup=await downloadNotes(qa);
+            assert(!('blob' in backup)&&!JSON.stringify(backup).includes('%PDF-'),'Notes backup leaked the remembered PDF.');
+          },true);
+          await check('A closed reader stays closed after reload and reopens its remembered PDF on demand',async()=>{
+            qa.reader.close();
+            qa=await initialize();
+            await until(()=>!find('[data-br="forget"]').hidden&&!find('[data-br="forget"]').disabled,'Remembered metadata did not load.');
+            assert(find('#book-reader').hidden,'Closed reader reopened unexpectedly.');
+            assert(!find('.br-text-layer'),'Closed reader unnecessarily rendered the remembered PDF.');
+            qa.reader.open();
+            await rendered(2);
+          });
+          await check('Choosing another PDF is session-only until explicitly remembered',async()=>{
+            await choose(other,1);
+            assert((await qa.fileStore.read()).bookId===bookId,'File selection replaced a remembered PDF without opt-in.');
+            assert(find('[data-br-memory-status]').textContent.includes(first.name),'Reader did not identify the existing remembered copy.');
+          });
+          await check('A failed PDF save preserves the previous copy and the active session',async()=>{
+            qa.failFileWrite=true;click('remember');
+            await until(()=>find('[data-br-memory-status]').textContent.startsWith('Not remembered:'),'Failed PDF save was not reported.');
+            assert((await qa.fileStore.read()).bookId===bookId,'Quota failure replaced the original remembered copy.');
+            assert(find('[data-br-filename]').textContent===other.name,'Quota failure closed the active PDF.');
+            qa.failFileWrite=false;
+            qa.failFileOpen=true;click('remember');
+            await until(()=>find('[data-br-memory-status]').textContent.includes('storage is unavailable'),'Storage denial was not reported.');
+            qa.failFileOpen=false;
+            assert((await qa.fileStore.read()).bookId===bookId,'Storage denial damaged the previous copy.');
+            click('remember');
+            await until(()=>find('[data-br-memory-status]').textContent.startsWith('Remembered on this device'),'Retry did not remember the new PDF.');
+            assert((await qa.fileStore.read()).bookId===otherId,'Retry did not atomically replace the stored PDF.');
+            qa=await initialize();await rendered(1);
+            assert(find('[data-br-filename]').textContent===other.name,'Replaced PDF did not restore after reload.');
+          },true);
+          await check('Forget PDF removes only the remembered copy and honest errors allow retry',async()=>{
+            const before=JSON.stringify(stored(bookId).annotations);
+            qa.failFileDelete=true;click('forget');
+            await until(()=>find('[data-br-memory-status]').textContent.includes('could not be removed'),'Forget failure was hidden.');
+            assert((await qa.fileStore.read()).bookId===otherId,'Failed deletion unexpectedly removed the copy.');
+            qa.failFileDelete=false;click('forget');
+            await until(()=>find('[data-br="forget"]').hidden,'Successful Forget did not update controls.');
+            assert(await qa.fileStore.read()===null,'Remembered PDF remains after Forget.');
+            assert(find('.br-text-layer'),'Forget closed the current in-memory PDF.');
+            assert(JSON.stringify(stored(bookId).annotations)===before,'Forget removed annotations.');
+            qa=await initialize();
+            qa.reader.open();
+            await until(()=>!find('[data-br="choose"]').disabled,'Reader did not initialize.');
+            await delay(300);
+            assert(find('[data-br-filename]').textContent==='No book selected','Forgotten PDF returned after reload.');
+            await choose(first,2);
+            assert(find('.br-highlight-green'),'Original annotations did not return when reselecting after Forget.');
+          },true);
+          await check('A damaged remembered copy is rejected without losing notes and can be forgotten',async()=>{
+            const before=JSON.stringify(stored(bookId).annotations);
+            await qa.fileStore.remember({bookId,name:other.name,blob:new stage.contentWindow.Blob([other],{type:'application/pdf'})});
+            qa=await initialize();
+            await until(()=>find('[data-br-notice]').textContent.includes('fingerprint'),'Damaged remembered copy was not rejected.');
+            assert(!find('.br-text-layer'),'Unverified PDF was rendered.');
+            assert(JSON.stringify(stored(bookId).annotations)===before,'Damaged copy changed saved notes.');
+            await until(()=>!find('[data-br="forget"]').disabled,'Forget remains disabled after restore failure.');
+            click('forget');
+            await until(()=>find('[data-br="forget"]').hidden,'Damaged copy could not be forgotten.');
+            assert(await qa.fileStore.read()===null,'Damaged copy remains stored.');
+          });
         } catch (error) {
           lines.push('Dependent reader checks stopped because a prerequisite failed.');
         } finally {
-          if (qa) qa.failKey = null;
+          if (qa){qa.failKey=null;qa.failFileWrite=false;qa.failFileDelete=false;qa.failFileOpen=false;}
           await check('Private PDF data never enters a network request or the progress storage key', async () => {
             const currentAudits = audits.slice(auditStart);
             const bad = currentAudits.flatMap(session => session.audit).filter(entry => !entry.allowed);
@@ -485,7 +580,7 @@
             const requests = currentAudits.flatMap(session => session.audit);
             assert(requests.every(entry => !entry.url.includes(runId) && !entry.url.includes('QA_PRIVATE_NOTE') && !entry.hasBody), 'A request contains private fixture content.');
             const keys = currentAudits.flatMap(session => session.writes).map(write => write.key);
-            assert(keys.length > 0 && keys.every(key => key === prefix + bookId || key === prefix + otherId), 'Reader wrote outside its two fingerprint-specific annotation keys.');
+            assert(keys.length > 0 && keys.every(key => key === prefix + bookId || key === prefix + otherId || key === 'fieldwork.book-reader-open.v1'), 'Reader wrote outside its annotation keys and open/closed preference.');
           });
           const passes = lines.filter(line => line.startsWith('PASS')).length;
           results.textContent = lines.join('\n') + `\n\n${passes} checks passed; ${failures.length} failed.\nSynthetic document IDs: ${bookId.slice(0,12)}, ${otherId.slice(0,12)}.\nNo user book was opened.`;

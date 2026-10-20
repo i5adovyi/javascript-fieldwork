@@ -10,6 +10,7 @@ const html=`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta nam
 await writeFile(new URL('field-guide.html',root),html);
 await Promise.all([
   copyFile(new URL('../docs/LEARNER-HANDBOOK.md',import.meta.url),new URL('handbook.md',root)),
+  copyFile(new URL('../docs/account-switch.md',import.meta.url),new URL('account-switch.md',root)),
   copyFile(new URL('../docs/CURRICULUM-MAP.md',import.meta.url),new URL('CURRICULUM-MAP.md',root))
 ]);
 await buildStudyPack(root);

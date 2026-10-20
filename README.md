@@ -4,7 +4,7 @@ An independent, original learning studio built around the chapter structure of D
 
 ## Start here
 
-Requires Node.js 20 or newer. The checked-in app runs without installing dependencies.
+Requires Node.js 20.11 or newer. The checked-in app runs without installing dependencies.
 
 ```sh
 cd javascript-fieldwork
@@ -53,7 +53,11 @@ All 36 lessons have mapped assignments comprising 97 reading ranges. The mapping
 
 Select text and choose a highlight color to mark a passage. Add a note to the current page or selected text, then edit or delete annotations as needed; use the reader’s undo control to reverse an annotation change. These private book annotations are separate from lesson reflections in **My notebook**.
 
-Reselect the PDF after a reload. Its fingerprint identifies the matching copy and restores its last page, highlights, and notes from this browser. Use the reader’s private book notes export/import controls to keep or transfer annotations; the general progress backup does not include them. Neither backup includes the PDF. Clearing browser data loses unexported annotations, and there is no account or cloud synchronization.
+Select **Remember PDF** to keep one private copy in this browser’s IndexedDB. It reopens after reload at your saved page, with highlights and notes. If you close the reader, it stays closed after reload; opening it again restores the remembered file without a file chooser. Selecting another PDF is session-only until you choose **Remember PDF**, which replaces the previous local copy.
+
+**Forget PDF** removes the remembered copy without changing your original file or annotations. **Release PDF** frees the current session’s document but leaves the remembered copy available. Storage failures are reported explicitly; you can still read for the current session.
+
+Use the reader’s private book notes export/import controls to keep or transfer annotations; the general progress backup does not include them. Neither backup includes the PDF. Browser data clearing, private browsing, or storage eviction can remove the remembered copy and unexported annotations. Keep your original PDF and exported notes. There is no account or cloud synchronization.
 
 ## Experiment in lessons and the wiki
 
@@ -73,7 +77,13 @@ Lesson snippets include editable sample inputs, dependencies, and calls where th
 
 Progress is localStorage on the current origin and browser, not an account-backed service. Localhost, hosted deployment, and another browser have separate progress; transfer it using Export backup / Import backup. Imports merge completed lessons and labs; matching notes, code, quiz answers, and project entries are replaced by the imported entries. Backup format is version 1.
 
-The bundled PDF.js reader reads selected PDF bytes in memory. It does not upload them, put them in the offline cache, or copy the book into the repository. The book fingerprint, reading position, highlights, and notes are stored locally. Reselect the matching PDF after reloading to resume. Private book annotations have their own export/import workflow, separate from general progress backups. The supplied copyrighted book is not redistributed. This project is not affiliated with O’Reilly or David Flanagan.
+The bundled PDF.js reader reads selected PDF bytes in memory and optionally remembers one private copy in IndexedDB on this device. It does not upload the PDF, put it in the application’s offline cache, or copy it into the repository. The book fingerprint, reading position, highlights, and notes are stored locally. Private book annotations have their own export/import workflow, separate from general progress backups. The supplied copyrighted book is not redistributed. This project is not affiliated with O’Reilly or David Flanagan.
+
+## Keep access when changing accounts
+
+Learning in the public portal does not require an OpenAI login. This folder also runs independently of ChatGPT with `npm start`, or **Start Fieldwork.command** on macOS. Keep [the account-switch guide](docs/account-switch.md), the full source backup, and both private data exports before changing accounts or browser profiles. A local project can be attached to a new chat under your new account; the source files provide the continuing project context.
+
+The app’s data belongs to its browser profile and URL, not an OpenAI account. A different account’s in-app browser may use a separate profile. Import your progress and book-note backups there, then select and remember your original PDF once. The hosted Site’s ownership and this conversation are not transferred by copying the source. See the account-switch guide for independent hosting and continued development.
 
 The UI fonts and PDF.js runtime are bundled locally, with their open-source licenses. Reading does not require external font or viewer services. External library links open separately. Service-worker caching makes the core app available offline after a successful first load on a supported browser; linked websites, external fonts, and videos need their own connectivity. The study pack, wiki reference, handbook, curriculum map, printable guide, and starter kits are included in the offline cache.
 

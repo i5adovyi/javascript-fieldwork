@@ -16,8 +16,8 @@ Verified locally on 20 October 2026. No book pages, extracted book text, private
 `npm test` passes, including the existing curriculum, lab, wiki, progress, and playground suites.
 
 - 18 storage test groups cover fingerprint isolation, valid geometry and page bounds, defensive copies, schema and size limits, deterministic imports, failed writes, and corrupt storage.
-- 16 browser checks exercise the actual PDF.js reader using original synthetic PDFs. They cover first-open page targeting, note creation and editing, highlighting, zoom, bounds, lesson synchronization, reload recovery, switching PDFs, export/import, invalid backups, quota failures, delete/undo, and request privacy.
-- The release check examines all 264 deployable files, rejects PDFs and private QA data, checks offline reader assets, and verifies that the service worker ignores books, private backup URLs, and blob URLs.
+- 22 browser checks exercise the actual PDF.js reader using original synthetic PDFs. They cover first-open page targeting, note creation and editing, highlighting, zoom, bounds, lesson synchronization, reload recovery, switching PDFs, export/import, invalid backups, quota failures, delete/undo, and request privacy.
+- The release check examines all deployable files, rejects PDFs and private QA data, checks offline reader assets, and verifies that the service worker ignores books, private backup URLs, and blob URLs.
 - UI fonts, PDF.js, its worker, fonts, character maps, and codecs are served by the application. The browser harness observed no external requests or document/annotation uploads.
 
 The browser checks caught and verified a fix for PDF.js 6 task cleanup during document replacement. Destruction now uses the owning loading task.
@@ -31,4 +31,10 @@ node tests/serve-reader-qa.mjs
 
 Open `http://127.0.0.1:4197/__reader-qa` and select **Run reader browser tests**, then **Open 390px mobile preview**. These tests create their own two-page PDFs in memory. They do not need or read the reference book.
 
-The reader keeps the selected PDF in browser memory. Only page position and annotations are stored in localStorage under the PDF's SHA-256 fingerprint. Book-note backups are separate from course-progress backups; neither backup includes the PDF. Clearing browser site data removes stored notes unless the learner has exported them.
+The reader keeps a newly selected PDF in browser memory until the learner opts into **Remember PDF**. One private Blob is then stored in IndexedDB and fingerprint-verified before automatic restoration. Page position and annotations are stored separately in localStorage under the PDF's SHA-256 fingerprint. Reader open/closed preference is also stored locally. Book-note backups are separate from course-progress backups; neither backup includes the PDF. Clearing browser site data removes both the remembered copy and stored notes unless the learner has exported the notes and retained the original PDF.
+
+## Remembered PDF checks
+
+The actual-browser suite additionally verifies opt-in storage, automatic reopening without a file chooser, closed-reader preference, session-only replacement, atomic replacement after simulated quota/blocked-storage failures, honest failed deletion and retry, and rejection of a damaged remembered copy. Forgetting preserves the open document and its annotations. Notes exports still exclude PDF bytes. The request audit covers these flows, with no PDF uploads or course-progress writes.
+
+The supplied 1,245-page PDF was remembered on a local origin and restored after a real reload at PDF page 198 without a file chooser. The 390-pixel mobile preview also passed. A server-stopped reload did not work in this run of the in-app browser; offline restoration of the new remembered-file flow remains unverified there. The local launcher was separately tested and served HTTP 200 without an OpenAI login. Keep the local server running for reliable independent access.
