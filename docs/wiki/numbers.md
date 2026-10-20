@@ -8,7 +8,7 @@ Number uses binary floating point. Check numeric boundaries explicitly instead o
 
 Number(text) converts the entire string; invalid numeric text produces NaN. Number.isFinite(value) accepts finite numbers without coercing strings. Number.isNaN(value) identifies NaN itself.
 
-Many decimal fractions cannot be represented exactly. Choose an error tolerance appropriate to the scale of a calculation. Integer quantities are exact only within the safe integer range. BigInt supports larger integers, but it is a separate type with integer division.
+Many decimal fractions cannot be represented exactly. Choose an error tolerance appropriate to the scale of a calculation. Every integer within the safe integer range is exactly representable. Some larger integers, such as 2 ** 53, are also exact, but adjacent integers may round to the same Number value. BigInt supports larger integers, but it is a separate type with integer division.
 
 ## When to use it
 

@@ -210,7 +210,7 @@ Number uses binary floating point. Check numeric boundaries explicitly instead o
 
 Number(text) converts the entire string; invalid numeric text produces NaN. Number.isFinite(value) accepts finite numbers without coercing strings. Number.isNaN(value) identifies NaN itself.
 
-Many decimal fractions cannot be represented exactly. Choose an error tolerance appropriate to the scale of a calculation. Integer quantities are exact only within the safe integer range. BigInt supports larger integers, but it is a separate type with integer division.
+Many decimal fractions cannot be represented exactly. Choose an error tolerance appropriate to the scale of a calculation. Every integer within the safe integer range is exactly representable. Some larger integers, such as 2 ** 53, are also exact, but adjacent integers may round to the same Number value. BigInt supports larger integers, but it is a separate type with integer division.
 
 ## When to use it
 
@@ -279,7 +279,7 @@ Transform text without confusing code units with visible characters.
 
 ## Essential rule
 
-String methods return new strings; length and indexes count UTF-16 code units.
+Strings are immutable: text-transforming methods return new strings. Length and indexes count UTF-16 code units.
 
 Use trim, includes, startsWith, slice, and template literals for straightforward text work. Keep the returned value: calling trim() alone does not change the original string.
 
@@ -1937,7 +1937,7 @@ The list stays detached, so this changes no visible page. The angle brackets rem
 
 - Dereferencing a missing selector result throws; handle null.
 - Untrusted strings in innerHTML can inject executable markup.
-- Replacing children destroys their identity and their directly attached listeners.
+- New replacement nodes do not inherit listeners attached to the old nodes. Removed nodes retain their identity and listeners while references keep them reachable, including if they are reinserted.
 
 ## Related topics
 

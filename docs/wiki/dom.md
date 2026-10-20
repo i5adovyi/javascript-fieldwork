@@ -45,7 +45,7 @@ The list stays detached, so this changes no visible page. The angle brackets rem
 
 - Dereferencing a missing selector result throws; handle null.
 - Untrusted strings in innerHTML can inject executable markup.
-- Replacing children destroys their identity and their directly attached listeners.
+- New replacement nodes do not inherit listeners attached to the old nodes. Removed nodes retain their identity and listeners while references keep them reachable, including if they are reinserted.
 
 ## Related topics
 

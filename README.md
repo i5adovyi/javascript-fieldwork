@@ -48,7 +48,7 @@ Read [the learner handbook](docs/LEARNER-HANDBOOK.md) for 8-week and 16-week sch
 
 Open **JavaScript wiki**, choose a topic, and edit its **Practical example**. Select **Run example** or press **⌘ / Ctrl + Enter** to see console output and errors. **Reset example** restores the original code. The expected result stays available in a separate disclosure so edited examples can produce different results.
 
-Drafts are saved automatically on this device, separately for each topic and module file. They survive navigation and reloads. Wiki drafts are separate from notebook backups; use **Copy code** to keep an experiment elsewhere. If browser storage is unavailable, the editor reports that changes last only for the current session.
+Drafts are saved automatically on this device, separately for each topic and module file. They survive navigation and reloads. Wiki drafts are included in notebook backups; use **Copy code** to keep individual experiments elsewhere. If browser storage is unavailable, the editor reports that changes last only for the current session.
 
 Most examples run in a fresh Web Worker. DOM and event examples use an isolated document with a visible, interactive preview; append elements to `document.body` to display them. The storage example uses a fresh in-memory implementation of the Storage methods each run, so it cannot change your studio progress. The module example has separate file editors and loads real ES modules; it supports local literal imports and reports unsupported circular imports.
 
@@ -60,13 +60,13 @@ Progress is localStorage on the current origin and browser, not an account-backe
 
 PDFs are opened as local object URLs, never uploaded. Reselect the PDF after reloading. The supplied copyrighted book is neither copied into this repository nor redistributed. This project is not affiliated with O’Reilly or David Flanagan.
 
-Google Fonts is the only external UI asset provider; fallback fonts preserve usability when offline. External library links open separately. Service-worker caching makes the core app available offline after a successful first load on a supported browser; linked websites, external fonts, and videos need their own connectivity. Starter-kit downloads should be saved explicitly before going offline.
+Google Fonts is the only external UI asset provider; fallback fonts preserve usability when offline. External library links open separately. Service-worker caching makes the core app available offline after a successful first load on a supported browser; linked websites, external fonts, and videos need their own connectivity. The study pack, wiki reference, handbook, curriculum map, printable guide, and starter kits are included in the offline cache.
 
 ## Engineering
 
 The portal is buildless HTML, CSS, and JavaScript. Content lives in four JSON files in `dist/data/`. `dist/app.js` renders the hash routes. `dist/runner.js` runs each lab in a fresh Worker; the UI terminates a run after three seconds. The wiki uses its own runner in `dist/wiki-runner.js` and does not affect lab scoring. Acorn 8.19.0 is vendored in `dist/vendor/` under its MIT license to parse module imports and instrument DOM loops; no installation or external runtime CDN is needed. Console output is capped. It is a learning aid, not a security boundary or a certification grader. Do not paste untrusted code. The tests and solutions are intentionally visible to the learner.
 
-Lesson completion and project checklists are self-assessed. Lab completion means the supplied assertions passed, not a proof of correctness for all inputs. A hosted private Site controls access to the page but does not synchronize learner state.
+Lesson completion and project checklists are self-assessed. Lab completion means the supplied assertions passed, not a proof of correctness for all inputs. The hosted Site is public and does not synchronize learner state.
 
 ## Validation
 
@@ -87,7 +87,7 @@ The content validator checks coverage, uniqueness, quiz structure, project rubri
 - `project-starters/`: six independent teaching scaffolds.
 - `tests/`: content and runner verification.
 - `scripts/serve.mjs`: dependency-free local development server.
-- `.openai/hosting.json`: private Sites deployment configuration.
+- `.openai/hosting.json`: Sites deployment configuration.
 
 ## Scope
 

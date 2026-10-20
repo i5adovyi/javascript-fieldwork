@@ -103,11 +103,11 @@
         }
       ],
       "starter": "function quoteBasket(items, discountPercent = 0) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
-      "solution": "function quoteBasket(items, discountPercent = 0) {\n  if (!Number.isInteger(discountPercent) || discountPercent < 0 || discountPercent > 100) throw new RangeError(\"Invalid discount\");\n  let subtotalCents = 0;\n  for (const {priceCents, quantity} of items) {\n    if (![priceCents, quantity].every(n => Number.isSafeInteger(n) && n >= 0)) throw new RangeError(\"Invalid line\");\n    subtotalCents += priceCents * quantity;\n  }\n  const discountCents = Math.round(subtotalCents * discountPercent / 100);\n  return {subtotalCents, discountCents, totalCents: subtotalCents - discountCents};\n}",
+      "solution": "function quoteBasket(items, discountPercent = 0) {\n  if (!Number.isInteger(discountPercent) || discountPercent < 0 || discountPercent > 100) throw new RangeError(\"Invalid discount\");\n  let subtotalCents = 0;\n  for (const {priceCents, quantity} of items) {\n    if (![priceCents, quantity].every(n => Number.isSafeInteger(n) && n >= 0)) throw new RangeError(\"Invalid line\");\n    subtotalCents += priceCents * quantity;\n  }\n  const discountCents = Math.floor(subtotalCents / 100) * discountPercent + Math.round((subtotalCents % 100) * discountPercent / 100);\n  return {subtotalCents, discountCents, totalCents: subtotalCents - discountCents};\n}",
       "hints": [
         "Use integer cents throughout; do not convert to currency units.",
         "Subtotal each line as priceCents \u00d7 quantity, then apply one discount to the basket.",
-        "Round the discount once, and subtract that rounded amount from subtotalCents."
+        "Split subtotalCents into whole hundreds and a remainder before multiplying by the percentage. Round only the remainder contribution: floor(subtotal / 100) \u00d7 percent + round((subtotal % 100) \u00d7 percent / 100). This avoids unsafe intermediate multiplication."
       ],
       "tests": [
         {
@@ -129,6 +129,10 @@
         {
           "name": "Invalid discount rejected",
           "code": "let e; try { quoteBasket([], 101); } catch(x) { e=x; } assert(e instanceof RangeError, \"Reject excessive discount\");"
+        },
+        {
+          "name": "Safe totals near the numeric limit",
+          "code": "assertEqual(quoteBasket([{priceCents:9007199254740000,quantity:1}],35),{subtotalCents:9007199254740000,discountCents:3152519739159000,totalCents:5854679515581000});assertEqual(quoteBasket([{priceCents:Number.MAX_SAFE_INTEGER,quantity:1}],100).totalCents,0);"
         }
       ]
     },
@@ -443,9 +447,9 @@
         }
       ],
       "starter": "function wordFrequencies(text) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
-      "solution": "function wordFrequencies(text) {\n  const counts = new Map();\n  for (const word of text.toLowerCase().match(/[a-z]+/g) || []) counts.set(word, (counts.get(word) || 0) + 1);\n  return [...counts].map(([word,count])=>({word,count})).sort((a,b)=>b.count-a.count || (a.word < b.word ? -1 : a.word > b.word ? 1 : 0));\n}",
+      "solution": "function wordFrequencies(text) {\n  const counts = new Map();\n  for (const word of (text.match(/[A-Za-z]+/g) || []).map(word=>word.toLowerCase())) counts.set(word, (counts.get(word) || 0) + 1);\n  return [...counts].map(([word,count])=>({word,count})).sort((a,b)=>b.count-a.count || (a.word < b.word ? -1 : a.word > b.word ? 1 : 0));\n}",
       "hints": [
-        "Normalize case before extracting tokens.",
+        "Extract ASCII letter sequences with /[A-Za-z]+/g first, then lowercase each token. Lowercasing all Unicode text first can turn non-ASCII symbols into ASCII letters.",
         "Count with a Map, defaulting unseen words to zero.",
         "Your comparator needs a deterministic secondary ordering when counts tie."
       ],
@@ -465,6 +469,10 @@
         {
           "name": "No tokens",
           "code": "assertEqual(wordFrequencies(\" 123 !?! \"),[]); assertEqual(wordFrequencies(\"\"),[]);"
+        },
+        {
+          "name": "Non-ASCII characters remain separators",
+          "code": "assertEqual(wordFrequencies(\"\u212a \u0130 K I\"),[{word:\"i\",count:1},{word:\"k\",count:1}]);assertEqual(wordFrequencies(\"a\u212ab\"),[{word:\"a\",count:1},{word:\"b\",count:1}]);"
         }
       ]
     },
@@ -563,7 +571,7 @@
       "difficulty": "Foundation",
       "minutes": 30,
       "concept": "Recursion \u00b7 object traversal \u00b7 path building",
-      "prompt": "Implement flattenRecord(record), returning an array of [dotPath, value] pairs for leaves in Object.entries traversal order. Recurse into non-null plain objects only; arrays and null are leaves. Empty nested objects are leaves too. The root is always a plain object; an empty root returns []. Keys contain no dots, and there are no cycles. Do not mutate the source.",
+      "prompt": "Implement flattenRecord(record), returning an array of [dotPath, value] pairs for leaves in Object.entries traversal order. Recurse into non-null plain objects only; arrays and null are leaves. Empty nested objects are leaves too. The root is always a plain object; an empty root returns []. Keys contain no dots but may be empty strings, and there are no cycles. Do not mutate the source.",
       "examples": [
         {
           "input": "flattenRecord({user:{name:\"Ada\"}})",
@@ -571,9 +579,9 @@
         }
       ],
       "starter": "function flattenRecord(record) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
-      "solution": "function flattenRecord(record) {\n  const result=[];\n  function visit(object,prefix) {\n    for (const [key,value] of Object.entries(object)) {\n      const path=prefix ? prefix+\".\"+key : key;\n      const plain=value !== null && typeof value === \"object\" && Object.getPrototypeOf(value) === Object.prototype;\n      if (plain && Object.keys(value).length) visit(value,path);\n      else result.push([path,value]);\n    }\n  }\n  visit(record,\"\");\n  return result;\n}",
+      "solution": "function flattenRecord(record) {\n  const result=[];\n  function visit(object,segments) {\n    for (const [key,value] of Object.entries(object)) {\n      const path=[...segments,key];\n      const plain=value !== null && typeof value === \"object\" && Object.getPrototypeOf(value) === Object.prototype;\n      if (plain && Object.keys(value).length) visit(value,path);\n      else result.push([path.join(\".\"),value]);\n    }\n  }\n  visit(record,[]);\n  return result;\n}",
       "hints": [
-        "Keep the prefix separate from the current object.",
+        "Keep the path as an array of key segments and join with dots only when emitting a leaf. This preserves empty-string keys.",
         "Arrays should be emitted as a single leaf, not expanded into numeric paths.",
         "An empty nested object needs its own leaf entry; otherwise that setting disappears."
       ],
@@ -593,6 +601,10 @@
         {
           "name": "No mutation",
           "code": "const source={a:{b:3}}; const before=JSON.stringify(source); flattenRecord(source); assertEqual(JSON.stringify(source),before);"
+        },
+        {
+          "name": "Empty keys retain their path position",
+          "code": "assertEqual(flattenRecord({\"\":{x:1},x:2}),[[\".x\",1],[\"x\",2]]);assertEqual(flattenRecord({a:{\"\":{b:3}},\"\":4}),[[\"a..b\",3],[\"\",4]]);"
         }
       ]
     },
@@ -647,7 +659,7 @@
       "difficulty": "Foundation",
       "minutes": 25,
       "concept": "Sliding windows \u00b7 algorithmic cost",
-      "prompt": "Implement movingAverage(values, size), returning the average of every complete consecutive window of size values. size must be a positive integer or throw RangeError. If size exceeds the array length, return []. Assume values are finite numbers. Do not mutate values. Aim for O(n) time with a running sum; do not sum each window from scratch.",
+      "prompt": "Implement movingAverage(values, size), returning the average of every complete consecutive window of size values. values must be a dense array of integers with absolute value at most 1,000,000,000. size must be an integer from 1 through 10,000. Invalid arguments or values throw RangeError. These bounds keep running sums exact safe integers; averages may be fractional JavaScript Numbers. If size exceeds the array length, return []. Validate all values even when no complete window exists. Do not mutate values. Aim for O(n) time with a running sum; do not sum each window from scratch.",
       "examples": [
         {
           "input": "movingAverage([10, 20, 30, 40], 3)",
@@ -655,11 +667,11 @@
         }
       ],
       "starter": "function movingAverage(values, size) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
-      "solution": "function movingAverage(values, size) {\n  if (!Number.isInteger(size) || size <= 0) throw new RangeError(\"Invalid window size\");\n  const result=[];\n  let sum=0;\n  for (let i=0;i<values.length;i++) {\n    sum+=values[i];\n    if (i>=size) sum-=values[i-size];\n    if (i>=size-1) result.push(sum/size);\n  }\n  return result;\n}",
+      "solution": "function movingAverage(values, size) {\n  if (!Array.isArray(values) || !Number.isInteger(size) || size < 1 || size > 10000) throw new RangeError(\"Invalid values or window size\");\n  for (const value of values) {\n    if (!Number.isInteger(value) || Math.abs(value) > 1e9) throw new RangeError(\"Value outside the supported integer range\");\n  }\n  const result=[];\n  let sum=0;\n  for (let i=0;i<values.length;i++) {\n    if (i>=size) sum-=values[i-size];\n    sum+=values[i];\n    if (i>=size-1) result.push(sum/size);\n  }\n  return result;\n}",
       "hints": [
-        "Track a running sum as the right edge moves.",
-        "Once the window is too large, subtract the element leaving on the left.",
-        "Emit an average only after you have seen size elements."
+        "Validate the complete dense integer array and the window bounds before calculating. The stated bounds keep each running sum below Number.MAX_SAFE_INTEGER.",
+        "Track a running sum. Before adding the next value, subtract the old value if it is leaving the window.",
+        "Emit sum / size only after seeing size elements. Removing and adding one value per step gives O(n) time."
       ],
       "tests": [
         {
@@ -681,6 +693,14 @@
         {
           "name": "Invalid size",
           "code": "for(const size of [0,-2,1.5]){let e;try{movingAverage([1,2],size);}catch(x){e=x;}assert(e instanceof RangeError,\"Validate window size\");}"
+        },
+        {
+          "name": "Reject unsupported numeric inputs",
+          "code": "for(const values of [[1e16,1,1],[Number.MAX_VALUE],[0.5],[NaN],[Infinity],Array(1)]){let e;try{movingAverage(values,2);}catch(x){e=x;}assert(e instanceof RangeError,\"Reject values outside the exact-sum domain\");}let e;try{movingAverage([1],10001);}catch(x){e=x;}assert(e instanceof RangeError,\"Enforce window bound\");"
+        },
+        {
+          "name": "Exact sums at supported boundaries",
+          "code": "assertEqual(movingAverage([1e9,-1e9,1],1),[1e9,-1e9,1]);assertEqual(movingAverage([1e9,-1e9,1,3],2),[0,-499999999.5,2]);assertEqual(movingAverage(Array(10000).fill(1e9),10000),[1e9]);"
         }
       ]
     },
@@ -731,7 +751,7 @@
       "difficulty": "Intermediate",
       "minutes": 35,
       "concept": "Publish/subscribe \u00b7 Set \u00b7 mutation during iteration",
-      "prompt": "Implement createEventBus() returning on(event, listener), emit(event, payload), and listenerCount(event). on adds a function once per event and returns an idempotent unsubscribe function. emit invokes a snapshot of listeners in registration order and returns the invocation count; changes to subscriptions during emission only affect future emissions. Listener errors propagate immediately. Unknown events have zero listeners.",
+      "prompt": "Implement createEventBus() returning on(event, listener), emit(event, payload), and listenerCount(event). on adds a function once per event and returns an idempotent unsubscribe function. Duplicate on calls for an active listener return the same disposer. Once disposed, that disposer must never remove a later re-subscription of the same listener. emit invokes a snapshot of listeners in registration order and returns the invocation count; changes to subscriptions during emission only affect future emissions. Listener errors propagate immediately. Unknown events have zero listeners.",
       "examples": [
         {
           "input": "const bus = createEventBus(); bus.listenerCount(\"saved\")",
@@ -739,11 +759,11 @@
         }
       ],
       "starter": "function createEventBus() {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
-      "solution": "function createEventBus() {\n  const events=new Map();\n  return {\n    on(event, listener) {\n      if(typeof listener!==\"function\") throw new TypeError(\"Listener must be a function\");\n      if(!events.has(event)) events.set(event,new Set());\n      const listeners=events.get(event);\n      listeners.add(listener);\n      return ()=>listeners.delete(listener);\n    },\n    emit(event,payload) {\n      const listeners=[...(events.get(event)||[])];\n      for(const listener of listeners) listener(payload);\n      return listeners.length;\n    },\n    listenerCount:event=>events.get(event)?.size||0\n  };\n}",
+      "solution": "function createEventBus() {\n  const events=new Map();\n  return {\n    on(event, listener) {\n      if(typeof listener!==\"function\") throw new TypeError(\"Listener must be a function\");\n      if(!events.has(event)) events.set(event,new Map());\n      const listeners=events.get(event);\n      if(listeners.has(listener)) return listeners.get(listener);\n      let active=true;\n      const unsubscribe=()=>{\n        if(!active) return false;\n        active=false;\n        return listeners.delete(listener);\n      };\n      listeners.set(listener,unsubscribe);\n      return unsubscribe;\n    },\n    emit(event,payload) {\n      const listeners=[...(events.get(event)?.keys()||[])];\n      for(const listener of listeners) listener(payload);\n      return listeners.length;\n    },\n    listenerCount:event=>events.get(event)?.size||0\n  };\n}",
       "hints": [
-        "Map each event to a Set of listeners.",
-        "Copy the Set into an array before emitting.",
-        "The unsubscribe closure captures the Set and listener; Set.delete is safe to repeat."
+        "Map each event to an insertion-ordered Map of listener functions to their disposer functions.",
+        "Copy the listener keys into an array before emitting, so subscription changes do not change the current snapshot.",
+        "A disposer tracks whether its registration is still active. Return the existing disposer for a duplicate subscription; a fresh subscription after disposal gets a fresh disposer."
       ],
       "tests": [
         {
@@ -761,6 +781,10 @@
         {
           "name": "Unknown events and errors",
           "code": "const bus=createEventBus();assertEqual(bus.emit(\"missing\",1),0);const expected=new Error(\"listener\");bus.on(\"x\",()=>{throw expected;});let e;try{bus.emit(\"x\");}catch(x){e=x;}assert(e===expected,\"Preserve listener error\");"
+        },
+        {
+          "name": "Stale disposers cannot remove a new subscription",
+          "code": "const bus=createEventBus(),fn=()=>{};const first=bus.on(\"x\",fn),duplicate=bus.on(\"x\",fn);assert(first===duplicate,\"Duplicate registration shares its disposer\");first();const second=bus.on(\"x\",fn);first();duplicate();assertEqual(bus.listenerCount(\"x\"),1);second();assertEqual(bus.listenerCount(\"x\"),0);"
         }
       ]
     },
@@ -851,7 +875,7 @@
       "difficulty": "Intermediate",
       "minutes": 30,
       "concept": "Object descriptors \u00b7 WeakSet \u00b7 graph traversal",
-      "prompt": "Implement deepFreeze(value). Recursively freeze objects and arrays reachable through own data properties, including non-enumerable and symbol properties. Return the same root reference. Handle cycles without infinite recursion. Primitive values and functions are returned unchanged. Do not invoke getters; freeze their containing object while leaving the getter function untouched.",
+      "prompt": "Implement deepFreeze(value). Recursively freeze objects and arrays reachable through own data properties, including non-enumerable and symbol properties. Return the same root reference. Handle cycles without infinite recursion. Primitive values and functions are returned unchanged. Do not invoke getters; freeze their containing object while leaving the getter function untouched. Input graphs contain only ordinary objects, arrays, primitive values, and functions; exotic built-ins such as typed arrays, Maps, and Sets are outside this exercise.",
       "examples": [
         {
           "input": "Object.isFrozen(deepFreeze({settings:{mode:\"dark\"}}).settings)",
@@ -1139,7 +1163,7 @@
       "difficulty": "Intermediate",
       "minutes": 30,
       "concept": "Promise settlement \u00b7 ordered results",
-      "prompt": "Implement async settleAll(values) without using Promise.allSettled. Values may be promises, thenables, or ordinary values. Return an ordered array of {status:\"fulfilled\", value} or {status:\"rejected\", reason}. One rejection must not discard the other outcomes. Preserve rejection reasons exactly, and resolve an empty input to [].",
+      "prompt": "Implement async settleAll(values) without using Promise.allSettled. values is an array whose entries may be promises, thenables, or ordinary values. Treat sparse array holes as undefined values. Return an ordered array of {status:\"fulfilled\", value} or {status:\"rejected\", reason}. One rejection must not discard the other outcomes. Preserve rejection reasons exactly, and resolve an empty input to [].",
       "examples": [
         {
           "input": "await settleAll([42, Promise.reject(\"offline\")])",
@@ -1147,9 +1171,9 @@
         }
       ],
       "starter": "async function settleAll(values) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
-      "solution": "async function settleAll(values) {\n  return Promise.all(values.map(value=>Promise.resolve(value).then(\n    value=>({status:\"fulfilled\",value}),\n    reason=>({status:\"rejected\",reason})\n  )));\n}",
+      "solution": "async function settleAll(values) {\n  return Promise.all(Array.from(values,value=>Promise.resolve(value).then(\n    value=>({status:\"fulfilled\",value}),\n    reason=>({status:\"rejected\",reason})\n  )));\n}",
       "hints": [
-        "Normalize each value with Promise.resolve.",
+        "Use Array.from(values, mapper) to visit every array position, including holes as undefined. Normalize each visited value with Promise.resolve.",
         "Attach both success and rejection handlers, each returning an outcome object.",
         "Promise.all can now collect those normalized outcomes because the wrappers fulfill."
       ],
@@ -1169,6 +1193,10 @@
         {
           "name": "Empty and undefined",
           "code": "assertEqual(await settleAll([]),[]);const [outcome]=await settleAll([undefined]);assert(outcome.status===\"fulfilled\"&&Object.hasOwn(outcome,\"value\"),\"Preserve undefined outcome\");"
+        },
+        {
+          "name": "Sparse array holes have fulfilled outcomes",
+          "code": "const results=await settleAll([,42]);assertEqual(results.length,2);assertEqual(results[0],{status:\"fulfilled\",value:undefined});assertEqual(results[1],{status:\"fulfilled\",value:42});"
         }
       ]
     },
@@ -1267,7 +1295,7 @@
       "difficulty": "Intermediate",
       "minutes": 30,
       "concept": "Date \u00b7 UTC arithmetic \u00b7 immutable values",
-      "prompt": "Implement nextWeekdayUTC(isoDate, weekday). isoDate is a valid ISO timestamp and weekday is an integer 0 (Sunday) through 6 (Saturday), otherwise throw RangeError. Return the ISO timestamp of the next strictly later occurrence of that weekday, preserving the UTC time of day and milliseconds. If the date is already on that weekday, advance seven days. Reject invalid date strings. Use UTC operations so local daylight-saving time cannot change the result.",
+      "prompt": "Implement nextWeekdayUTC(isoDate, weekday). Accept only canonical UTC ISO strings in the exact format YYYY-MM-DDTHH:mm:ss.sssZ (four-digit years 0000\u20139999), with a real calendar date and time. weekday must be an integer 0 (Sunday) through 6 (Saturday). Invalid arguments throw RangeError. Return the next strictly later occurrence of that weekday in the same canonical format, preserving UTC time of day and milliseconds. If already on that weekday, advance seven days. Throw RangeError if the result would leave the supported four-digit year range. Use UTC operations so local daylight-saving time cannot change the result.",
       "examples": [
         {
           "input": "nextWeekdayUTC(\"2024-01-05T08:00:00.000Z\", 1)",
@@ -1275,11 +1303,11 @@
         }
       ],
       "starter": "function nextWeekdayUTC(isoDate, weekday) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
-      "solution": "function nextWeekdayUTC(isoDate,weekday) {\n  const date=new Date(isoDate);\n  if(typeof isoDate!==\"string\"||Number.isNaN(date.getTime())||!Number.isInteger(weekday)||weekday<0||weekday>6) throw new RangeError(\"Invalid date or weekday\");\n  const days=(weekday-date.getUTCDay()+7)%7||7;\n  date.setUTCDate(date.getUTCDate()+days);\n  return date.toISOString();\n}",
+      "solution": "function nextWeekdayUTC(isoDate,weekday) {\n  const format=/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$/;\n  if(typeof isoDate!==\"string\" || !format.test(isoDate) || !Number.isInteger(weekday) || weekday<0 || weekday>6) throw new RangeError(\"Invalid canonical timestamp or weekday\");\n  const date=new Date(isoDate);\n  if(Number.isNaN(date.getTime()) || date.toISOString()!==isoDate) throw new RangeError(\"Invalid calendar date or time\");\n  const days=(weekday-date.getUTCDay()+7)%7||7;\n  date.setUTCDate(date.getUTCDate()+days);\n  const result=date.toISOString();\n  if(!format.test(result)) throw new RangeError(\"Result exceeds the supported year range\");\n  return result;\n}",
       "hints": [
-        "Find the forward distance with modular arithmetic.",
-        "A modular result of zero means seven days because the next occurrence must be later.",
-        "Use getUTCDay and setUTCDate, then serialize with toISOString."
+        "Validate the exact canonical format before constructing Date. Compare date.toISOString() with the input to reject silent calendar rollover such as February 30.",
+        "Find the forward weekday distance with modular arithmetic; zero means seven days because the result must be strictly later.",
+        "Use getUTCDay and setUTCDate. Preserve milliseconds, then reject a result outside the supported four-digit year range."
       ],
       "tests": [
         {
@@ -1297,6 +1325,14 @@
         {
           "name": "Reject invalid arguments",
           "code": "for(const args of [[\"bad\",1],[\"2024-01-01\",7],[\"2024-01-01\",1.5]]){let e;try{nextWeekdayUTC(...args);}catch(x){e=x;}assert(e instanceof RangeError,\"Validate date and weekday\");}"
+        },
+        {
+          "name": "Reject calendar rollover and noncanonical timestamps",
+          "code": "for(const value of [\"2024-02-30T12:00:00.000Z\",\"2023-02-29T12:00:00.000Z\",\"12/31/2024\",\"2024-01-01\",\"2024-01-01T00:00:00Z\",\"2024-01-01T24:00:00.000Z\",null,Symbol(\"date\")]){let e;try{nextWeekdayUTC(value,1);}catch(x){e=x;}assert(e instanceof RangeError,\"Reject invalid or noncanonical timestamp\");}"
+        },
+        {
+          "name": "Year boundaries remain explicit",
+          "code": "assertEqual(nextWeekdayUTC(\"0000-01-01T01:02:03.004Z\",0),\"0000-01-02T01:02:03.004Z\");let e;try{nextWeekdayUTC(\"9999-12-31T00:00:00.000Z\",1);}catch(x){e=x;}assert(e instanceof RangeError,\"Reject unsupported output year\");"
         }
       ]
     },
@@ -1479,9 +1515,9 @@
         }
       ],
       "starter": "function searchDocuments(documents, query) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
-      "solution": "function searchDocuments(documents,query) {\n  const tokens=text=>text.toLowerCase().match(/[a-z]+/g)||[],terms=[...new Set(tokens(query))],results=[];\n  if(!terms.length)return [];\n  for(const document of documents){\n    const counts=new Map();\n    for(const word of tokens(document.title))counts.set(word,(counts.get(word)||0)+3);\n    for(const word of tokens(document.body))counts.set(word,(counts.get(word)||0)+1);\n    if(terms.every(term=>counts.has(term)))results.push({id:document.id,score:terms.reduce((sum,term)=>sum+counts.get(term),0)});\n  }\n  return results.sort((a,b)=>b.score-a.score||(a.id<b.id?-1:a.id>b.id?1:0));\n}",
+      "solution": "function searchDocuments(documents,query) {\n  const tokens=text=>(text.match(/[A-Za-z]+/g)||[]).map(word=>word.toLowerCase()),terms=[...new Set(tokens(query))],results=[];\n  if(!terms.length)return [];\n  for(const document of documents){\n    const counts=new Map();\n    for(const word of tokens(document.title))counts.set(word,(counts.get(word)||0)+3);\n    for(const word of tokens(document.body))counts.set(word,(counts.get(word)||0)+1);\n    if(terms.every(term=>counts.has(term)))results.push({id:document.id,score:terms.reduce((sum,term)=>sum+counts.get(term),0)});\n  }\n  return results.sort((a,b)=>b.score-a.score||(a.id<b.id?-1:a.id>b.id?1:0));\n}",
       "hints": [
-        "Use the same tokenizer for documents and queries.",
+        "Use the same tokenizer for documents and queries: extract /[A-Za-z]+/g first, then lowercase each token. Non-ASCII characters remain separators.",
         "Build weighted token counts for each document.",
         "Deduplicate query tokens so repeated words do not inflate scores."
       ],
@@ -1505,6 +1541,10 @@
         {
           "name": "No mutation",
           "code": "const docs=[{id:\"a\",title:\"one\",body:\"one\"}],before=JSON.stringify(docs);searchDocuments(docs,\"one\");assertEqual(JSON.stringify(docs),before);"
+        },
+        {
+          "name": "ASCII tokens exclude Unicode lookalikes",
+          "code": "assertEqual(searchDocuments([{id:\"x\",title:\"\u212a\",body:\"\u0130\"}],\"k i\"),[]);assertEqual(searchDocuments([{id:\"x\",title:\"k\",body:\"\"}],\"\u212a\"),[]);"
         }
       ]
     },
@@ -1947,7 +1987,7 @@
       "difficulty": "Advanced",
       "minutes": 40,
       "concept": "Configuration \u00b7 explicit coercion \u00b7 aggregate errors",
-      "prompt": "Implement parseEnvironment(env, schema). schema maps keys to {type:\"string\"|\"number\"|\"boolean\", required?:boolean, default?:value}. Read only own env keys. Missing/empty-string values use an own default if present, otherwise required fields add \"KEY: required\" and optional fields are omitted. Present values must be strings. Strings are preserved. Numbers use Number after rejecting whitespace-only strings and must be finite. Booleans accept exactly \"true\" or \"false\". Invalid values add \"KEY: invalid TYPE\". Ignore unknown env keys. Return {values, errors} in schema key order. Defaults are already correctly typed.",
+      "prompt": "Implement parseEnvironment(env, schema). schema maps keys to {type:\"string\"|\"number\"|\"boolean\", required?:boolean, default?:value}. Read only own env keys. Absent keys and empty-string values use an own default if present, otherwise required fields add \"KEY: required\" and optional fields are omitted. Present nonempty values must be strings; an own property with value undefined is invalid rather than absent. Strings are preserved. Numbers use Number after rejecting whitespace-only strings and must be finite. Booleans accept exactly \"true\" or \"false\". Invalid values add \"KEY: invalid TYPE\". Ignore unknown env keys. Return {values, errors} in schema key order. Defaults are already correctly typed.",
       "examples": [
         {
           "input": "parseEnvironment({PORT:\"4000\"},{PORT:{type:\"number\",required:true}})",
@@ -1955,9 +1995,9 @@
         }
       ],
       "starter": "function parseEnvironment(env, schema) {\n  // Write your implementation here.\n  throw new Error(\"Not implemented yet\");\n}",
-      "solution": "function parseEnvironment(env,schema) {\n  const values={},errors=[];\n  const put=(key,value)=>Object.defineProperty(values,key,{value,enumerable:true,writable:true,configurable:true});\n  for(const [key,rule] of Object.entries(schema)){\n    const raw=Object.hasOwn(env,key)?env[key]:undefined;\n    if(raw===undefined||raw===\"\"){if(Object.hasOwn(rule,\"default\"))put(key,rule.default);else if(rule.required)errors.push(key+\": required\");continue;}\n    let value,valid=typeof raw===\"string\";\n    if(rule.type===\"string\")value=raw;\n    else if(rule.type===\"number\"){value=valid?Number(raw):NaN;valid=valid&&raw.trim()!==\"\"&&Number.isFinite(value);}\n    else if(rule.type===\"boolean\"){valid=valid&&(raw===\"true\"||raw===\"false\");value=raw===\"true\";}\n    else valid=false;\n    if(valid)put(key,value);else errors.push(key+\": invalid \"+rule.type);\n  }\n  return {values,errors};\n}",
+      "solution": "function parseEnvironment(env,schema) {\n  const values={},errors=[];\n  const put=(key,value)=>Object.defineProperty(values,key,{value,enumerable:true,writable:true,configurable:true});\n  for(const [key,rule] of Object.entries(schema)){\n    const present=Object.hasOwn(env,key),raw=present?env[key]:undefined;\n    if(!present||raw===\"\"){if(Object.hasOwn(rule,\"default\"))put(key,rule.default);else if(rule.required)errors.push(key+\": required\");continue;}\n    let value,valid=typeof raw===\"string\";\n    if(rule.type===\"string\")value=raw;\n    else if(rule.type===\"number\"){value=valid?Number(raw):NaN;valid=valid&&raw.trim()!==\"\"&&Number.isFinite(value);}\n    else if(rule.type===\"boolean\"){valid=valid&&(raw===\"true\"||raw===\"false\");value=raw===\"true\";}\n    else valid=false;\n    if(valid)put(key,value);else errors.push(key+\": invalid \"+rule.type);\n  }\n  return {values,errors};\n}",
       "hints": [
-        "Handle missing values before type conversion.",
+        "Use Object.hasOwn to distinguish an absent key from a present value of undefined. Only absent keys and empty strings use defaults.",
         "Boolean(\"false\") is true; use explicit string comparisons.",
         "Aggregate errors so all invalid settings can be fixed together."
       ],
@@ -1985,6 +2025,10 @@
         {
           "name": "Do not coerce non-string objects",
           "code": "const raw={valueOf(){throw new Error(\"Do not coerce\");}};assertEqual(parseEnvironment({N:raw},{N:{type:\"number\"}}),{values:{},errors:[\"N: invalid number\"]});"
+        },
+        {
+          "name": "Present undefined does not use a default",
+          "code": "assertEqual(parseEnvironment({X:undefined},{X:{type:\"string\",default:\"fallback\"}}),{values:{},errors:[\"X: invalid string\"]});assertEqual(parseEnvironment({X:undefined},{X:{type:\"number\",required:true}}),{values:{},errors:[\"X: invalid number\"]});"
         }
       ]
     },

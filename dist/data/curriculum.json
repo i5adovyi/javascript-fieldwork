@@ -294,7 +294,7 @@
       ],
       "quiz": [
         {
-          "question": "Which expression preserves a valid zero?",
+          "question": "Which expression uses 10 only when value is null or undefined, while preserving a valid zero?",
           "options": [
             "value || 10",
             "value ?? 10",

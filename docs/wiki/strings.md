@@ -4,7 +4,7 @@ Transform text without confusing code units with visible characters.
 
 ## Essential rule
 
-String methods return new strings; length and indexes count UTF-16 code units.
+Strings are immutable: text-transforming methods return new strings. Length and indexes count UTF-16 code units.
 
 Use trim, includes, startsWith, slice, and template literals for straightforward text work. Keep the returned value: calling trim() alone does not change the original string.
 
