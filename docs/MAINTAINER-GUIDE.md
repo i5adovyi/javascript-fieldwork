@@ -1,5 +1,7 @@
 # Maintainer guide
 
+Read [project context](PROJECT-CONTEXT.md) and the root [agent instructions](../AGENTS.md) first. This guide describes the current implementation; earlier verification reports are historical evidence.
+
 ## Content contracts
 
 `curriculum.json` owns stage metadata and lessons. Lesson ids are stable `lesson-01` through `lesson-36`. Preserve IDs when editing: progress uses them as keys. Each lesson has three explanatory sections, objectives, quizzes, three written assignments, pitfalls, and recap.
@@ -18,15 +20,21 @@ Write a precise contract covering argument types, mutation, return shape, errors
 
 ## Accessibility and interaction
 
-Keep semantic links for navigation, buttons for actions, labels for inputs, and visible focus indicators. Do not remove Escape-to-close behavior from native dialogs. Use reduced-motion styles for motion effects. Inspect the page at desktop and phone widths after layout changes. The editor uses Tab to insert two spaces; Shift+Tab leaves the editor for keyboard navigation. Ctrl/Command+Enter runs tests; Ctrl/Command+K opens search.
+Keep semantic links for navigation, buttons for actions, labels for inputs, and visible focus indicators. Do not remove Escape-to-close behavior from native dialogs. Use reduced-motion styles for motion effects. Inspect the page at desktop and phone widths after layout changes. The lab editor uses Tab to insert two spaces; Shift+Tab leaves it for keyboard navigation. Lesson/wiki CodeMirror editors use Tab to accept an active completion and otherwise allow focus navigation. Ctrl/Command+Enter runs the current lab/example; Ctrl/Command+K opens search.
 
 ## Persistence
 
-The localStorage key is `fieldwork.progress.v1`. Keep versioned backups compatible. Import validates data types, bounds quiz indexes, filters lesson/lab IDs, and excludes prototype keys. Never silently discard an imported backup because a future version differs: tell the user to keep their file.
+`dist/study-storage.js` supplies the shared storage adapter. Hosted/static mode uses browser storage. `npm start` adds SQLite through the loopback-only server; the browser maintains a durable pending-write journal and sends revisions to prevent silent overwrites. Save status must reflect actual pending, failed, conflicted, or committed state.
+
+The core progress record is `fieldwork.progress.v1`; example drafts, reader preference, and per-PDF annotations have separate records. See [the storage model](PROJECT-CONTEXT.md#persistence-model-and-migration-pitfalls). Keep versioned backups compatible. Import validates data types, bounds quiz indexes, filters lesson/lab IDs, and excludes prototype keys. Never silently discard an imported backup because a future version differs: tell the user to keep their file.
+
+All-data import replaces matching whole records and preserves unmentioned keys; the older notebook import merges completions and replaces matching entries. Back up both sides before moving actual learner data. The PDF Blob stays in browser IndexedDB and is excluded from both SQLite and JSON exports.
+
+Use temporary `FIELDWORK_DATA_DIR` directories and separate browser origins for tests. Run `tests/validate-local-database.mjs` and `tests/validate-storage-recovery.mjs` when changing persistence, in addition to the relevant state/book tests. Do not weaken loopback/Origin/token checks or allow learner runners to read the storage API. See [backup and recovery](RUNNING.md) before working with an actual database.
 
 ## Offline and updates
 
-The service worker uses network-first responses with cached fallback. Update its cache name when changing the app shell or content substantially. The first successful visit needs every precached file available. External resources are never cached by the app. Private host access may affect offline behavior in a browser-specific way; verify it in the target deployment if offline access is business-critical.
+The service worker uses network-first responses with cached fallback. Update its cache name when changing the app shell or content substantially. The first successful visit needs every precached file available. External resources, local storage API responses, and private PDF/backup URLs must not be cached. Private host access may affect offline behavior in a browser-specific way; verify it in the target deployment if offline access is business-critical. An offline shell is not proof that SQLite saves can commit while the server is stopped.
 
 ## Deployment
 

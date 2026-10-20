@@ -1,5 +1,7 @@
 # Portal verification — 20 October 2026
 
+Historical feature audit. The original portal checks below predate the SQLite implementation; later sections record additions. See [release closeout](PROJECT-CLOSEOUT.md) for the current storage model and final validation scope.
+
 ## Result
 
 The learning flows passed the checks below after repairs. Interactive checks used the Codex in-app browser. Progress-changing tests ran on isolated localhost origins, leaving the learner's hosted progress intact.
@@ -36,7 +38,7 @@ Run `npm test` for the automated content, lab, runner, wiki, persistence, loader
 
 The six project starter kits intentionally contain unfinished exercises: 6 implemented checks pass and 18 tests are marked TODO. Lab starters are also intentionally unfinished. Completion checklists are self-assessment; lab assertions cover their stated cases rather than every possible program.
 
-This audit does not claim a full browser/device matrix. Progress remains local to each browser and origin; use notebook backups when moving devices. External courses and videos require connectivity.
+This audit does not claim a full browser/device matrix. At the time of the original checks, progress was browser-only. Current hosted/static mode still uses each browser/origin's storage; current desktop mode also persists records in SQLite. Use **Data & backups** for complete textual-data transfer. External courses and videos require connectivity.
 
 
 ## Incident workshop addition · 20 October 2026

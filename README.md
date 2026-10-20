@@ -2,7 +2,17 @@
 
 An independent, original learning studio built around the chapter structure of David Flanagan’s *JavaScript: The Definitive Guide*, seventh edition.
 
+Fieldwork turns reading a large reference book into a practical learning routine: read a mapped section, predict what code will do, run an experiment, investigate a failure, and build something you can explain. It combines a polished learning portal with exercises about the problems developers actually encounter: ambiguous inputs, mutation, failed requests, stale responses, lost saves, and incompatible releases.
+
+The learner owns their source and study data. The same portal runs on a hosted Site or on localhost with a private SQLite database. Studying locally needs no OpenAI login, subscription, or API key. The learner supplies their own book; its contents are never bundled or published.
+
 Source: [i5adovyi/javascript-fieldwork](https://github.com/i5adovyi/javascript-fieldwork) · [OpenAI-hosted studio](https://javascript-fieldwork-igor.igor-sadovyi87.chatgpt.site/)
+
+## Start a new development session
+
+Read [project context](docs/PROJECT-CONTEXT.md) for the purpose, decisions, architecture, and remaining extensions. [AGENTS.md](AGENTS.md) gives the shared development rules; [CLAUDE.md](CLAUDE.md) points Claude sessions to the same instructions. Then read [running and recovery](docs/RUNNING.md) before touching storage, and [the maintainer guide](docs/MAINTAINER-GUIDE.md) before changing content or behavior.
+
+[Project history and postmortem](docs/PROJECT-HISTORY.md) records how this version evolved. [The closeout report](docs/PROJECT-CLOSEOUT.md) distinguishes final validation from earlier browser audits and explains when the project can be considered finished. These files carry project context across accounts and sessions; private learner records and previous chat transcripts do not belong in them.
 
 ## Start here
 
@@ -76,7 +86,7 @@ Select **Remember PDF** to keep one private copy in this browser’s IndexedDB. 
 
 **Forget PDF** removes the remembered copy without changing your original file or annotations. **Release PDF** frees the current session’s document but leaves the remembered copy available. Storage failures are reported explicitly; you can still read for the current session.
 
-Use the reader’s private book notes export/import controls to keep or transfer annotations; the general progress backup does not include them. Neither backup includes the PDF. Browser data clearing, private browsing, or storage eviction can remove the remembered copy and unexported annotations. Keep your original PDF and exported notes. There is no account or cloud synchronization.
+Use **Data & backups** for a combined text backup, including annotations, or the reader’s private book notes export/import controls for annotations alone. The older **My notebook** progress backup does not include book annotations. None of these backups includes the PDF. Browser data clearing, private browsing, or storage eviction can remove the remembered copy and hosted annotations; local annotations already committed to SQLite remain in the database. Keep your original PDF and exported notes. There is no account or cloud synchronization.
 
 ## Experiment in lessons and the wiki
 
@@ -86,7 +96,7 @@ Editors highlight JavaScript syntax, match and close brackets, and suggest local
 
 Drafts are saved automatically on this device, separately for each lesson example, wiki topic, and module file. They survive navigation and reloads. Lesson and wiki drafts are included in notebook backups; use **Copy code** to keep individual experiments elsewhere. If browser storage is unavailable, the editor reports that changes last only for the current session.
 
-Most examples run in a fresh Web Worker. DOM and event examples use an isolated document with a visible, interactive preview; append elements to `document.body` to display them. The storage example uses a fresh in-memory implementation of the Storage methods each run, so it cannot change your studio progress. Module examples have separate file editors and loads real ES modules; it supports local literal imports and reports unsupported circular imports.
+Most examples run in a fresh Web Worker. DOM and event examples use an isolated document with a visible, interactive preview; append elements to `document.body` to display them. The storage example uses a fresh in-memory implementation of the Storage methods each run, so it cannot change your studio progress. Module examples have separate file editors and load real ES modules; the runner supports local literal imports and reports unsupported circular imports.
 
 Node filesystem, streams, and assertion topics provide explicitly labeled browser equivalents alongside their original Node code. The browser does not run Node or access filesystem paths. Runs have a three-second limit, console output is capped, and DOM loops receive deadline checks. These limits catch common mistakes, not every possible way to block a browser. Resetting, stopping, rerunning, or leaving the page disposes the old context.
 
@@ -106,13 +116,13 @@ Local SQLite data stays in your user application-data directory and survives Ope
 
 To publish under a different account, commit source changes and run `npm run prepare:new-account`. Open the newly created sibling folder in that account and follow its `AGENTS.md` / `docs/NEW-ACCOUNT.md`. The export removes the original Site identity and hosted launch link without changing the working checkout. It does not create or publish a Site. The new account needs Sites access; create a new private Site there, persist its returned identity, and publish through the Sites skill. See the guide for configuring its new URL and keeping deployment identities separate.
 
-The UI fonts and PDF.js runtime are bundled locally, with their open-source licenses. Reading does not require external font or viewer services. External library links open separately. Service-worker caching makes the core app available offline after a successful first load on a supported browser; linked websites, external fonts, and videos need their own connectivity. The study pack, wiki reference, handbook, curriculum map, printable guide, and starter kits are included in the offline cache.
+The UI fonts and PDF.js runtime are bundled locally, with their open-source licenses. Reading does not require external font or viewer services. External library links open separately. Service-worker caching can make the core app available offline after a successful first load on a supported browser; linked websites and videos need their own connectivity. Offline behavior varies by browser, so keep the local server running for reliable study and database saves. The study pack, wiki reference, handbook, curriculum map, printable guide, and starter kits are included in the offline cache.
 
 ## Engineering
 
 The deployable portal is static HTML, CSS, and JavaScript. The loopback-only local Node server adds a private SQLite API for local sessions; `npm run start:static` previews browser-only hosted behavior without opening that database. CodeMirror 6 and Lezer power the shared lesson/wiki editor, bundled locally in `dist/code-editor.js` with MIT notices in `dist/vendor/editor-LICENSES.txt`. To change the editor, run `npm ci`, edit `src/editor-entry.js` or `src/editor-completions.js`, then run `npm run editors:build`. The checked-in bundle is included in the offline cache; no editor CDN is used. Content lives in five JSON files in `dist/data/`. `dist/app.js` renders the hash routes. `dist/runner.js` runs each lab in a fresh Worker; the UI terminates a run after three seconds. Lesson and wiki examples share a runner in `dist/wiki-runner.js` and does not affect lab scoring. Acorn 8.19.0 is vendored in `dist/vendor/` under its MIT license to parse module imports and instrument DOM loops; no installation or external runtime CDN is needed. The local reader uses bundled PDF.js and its worker; `dist/book-map.js` contains section headings and physical-page ranges, without book prose or PDF bytes. Console output is capped. It is a learning aid, not a security boundary or a certification grader. Do not paste untrusted code. The tests and solutions are intentionally visible to the learner.
 
-Lesson completion and project checklists are self-assessed. Lab completion means the supplied assertions passed, not a proof of correctness for all inputs. The hosted Site is public and does not synchronize learner state.
+Lesson completion and project checklists are self-assessed. Lab completion means the supplied assertions passed, not a proof of correctness for all inputs. The original hosted Site is public and does not synchronize learner state; a new account's Site has its own audience setting.
 
 ## Validation
 
@@ -138,6 +148,9 @@ The content validator checks coverage, uniqueness, quiz structure, project rubri
 - `scripts/prepare-new-account.mjs`: committed-source export with account identity removed.
 - `dist/site-config.js`: public hosted/source links; no credentials.
 - `AGENTS.md`: instructions for the next Codex session, including account and private-data boundaries.
+- `CLAUDE.md`: entry point to the same context and rules for Claude sessions.
+- `docs/PROJECT-CONTEXT.md`: product intent, architectural decisions, and the continuation checklist.
+- `docs/PROJECT-HISTORY.md` / `docs/PROJECT-CLOSEOUT.md`: historical record, postmortem, validation, and closure boundaries.
 - `.openai/hosting.json`: Sites deployment configuration.
 
 ## Scope

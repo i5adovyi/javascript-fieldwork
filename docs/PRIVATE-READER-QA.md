@@ -2,6 +2,8 @@
 
 Verified locally on 20 October 2026. No book pages, extracted book text, private note exports, or screenshots containing the book are included in the release.
 
+This is a historical reader audit, including checks from before local SQLite support. See [release closeout](PROJECT-CLOSEOUT.md) for current validation scope; no private migration evidence is included here.
+
 ## Reading and annotation checks
 
 - All 36 lessons have reading assignments: 97 inclusive ranges verified against the supplied 1,245-page seventh-edition PDF. These are physical PDF positions, not printed page labels.
@@ -31,7 +33,7 @@ node tests/serve-reader-qa.mjs
 
 Open `http://127.0.0.1:4197/__reader-qa` and select **Run reader browser tests**, then **Open 390px mobile preview**. These tests create their own two-page PDFs in memory. They do not need or read the reference book.
 
-The reader keeps a newly selected PDF in browser memory until the learner opts into **Remember PDF**. One private Blob is then stored in IndexedDB and fingerprint-verified before automatic restoration. Page position and annotations are stored separately in localStorage under the PDF's SHA-256 fingerprint. Reader open/closed preference is also stored locally. Book-note backups are separate from course-progress backups; neither backup includes the PDF. Clearing browser site data removes both the remembered copy and stored notes unless the learner has exported the notes and retained the original PDF.
+The reader keeps a newly selected PDF in browser memory until the learner opts into **Remember PDF**. One private Blob is then stored in IndexedDB and fingerprint-verified before automatic restoration. Page position and annotations use the PDF's SHA-256 fingerprint. Current hosted/static mode saves them in browser storage; desktop mode also commits these textual records to SQLite. Reader open/closed preference is stored separately. Book-note backups are separate from the older course-progress backup; the newer all-data backup includes both. None includes the PDF. Clearing browser site data removes its remembered copy and browser-only annotations; records already committed to local SQLite remain. Keep an exported backup and the original PDF.
 
 ## Remembered PDF checks
 
