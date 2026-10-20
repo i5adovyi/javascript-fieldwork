@@ -12,4 +12,4 @@ else
 fi
 print 'Keep this Terminal window open while learning. Open the URL printed below in your browser.'
 print 'Press Control-C here to stop the local portal.'
-exec "$FIELDWORK_NODE" scripts/serve.mjs
+exec "$FIELDWORK_NODE" scripts/serve.mjs --open

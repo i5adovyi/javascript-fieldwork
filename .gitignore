@@ -4,3 +4,11 @@ node_modules/
 *.pdf
 tmp/
 .openai/*.local.*
+.env
+.env.*
+!.env.example
+Fieldwork-private-backups/
+fieldwork-backup-*.json
+fieldwork-book-notes-*.json
+*.pem
+*.key

@@ -9,6 +9,8 @@ Your learning app is a self-contained website. It needs no OpenAI account, API k
 3. Open your PDF in the private reader, expand **Your book notes**, and choose **Export notes**. This saves reading position and annotations separately from progress.
 4. Keep your original book PDF separately. Neither ZIP nor either JSON backup includes it. Never put private exports or your book into a published folder.
 
+See [Run online or locally](running.md) for both launch modes and GitHub source setup.
+
 ## Continue learning
 
 Bookmark the existing public portal:
@@ -17,7 +19,7 @@ https://javascript-fieldwork-igor.igor-sadovyi87.chatgpt.site/
 
 It is configured for public access, without a learner login. Hosted availability still depends on the original Site and its hosting service; use the local copy if that URL becomes unavailable.
 
-On this Mac, open **Start Fieldwork.command** inside the project folder. Keep its Terminal window open and visit the printed address, normally `http://localhost:4173`. Alternatively, run `npm start` from the project directory. No `npm install` is needed to use the checked-in app. Keep the same hostname and port for future sessions so your browser can find its stored data. Do not open `dist/index.html` directly with `file://`.
+On this Mac, open **Start Fieldwork.command** inside the project folder. Keep its Terminal window open and visit the printed address, normally `http://localhost:4187`. Alternatively, run `npm start` from the project directory. No `npm install` is needed to use the checked-in app. Keep the same hostname and port for future sessions so your browser can find its stored data. Do not open `dist/index.html` directly with `file://`.
 
 At a new URL, browser profile, device, or account’s in-app browser:
 
@@ -45,7 +47,7 @@ For a new Site under the new account, make a separate copy of the source without
 ## Maintainer map
 
 - `dist/`: complete deployable app; all runtime assets are local.
-- `dist/data/`: curriculum, labs, wiki, and library content.
+- `dist/data/`: curriculum, labs, wiki, library, and incident content.
 - `dist/app.js`: routes, learning progress, and backup validation.
 - `dist/book-reader.js`, `book-storage.js`, `book-file-storage.js`: reader, private annotations, and optional remembered PDF.
 - `dist/book-map.js`: chapter/section references and physical PDF page numbers, with no copied book prose.

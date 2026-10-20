@@ -1,4 +1,4 @@
-const CACHE='fieldwork-v10-incident-workshop';
+const CACHE='fieldwork-v11-run-anywhere';
 // Only application assets are cached. Selected PDF bytes never enter this list.
 const FILES=[
  './',
@@ -6,6 +6,9 @@ const FILES=[
  './styles.css',
  './app.js',
  './incidents.js',
+ './run-anywhere.js',
+ './run-anywhere.css',
+ './running.md',
  './incidents.css',
  './data/incidents.json',
  './incident-workbook.md',

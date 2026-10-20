@@ -2,6 +2,8 @@
 
 An independent, original learning studio built around the chapter structure of David Flanagan’s *JavaScript: The Definitive Guide*, seventh edition.
 
+Source: [i5adovyi/javascript-fieldwork](https://github.com/i5adovyi/javascript-fieldwork) · [OpenAI-hosted studio](https://javascript-fieldwork-igor.igor-sadovyi87.chatgpt.site/)
+
 ## Start here
 
 Requires Node.js 20.11 or newer. The checked-in app runs without installing dependencies.
@@ -11,13 +13,28 @@ cd javascript-fieldwork
 npm start
 ```
 
-Open the printed URL (by default `http://localhost:4173`). If that port is occupied:
+Open the printed URL (by default `http://localhost:4187`). If that port is occupied:
 
 ```sh
-PORT=4187 npm start
+PORT=4197 npm start
 ```
 
 You can also deploy `dist/` to any static HTTPS host. Hash-based routes require no server rewrite configuration. Do not open the HTML through `file://`: the data files and code runner need an HTTP origin.
+
+## Choose where to run
+
+Open **Run anywhere** in the portal for the current mode, launch links, and progress-transfer steps.
+
+| Mode | Start | Requirements |
+| --- | --- | --- |
+| OpenAI Sites | [Hosted studio](https://javascript-fieldwork-igor.igor-sadovyi87.chatgpt.site/) or `npm run open:hosted` | Browser and internet access |
+| Localhost | `npm start` → `http://localhost:4187` | Node.js 20.11+; no OpenAI account or API key |
+| Localhost + browser | `npm run start:open`, `Start Fieldwork.command` (Mac), or `Start Fieldwork.cmd` (Windows) | Same local requirements; keep the terminal open |
+
+Both modes use the exact same application. There is no automatic data sync: export/import
+progress and book notes when changing browser origins. The PDF remains local.
+Read [the setup and publishing guide](docs/RUNNING.md) for ports, backups, GitHub, and Sites updates.
+GitHub stores source; pushing a commit does not automatically deploy the Site.
 
 ## What is inside
 
