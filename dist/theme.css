@@ -1,0 +1,187 @@
+/* Appearance control is shared by the landing page and study workspace. */
+:root { color-scheme: light; }
+.theme-control { position:relative; display:inline-flex; align-items:center; gap:7px; flex-shrink:0; color:var(--ink); }
+.theme-control > .icon { width:17px; height:17px; pointer-events:none; }
+.theme-control select { max-width:100%; min-height:36px; padding:6px 24px 6px 9px; border:1px solid var(--line); border-radius:5px; background:var(--white); color:var(--ink); font:500 12px var(--body); cursor:pointer; }
+.theme-control select:focus-visible { outline:2px solid var(--orange); outline-offset:3px; }
+.theme-save-status { position:absolute; z-index:130; top:calc(100% + 8px); right:0; width:240px; padding:10px 12px; border:1px solid var(--line); border-radius:5px; background:var(--white); color:var(--ink); font-size:12px; box-shadow:0 8px 24px #0003; }
+.theme-save-status[hidden] { display:none; }
+.landing-actions { display:flex; align-items:center; gap:18px; }
+.workspace-header > .theme-control { margin-left:0; }
+@media (max-width:1100px) { .landing-nav nav { gap:16px; } .landing-actions { gap:12px; } }
+@media (max-width:900px) { .landing-nav nav { display:none; } .workspace-header { gap:16px; } }
+@media (max-width:600px) {
+  .landing-actions { gap:8px; }
+  .landing-actions > .button { white-space:nowrap; }
+  .theme-control { gap:4px; }
+  .theme-control > .icon { display:none; }
+  .theme-control select { font-size:12px; padding:6px 18px 6px 7px; }
+  .workspace-header { gap:8px; }
+  .breadcrumb { min-width:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+  .search-trigger { flex-shrink:0; }
+}
+@media (max-width:380px) {
+  .landing-nav { margin:0 6%; height:auto; padding:16px 0; flex-wrap:wrap; gap:14px; }
+  .landing-actions { width:100%; justify-content:space-between; }
+}
+
+/* Keep printed lessons on paper. PDF pages and runnable previews retain their
+   original colors; only the surrounding reader and editor interface is themed. */
+@media screen {
+  :root[data-theme="dark"] {
+    color-scheme:dark;
+    --paper:#181d19; --white:#222923; --ink:#edf0e6; --muted:#a7b2a1;
+    --line:#3b483d; --orange:#f48b66; --orange-dark:#ffac8b; --sage:#29372b;
+    --surface-soft:#263128; --surface-hover:#324135;
+    --text-secondary:#c3ccbc; --success:#b7d596; --success-bg:#293c2a;
+    --warning:#f0ca8b; --warning-bg:#3b3022; --error:#ffb29b; --error-bg:#402a27;
+    --br-ink:var(--ink); --br-muted:var(--muted); --br-paper:#1e261f; --br-line:var(--line);
+  }
+  :root[data-theme="dark"] .orange,
+  :root[data-theme="dark"] .brand-mark,
+  :root[data-theme="dark"] .skip-link { color:#211c17; }
+  :root[data-theme="dark"] .dark { background:#d5e1c3; color:#202a20; }
+  :root[data-theme="dark"] .dark:hover { background:#e6efd9; }
+  :root[data-theme="dark"] #toast { background:#d5e1c3; color:#202a20; }
+  :root[data-theme="dark"] .outline { border-color:var(--line); }
+  :root[data-theme="dark"] :is(input,textarea)::placeholder { color:var(--muted); opacity:1; }
+  :root[data-theme="dark"] .tag { background:var(--surface-soft); border-color:var(--line); color:var(--text-secondary); }
+  :root[data-theme="dark"] .tag.green { background:var(--success-bg); border-color:#536c43; color:var(--success); }
+
+  /* Main reading text, metadata, and controls. Keep syntax colors scoped to editors. */
+  :root[data-theme="dark"] :is(
+    .hero-copy>p,.stage-card p,.objectives li,.prose-section p,.prose-section ul,.recap ul,
+    .practice-prompts details p,.practice-prompts details li,.lesson-note textarea,
+    .input-search input,.lab-card>p,.lab-brief-content>p,.example pre,.test-names li,.hint-area p,
+    .project-card p,.lead,.milestones label,.rubric>div,.article-card p,.resource-row p,
+    .notebook-main p,.notebook-main textarea,.note-entry p,.backup-card p,.handbook-card p,
+    .wiki-card p,.wiki-about p,.wiki-article .lead,.wiki-details p,.wiki-article .prose-section p,
+    .wiki-article li,.wiki-output pre,.wiki-related a,.wiki-study-links a,.wiki-source p,
+    .wiki-source a,.wiki-playground .wiki-playground-note,.wiki-playground .wiki-console pre,
+    .wiki-expected,.wiki-original,.incident-card p,.incident-standard p,.incident-heading>p,
+    .incident-article p,.incident-article li,.incident-report p,.incident-evidence pre,.incident-file pre,
+    .incident-case-file p,.incident-related>p,.incident-related-links>a,
+    .run-card p,.run-instructions p,.run-transfer p,.run-instructions li,.run-transfer li,.run-current code
+  ) { color:var(--text-secondary); }
+  :root[data-theme="dark"] :is(
+    .mini-stack,.art-top,.art-label,.art-stamp,.sidebar-label,.sidebar nav>a,
+    .book-tile>.tiny-label,.book-tile>.icon,.book-tile>small,.profile small,.breadcrumb,
+    .search-trigger,.search-trigger kbd,.header-home,.page-intro .eyebrow,.date-label,
+    .dashboard-hero .tiny-label,.dashboard-hero p,.progress-orbit strong>span,.progress-orbit small,
+    .metric-grid>div>span,.metric-grid .icon,.metric-grid strong>small,.metric-grid>div>small,
+    .path-row p,.path-row>.icon,.stage-completion,.dashboard-bottom .eyebrow,.dashboard-bottom p,
+    .workspace-footer,.curriculum-heading .tiny-label,.curriculum-heading p,.lesson-row p,
+    .lesson-time,.lesson-row>.icon,.back-link,.lesson-title .eyebrow,.lesson-title>p,
+    .reading-assignment>div,.reading-assignment .tiny-label,.reading-assignment p,.objectives .icon,
+    .knowledge-check .eyebrow,.quiz h3>span,.quiz-option>span,.practice-prompts summary>span,
+    .practice-prompts summary>b,.lesson-note p,.lesson-note small,.lesson-rail .tiny-label,
+    .lesson-rail p,.lesson-rail>small,.input-search>.icon,.lab-toolbar>span,.lab-card>.tiny-label,
+    .lab-status,.lab-heading .eyebrow,.tab-label,.example small,.test-names .icon,
+    .solution-details summary,.solution-details>p,.lab-footnote,.project-card-body>.tiny-label,
+    .article-container>.eyebrow,.project-progress>span,.milestones .tiny-label,
+    .milestones input:checked+span,.rubric strong,.article-number>span,.article-card>.tiny-label,
+    .resource-row .tiny-label,.resource-meta small,.resource-row>span,.library-disclaimer,
+    .article-end>span,.notebook-main small,.backup-card .eyebrow,.handbook-card .eyebrow,
+    .backup-card>small,.privacy-card p,.empty-state,.modal-close,.search-modal .eyebrow,
+    .search-modal #search-results span,.book-modal-header .eyebrow,.book-modal p,.pdf-empty,.pdf-empty small,
+    .wiki-total small,.wiki-shortcut,.wiki-results-heading,.wiki-card-meta,.wiki-card-bottom,
+    .wiki-article .wiki-runtime,.wiki-source-links button span,.wiki-rail button,.wiki-rail-note p,
+    .wiki-playground-heading .tiny-label,.wiki-save-state,.wiki-run-meta,.wiki-playground .wiki-preview p,
+    .incident-card-meta,.incident-rail>a,.incident-rail small,.run-card small,.data-summary small
+  ) { color:var(--muted); }
+  :root[data-theme="dark"] :is(.book-tile .text-button,.lab-status.solved,.correct-text,[data-run-status]) { color:var(--success); }
+  :root[data-theme="dark"] :is(.wiki-total,.wiki-card-bottom>span,.wiki-related a>span,.wiki-rail button:hover,.incident-lab-context a,.incident-card-top) { color:var(--orange); }
+
+  /* Surfaces across the dashboard, lessons, labs, reference, and data pages. */
+  :root[data-theme="dark"] :is(
+    .metric-grid>div,.dashboard-stages,.curriculum-stage,.practice-prompts details,.input-search,
+    .lab-card,.lab-brief,.project-card,.milestones>section,.rubric>div,.article-card,.resource-list,
+    .notebook-main,.note-entry,.wiki-search-bar .input-search,.wiki-card,.wiki-related a,
+    .wiki-source-links button,.wiki-playground,.incident-card,.run-card
+  ) { background:var(--white); border-color:var(--line); }
+  :root[data-theme="dark"] :is(
+    .hero-art,.final-cta,.book-tile,.dashboard-hero,.progress-orbit>div,.curriculum-heading,
+    .reading-assignment,.lesson-note,.example,.project-progress,.backup-card,.wiki-rule,.wiki-output,
+    .wiki-source,.wiki-lesson-links,.wiki-library-banner,.wiki-console,.incident-environment,
+    .incident-evidence pre,.incident-file pre,.incident-debrief,.incident-acceptance,
+    .incident-related,.incident-lab-context,.run-instructions
+  ) { background:var(--surface-soft); border-color:var(--line); }
+  :root[data-theme="dark"] :is(.stage-card,.stage-2,.stage-3,.stage-4,.stage-5,.stage-6) { background:var(--surface-soft); border-color:var(--line); }
+  :root[data-theme="dark"] :is(.stage-3,.stage-4,.daily-card,.incident-report,.run-transfer) { background:#302d24; border-color:#4a4436; }
+  :root[data-theme="dark"] .stage-5 { background:#253330; }
+  :root[data-theme="dark"] .stage-6 { background:#302c2a; }
+  :root[data-theme="dark"] :is(.stage-symbol,.stage-3 .stage-symbol,.stage-4 .stage-symbol,.stage-5 .stage-symbol,.stage-6 .stage-symbol) { color:#c0d2a5; }
+  :root[data-theme="dark"] .reading-card { background:var(--surface-soft); border-color:var(--line); }
+  :root[data-theme="dark"] .sidebar { background:#1c241e; border-color:var(--line); }
+  :root[data-theme="dark"] .workspace-header { background:#1b221c; }
+  :root[data-theme="dark"] :is(.sidebar nav>a:hover,.path-row:hover,.lesson-row:hover,.quiz-option:hover,.article-card:hover,.resource-row:hover,.search-modal #search-results>a:hover) { background:var(--surface-hover); }
+  :root[data-theme="dark"] .sidebar nav>a.active { background:#35462e; color:#d9e8c6; }
+  :root[data-theme="dark"] :is(.sidebar nav>a small,.avatar,.count-pill,.stage-index,.curriculum-heading .stage-index) { background:#303d2c; border-color:var(--line); color:#c4d5ad; }
+  :root[data-theme="dark"] :is(.progress-track,.project-progress .progress-track) { background:#3a4934; }
+  :root[data-theme="dark"] .progress-track>span { background:#a8c780; }
+  :root[data-theme="dark"] .progress-orbit { background:conic-gradient(var(--orange) var(--progress),var(--line) 0); }
+  :root[data-theme="dark"] .dashboard-hero:after { border-color:var(--line); }
+  :root[data-theme="dark"] .filter-tabs>button,
+  :root[data-theme="dark"] .wiki-filters button { border-color:var(--line); color:var(--text-secondary); }
+  :root[data-theme="dark"] .filter-tabs>button.selected,
+  :root[data-theme="dark"] .wiki-filters button[aria-pressed=true] { background:#d5e1c3; border-color:#d5e1c3; color:#202a20; }
+  :root[data-theme="dark"] .lesson-check { border-color:var(--line); color:var(--muted); }
+  :root[data-theme="dark"] .lesson-check.complete { background:var(--success-bg); border-color:#536c43; color:var(--success); }
+  :root[data-theme="dark"] .quiz-option { background:var(--white); border-color:var(--line); color:var(--text-secondary); }
+  :root[data-theme="dark"] .quiz-option.correct { background:var(--success-bg); border-color:#78945e; color:var(--success); }
+  :root[data-theme="dark"] .quiz-option.incorrect { background:var(--error-bg); border-color:#ad7360; color:var(--error); }
+  :root[data-theme="dark"] .quiz-feedback { color:var(--warning); }
+  :root[data-theme="dark"] .quiz-feedback.correct-text { color:var(--success); }
+  :root[data-theme="dark"] :is(.callout,.wiki-pitfalls) { background:var(--warning-bg); border-color:#665138; }
+  :root[data-theme="dark"] :is(.callout .tiny-label,.callout ul) { color:var(--warning); }
+  :root[data-theme="dark"] .lesson-note textarea { background:var(--paper); border-color:var(--line); }
+  :root[data-theme="dark"] .notebook-main textarea { background:repeating-linear-gradient(transparent,transparent 31px,var(--line) 31px,var(--line) 32px); }
+  :root[data-theme="dark"] :is(.project-art,.project-art-2,.project-art-3,.project-art-4,.project-art-5) { background:var(--surface-soft); }
+  :root[data-theme="dark"] :is(.project-art>span,.project-art>strong) { color:#c0d2a5; }
+  :root[data-theme="dark"] .article-number { color:#7f916d; }
+  :root[data-theme="dark"] .resource-type { background:var(--surface-soft); border-color:var(--line); color:var(--muted); }
+  :root[data-theme="dark"] .wiki-log-error { color:var(--error); }
+  :root[data-theme="dark"] .wiki-log-warn { color:var(--warning); }
+  :root[data-theme="dark"] :is(.test-result.fail,.test-result.fail small,.error-output) { color:var(--error); }
+  :root[data-theme="dark"] :is(.test-result.pass,.test-result.pass small) { color:var(--success); }
+  :root[data-theme="dark"] .storage-banner { background:var(--surface-soft); border-color:var(--line); }
+  :root[data-theme="dark"] .storage-banner[data-warning=true] { background:var(--warning-bg); color:var(--warning); }
+  :root[data-theme="dark"] .data-summary [data-storage-detail] { color:var(--error); }
+  :root[data-theme="dark"] :is(
+    .mini-stack,.art-stamp,.card-meta,.article-preview,.search-trigger kbd,.header-home,.lesson-row,
+    .lesson-rail hr,.lab-workspace,.tab-label,.hint-area,.rubric,.resource-row,.library-disclaimer,
+    .article-tags,.article-end,.notebook-main textarea,.handbook-card,.empty-state,.modal,
+    .search-modal #search-results>a,.wiki-results-heading,.wiki-card-bottom,.wiki-empty,.wiki-about,
+    .wiki-rail button,.wiki-rail-note,.wiki-console,.wiki-preview,.wiki-expected,.wiki-original,
+    .incident-card-meta,.incident-standard,.incident-file,.incident-help details,.incident-variation,
+    .incident-case-file,.incident-related-links>a,.data-conflict
+  ) { border-color:var(--line); }
+  :root[data-theme="dark"] .orbit { border-color:#60734d; }
+  :root[data-theme="dark"] .modal::backdrop { background:#080e0bd9; }
+
+  /* Reader chrome and annotations, without altering PDF pixels or text layers. */
+  :root[data-theme="dark"] :is(.book-page-jump,.br-button,.br-range,#br-page-number,.br-marks-toolbar select,.br-note-editor textarea,.br-mark-card) { background:var(--white); color:var(--ink); border-color:var(--br-line); }
+  :root[data-theme="dark"] :is(.book-page-jump:hover,.br-icon-button:hover:not(:disabled),.br-button:hover:not(:disabled),.br-range:hover) { background:var(--surface-hover); border-color:#738862; }
+  :root[data-theme="dark"] .book-reader { border-color:var(--line); }
+  :root[data-theme="dark"] .br-button.br-primary { background:#c4d6af; color:#202c1e; border-color:#c4d6af; }
+  :root[data-theme="dark"] .br-button.br-primary:hover:not(:disabled) { background:#d5e5c3; }
+  :root[data-theme="dark"] :is(.br-text-button,.br-mark-jump) { color:var(--success)!important; }
+  :root[data-theme="dark"] :is(.br-memory,.br-assignment,.br-note-editor,.br-marks>summary) { background:var(--surface-soft); border-color:var(--line); }
+  :root[data-theme="dark"] .br-page-scroll { background:#111713; border-color:var(--line); }
+  :root[data-theme="dark"] .br-marks { background:var(--br-paper); }
+  :root[data-theme="dark"] .br-marks summary b { background:#364730; }
+  :root[data-theme="dark"] :is(.br-memory>span,.br-assignment>summary::after,.br-range>span,.br-notice,.br-selection-status,.br-empty,.br-empty-symbol,.br-empty small,.br-rendering,.br-marks>summary>span:first-child:before,[data-br-saved-state],.br-note-editor>small,.br-marks-empty,.br-backup-help,.br-footer) { color:var(--br-muted); }
+  :root[data-theme="dark"] :is(.br-note-editor blockquote,.br-mark-card blockquote) { color:var(--text-secondary); border-color:#6c805c; }
+  :root[data-theme="dark"] .br-notice { border-color:var(--line); }
+  :root[data-theme="dark"] :is(.br-edition-indicator,.br-notice[data-kind="warning"],.br-page-error) { background:var(--warning-bg); border-color:#665138; color:var(--warning); }
+  :root[data-theme="dark"] :is(.br-assignment>p,.br-memory [data-warning="true"],[data-br-saved-state][data-unsaved="true"]) { color:var(--warning); }
+  :root[data-theme="dark"] .br-notice[data-kind="error"] { background:var(--error-bg); color:var(--error); }
+  :root[data-theme="dark"] .br-mark-actions button:last-child { color:var(--error)!important; }
+  :root[data-theme="dark"] .br-loading { background:var(--surface-hover); }
+  :root[data-theme="dark"] .br-color[aria-pressed="true"] { box-shadow:0 0 0 2px var(--br-paper),0 0 0 3px #d5e1c3; }
+  :root[data-theme="dark"] .br-mark-yellow { border-left-color:#dec757; }
+  :root[data-theme="dark"] .br-mark-green { border-left-color:#8db47d; }
+  :root[data-theme="dark"] .br-mark-pink { border-left-color:#cc90a4; }
+  :root[data-theme="dark"] :is(.br-pdf-page,.wiki-preview iframe,#pdf-reader iframe) { color-scheme:only light; }
+}
+@media print { .theme-control { display:none!important; } }

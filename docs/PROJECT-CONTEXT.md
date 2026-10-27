@@ -49,6 +49,7 @@ Most frontend source is maintained directly in `dist/`. It is not all disposable
 | PDF UI, mapping, annotations, remembered Blob | `dist/book-reader.js`, `dist/book-map.js`, `dist/book-storage.js`, `dist/book-file-storage.js` |
 | Shared persistence and recovery UI | `dist/study-storage.js`, `dist/data-settings.js` |
 | Loopback HTTP server and SQLite | `scripts/serve.mjs`, `scripts/local-database.mjs` |
+| Browser appearance preference and dark palette | `dist/theme.js`, `dist/theme.css` (loaded before/after the main styles respectively) |
 | Offline assets and content loading | `dist/sw.js`, `dist/content-loader.js` |
 | Launch links and account export | `dist/site-config.js`, `scripts/open-hosted.mjs`, `scripts/prepare-new-account.mjs` |
 | Download generation | `scripts/build-guide.mjs`, `scripts/build-incidents.mjs`, `scripts/build-study-pack.mjs`, `scripts/export-wiki.mjs` |
@@ -74,6 +75,10 @@ Pending writes are journaled in browser storage and sent with revisions. Preserv
 PDF bytes remain in browser IndexedDB after **Remember PDF**, not in SQLite or JSON backups. The original PDF must be kept separately. The same filename does not establish the same PDF: annotations are associated with a content fingerprint. Browser profiles and origins have separate remembered files; `localhost` and `127.0.0.1` are different origins.
 
 An actual hosted-to-local transfer and local server restart were checked during handoff. The record-level evidence and personal backups belong in private storage, not this repository. Recheck the current database before future migration work; do not replay an old import from historical context.
+
+## Appearance update · 27 October 2026
+
+The landing page and workspace provide System, Light, and Dark themes. `theme.js` restores `fieldwork.theme.v1` before styles render, follows system changes when selected, and updates other tabs. This is a browser appearance preference, separate from the study-storage adapter and its backups. Switching themes changes attributes and styles without rerendering the lesson or editor. Reader chrome and notes use the dark palette; PDF pixels, code preview documents, and printed pages retain their original colors.
 
 ## What remains optional
 

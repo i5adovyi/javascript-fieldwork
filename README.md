@@ -74,6 +74,10 @@ Read [the curriculum review](docs/CURRICULUM-REVIEW.md) for existing coverage, t
 
 Read [the learner handbook](docs/LEARNER-HANDBOOK.md) for 8-week and 16-week schedules, and [the curriculum map](docs/CURRICULUM-MAP.md) for chapter coverage.
 
+## Choose your appearance
+
+Use the **Color theme** selector in the landing page or workspace header: **System**, **Light**, or **Dark**. System follows your device’s preference; an explicit choice stays in this browser across reloads and updates other open tabs. Theme changes keep your current editor, reading position, and unsaved input in place. The preference is separate from study backups. The reader controls and notes follow the theme; PDF pages and example previews keep their original colors, and printed lessons keep the light palette.
+
 ## Read the book beside a lesson
 
 On a lesson, select **Read beside lesson**, then **Choose PDF** and select your own local copy. The reader and lesson appear side by side on desktop and stack on a narrow mobile screen. Choose an assigned reading range to jump to its starting page, or navigate pages directly.

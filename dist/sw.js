@@ -1,9 +1,11 @@
-const CACHE='fieldwork-v12-local-database';
+const CACHE='fieldwork-v13-dark-theme';
 // Only application assets are cached. Selected PDF bytes never enter this list.
 const FILES=[
  './',
  './index.html',
  './styles.css',
+ './theme.js',
+ './theme.css',
  './app.js',
  './study-storage.js',
  './data-settings.js',

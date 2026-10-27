@@ -69,3 +69,9 @@ Use descriptive commit subjects for future changes. Update the appropriate conte
 - Close the personal-study milestone when its promised behavior works. Treat new commercial or advanced curriculum features as new scope.
 
 See [the closeout report](PROJECT-CLOSEOUT.md) for the final release evidence and explicit closure boundary.
+
+## Maintenance · 27 October 2026
+
+Added a saved System/Light/Dark appearance control to the landing page and workspace. The dark palette covers lessons, labs, wiki, incidents, notebook, data pages, and reader controls. Changes apply before first paint and do not rerender active editors or the reader. The preference is local to the browser and does not alter the learner database or exported study records. This is a post-v1.0.0 maintenance change; the earlier release snapshots remain historical.
+
+Validation: all 17 `npm test` validators passed, including new appearance checks for restored preferences, system changes, cross-tab events, blocked storage, data isolation, offline assets, and palette contrast. Browser QA used a separate temporary SQLite database and origin: landing, dashboard, lesson runner, lab results, wiki, library, notebook, data settings, empty reader, search dialog, reload persistence, and 390/320-pixel layouts. A live theme switch preserved an edited lesson example and its console output. No learner PDF or personal study data was used. This change updates local/GitHub source; the hosted Site requires a separate publication.
