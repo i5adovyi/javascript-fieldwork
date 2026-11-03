@@ -2,6 +2,8 @@
 
 An independent, original learning studio built around the chapter structure of David Flanagan’s *JavaScript: The Definitive Guide*, seventh edition.
 
+**[Open JavaScript Fieldwork](https://i5adovyi.github.io/javascript-fieldwork/)** to study without signing in. [Try the first lesson](https://i5adovyi.github.io/javascript-fieldwork/#/lesson/lesson-01), edit its example, and run it in your browser. The book is optional for these exercises.
+
 Fieldwork turns reading a large reference book into a practical learning routine: read a mapped section, predict what code will do, run an experiment, investigate a failure, and build something you can explain. It combines a polished learning portal with exercises about the problems developers actually encounter: ambiguous inputs, mutation, failed requests, stale responses, lost saves, and incompatible releases.
 
 The learner owns their source and study data. The same portal runs on a hosted Site or on localhost with a private SQLite database. Studying locally needs no OpenAI login, subscription, or API key. The learner supplies their own book; its contents are never bundled or published.
@@ -37,11 +39,12 @@ Open **Run anywhere** in the portal for the current mode, launch links, and prog
 
 | Mode | Start | Requirements |
 | --- | --- | --- |
+| GitHub Pages | [Public studio](https://i5adovyi.github.io/javascript-fieldwork/) | Browser; progress stays on this device |
 | OpenAI Sites | [Hosted studio](https://javascript-fieldwork-igor.igor-sadovyi87.chatgpt.site/) or `npm run open:hosted` | Browser and internet access |
 | Localhost | `npm start` → `http://localhost:4187` | Node.js 22.13+; no OpenAI account or API key |
 | Localhost + browser | `npm run start:open`, `Start Fieldwork.command` (Mac), or `Start Fieldwork.cmd` (Windows) | Same local requirements; keep the terminal open |
 
-Both modes use the same application. Local mode adds SQLite storage outside the repository for progress, notes, annotations, and drafts. Hosted mode uses browser storage. The PDF stays in browser IndexedDB in both modes. There is no automatic data sync: use **Data & backups** to transfer all saved records, or the existing progress/book-note exports.
+All modes use the same application. Local mode adds SQLite storage outside the repository for progress, notes, annotations, and drafts. Hosted mode uses browser storage. The PDF stays in browser IndexedDB in both modes. There is no automatic data sync: use **Data & backups** to transfer all saved records, or the existing progress/book-note exports.
 Read [the setup and publishing guide](docs/RUNNING.md) for ports, backups, GitHub, and Sites updates.
 GitHub stores source; pushing a commit does not automatically deploy the Site. To open the folder in Codex under another account and create that account’s own Site, follow [the new-account guide](docs/NEW-ACCOUNT.md). `npm run prepare:new-account` creates a clean, separate source export without the original Site identity.
 
@@ -114,7 +117,7 @@ The bundled PDF.js reader reads selected PDF bytes in memory and optionally reme
 
 ## Keep access when changing accounts
 
-Use the desktop app’s local project/folder picker to open this source folder under the new account; with an installed Codex CLI, use `codex -C /absolute/path/to/javascript-fieldwork`. Read [the new-account workflow](docs/NEW-ACCOUNT.md) for setup and a ready-to-paste prompt. Private GitHub access is a separate GitHub permission. The source carries your project forward, not the previous chat history.
+Use the desktop app’s local project/folder picker to open this source folder under the new account; with an installed Codex CLI, use `codex -C /absolute/path/to/javascript-fieldwork`. Read [the new-account workflow](docs/NEW-ACCOUNT.md) for setup and a ready-to-paste prompt. The public source can be cloned without signing in. The source carries your project forward, not the previous chat history.
 
 Local SQLite data stays in your user application-data directory and survives OpenAI account changes. Browser profiles keep the PDF and pending edits separately. Before switching browsers, URLs, or devices, export your data and keep your original PDF. [The account-switch guide](docs/account-switch.md) covers the checklist.
 

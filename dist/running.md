@@ -6,6 +6,7 @@ Open **Run anywhere** in the portal to see where you are running and whether loc
 
 | Mode | Start | Where learning data lives |
 | --- | --- | --- |
+| GitHub Pages | [Open the public studio](https://i5adovyi.github.io/javascript-fieldwork/) | Browser storage for this device and browser profile |
 | Local desktop project | `npm start` or `npm run start:open` | SQLite in your user application-data directory; browser keeps pending edits |
 | OpenAI Site | Open your published URL or `npm run open:hosted` | Browser storage for that URL and browser profile |
 | Static preview | `npm run start:static` | Browser storage; does not open the SQLite database |
@@ -102,7 +103,7 @@ For a different account, follow [Open Fieldwork in another account](new-account.
 
 ## GitHub and continued development
 
-Source repository: [i5adovyi/javascript-fieldwork](https://github.com/i5adovyi/javascript-fieldwork). It is private; sign into GitHub with an authorized account.
+Open the [public Fieldwork studio](https://i5adovyi.github.io/javascript-fieldwork/) to study in a browser without signing in. To use local SQLite saves, clone [i5adovyi/javascript-fieldwork](https://github.com/i5adovyi/javascript-fieldwork).
 
 ```sh
 git clone https://github.com/i5adovyi/javascript-fieldwork.git
@@ -114,6 +115,6 @@ Open that folder as a local project in Codex to work on it under the OpenAI acco
 
 In the original checkout, the remote is named `github`; use `git push github main`. A fresh clone normally calls its remote `origin`, so use `git push origin main` there. Do not force-push over an existing repository. Changes to the second account's Site identity belong in its separate source history, not on the original main branch.
 
-No GitHub Actions, GitHub Pages, automatic cloud deployment, or paid hosting integration is enabled. You choose when to publish a Site update.
+To update GitHub Pages from `main`, choose **Actions → Publish Fieldwork to GitHub Pages → Run workflow**. It runs the project checks, then publishes the tracked `dist/` directory. OpenAI Sites updates use their separate publishing workflow.
 
 Run `npm test` before committing or publishing. Run `npm run materials` after editing learner manuals. Windows/Linux launcher behavior should be verified on those operating systems before distribution; the automated tests check command construction and local server behavior.

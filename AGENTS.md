@@ -20,7 +20,7 @@ Inspect an existing local server before starting or stopping it. The normal stud
 
 ## Work under another account
 
-Opening this folder as a local project works independently of which OpenAI account is signed in. GitHub's private-repository access is a separate GitHub permission. There is no fabricated "Open in Codex" deep link: use Codex's local project/folder picker, or `codex -C /absolute/path/to/project` if the CLI is installed.
+Opening this folder as a local project works independently of which OpenAI account is signed in. The public source can be cloned without signing in to GitHub. There is no fabricated "Open in Codex" deep link: use Codex's local project/folder picker, or `codex -C /absolute/path/to/project` if the CLI is installed.
 
 Before creating a Site for a different account, run `npm run prepare:new-account` from a committed source checkout. Use the newly created sibling folder for that account. The command exports committed HEAD only, excludes private file patterns and Git metadata, writes a neutral manifest, and clears the configured hosted URL. It refuses to overwrite an existing folder. Do not delete or replace the original checkout's Site identity as an account-switch shortcut.
 

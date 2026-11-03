@@ -1,0 +1,3 @@
+# Publish identical study-pack bytes on Windows and Unix.
+*.md text eol=lf
+dist/field-guide.html text eol=lf

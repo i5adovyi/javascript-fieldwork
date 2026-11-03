@@ -4,7 +4,7 @@ Your source, learner data, and hosted Site are separate. Changing an OpenAI acco
 
 ## 1. Get the source
 
-Sign in to GitHub with an account that can access the private repository. An OpenAI login alone does not grant that access.
+You can clone the public source without signing in to GitHub.
 
 ```sh
 git clone https://github.com/i5adovyi/javascript-fieldwork.git

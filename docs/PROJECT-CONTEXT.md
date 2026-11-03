@@ -2,6 +2,8 @@
 
 Context baseline: 20 October 2026. Check current source, Git state, and the running application before treating a historical verification as current.
 
+The [public studio](https://i5adovyi.github.io/javascript-fieldwork/) serves the tracked `dist/` files through GitHub Pages. Learners can run examples in the browser or clone the repository to keep progress in local SQLite. OpenAI Sites has its own deployment and access settings.
+
 ## The idea
 
 The project began as a request for a substantial, beautifully presented JavaScript training studio based on David Flanagan's *JavaScript: The Definitive Guide*, seventh edition. Its intended value comes from the quality of the learning experience: original explanations, useful practice, real feedback, reference material, and projects worth finishing.

@@ -36,7 +36,15 @@ async function start({directory=dataDirectory,staticOnly=false,expectFailure=fal
  }
  return result;
 }
-async function stop(server){server.child.kill('SIGTERM');assert.equal(await server.exit,0,server.output);}
+async function stop(server){
+ assert.ok(server.child.kill('SIGTERM'),server.output);
+ const code=await server.exit;
+ // Windows terminates the child directly; the persistence check then covers abrupt shutdown.
+ if(process.platform==='win32'){
+  assert.equal(code,null,server.output);
+  assert.equal(server.child.signalCode,'SIGTERM',server.output);
+ }else assert.equal(code,0,server.output);
+}
 async function api(server,path='/api/local/status',{method='GET',headers={},body}={}){
  const payload=body===undefined?undefined:typeof body==='string'?body:JSON.stringify(body);
  const result=await new Promise((resolve,reject)=>{

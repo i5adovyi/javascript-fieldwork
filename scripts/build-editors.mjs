@@ -7,7 +7,7 @@ const packages=[];
 for (const scope of ['@codemirror','@lezer']) {
   for (const name of (await readdir(resolve(root,'node_modules',scope))).sort()) packages.push(`${scope}/${name}`);
 }
-packages.push('style-mod','w3c-keyname','crelt');
+packages.push('@marijn/find-cluster-break','style-mod','w3c-keyname','crelt');
 const licenses=[];
 for (const name of packages) {
   const path=resolve(root,'node_modules',name);

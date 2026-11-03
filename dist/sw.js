@@ -1,4 +1,4 @@
-const CACHE='fieldwork-v13-dark-theme';
+const CACHE='fieldwork-v14-pages';
 // Only application assets are cached. Selected PDF bytes never enter this list.
 const FILES=[
  './',
@@ -31,6 +31,10 @@ const FILES=[
  './wiki-execution.js',
  './wiki-code.js',
  './vendor/acorn.js',
+ './vendor/acorn-LICENSE',
+ './vendor/editor-LICENSES.txt',
+ './vendor/pdfjs/LICENSE',
+ './vendor/pdfjs/LICENSE_CORE_JS',
  './wiki.css',
  './wiki-playground.css',
  './data/wiki.json',
@@ -266,6 +270,8 @@ const FILES=[
  './vendor/pdfjs/wasm/LICENSE_PDFJS_OPENJPEG',
  './vendor/pdfjs/wasm/LICENSE_PDFJS_QCMS',
  './vendor/pdfjs/wasm/LICENSE_QCMS',
+ './vendor/pdfjs/wasm/LICENSE_QUICKJS',
+ './vendor/pdfjs/wasm/LICENSE_PDFJS_QUICKJS',
  './vendor/pdfjs/wasm/jbig2.wasm',
  './vendor/pdfjs/wasm/jbig2_nowasm_fallback.js',
  './vendor/pdfjs/wasm/openjpeg.wasm',
